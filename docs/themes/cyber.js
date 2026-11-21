@@ -1,7 +1,7 @@
 (function(){
 var CH='01アイウエオカキクケコサシスセソタチツテトナニヌネノ<>/{}$#%=+';
 function rc(){return CH.charAt(Math.floor(Math.random()*CH.length))}
-window.CloudSeason.reg('cy',{
+window.KryonuxSeason.reg('cy',{
   init:function(k){
     var D=[],fs=k.mobile()?13:16,L=12,pw=0;
     function build(w,h){

@@ -2,14 +2,14 @@
 export LC_ALL=C.UTF-8
 VER=$(sed -n 's/^VERSION_ID="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p' /etc/os-release 2>/dev/null | head -n 1)
 VER=${VER:-1.6}
-SH=${KRYOUNIX_SHARE:-/usr/share/kryounix}
+SH=${KRYONUX_SHARE:-/usr/share/kryonux}
 LOGO=$SH/logo.txt
 mode=auto
 case ${1:-} in --ff|--fastfetch) shift; exec fastfetch "$@" ;; esac
 for a in "$@"; do
   case $a in
     --plain|--no-logo) mode=plain ;;
-    --version|-v) echo "neofetch $VER (kryounix)"; exit 0 ;;
+    --version|-v) echo "neofetch $VER (kryonux)"; exit 0 ;;
     --help|-h) echo "neofetch [--plain] [--ff] [--version]"; exit 0 ;;
   esac
 done

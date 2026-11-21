@@ -2,7 +2,7 @@
 if(window.I18N)window.I18N.add({
 "Kryonux live iso 1.0": "Kryonux live iso 1.0",
 "быстрый и усиленный linux, который ставится одной командой": "a fast hardened linux that installs with one command",
-"загружаешься с live iso, запускаешь установщик, через несколько минут в /mnt/kryounix уже готовая система. openrc, ядро kryonk, фаервол включён с первой загрузки.": "boot the live iso, run the installer, and within minutes /mnt/kryounix holds a ready system. openrc, the kryonk kernel, firewall on from the first boot.",
+"загружаешься с live iso, запускаешь установщик, через несколько минут в /mnt/kryonux уже готовая система. openrc, ядро kryonk, фаервол включён с первой загрузки.": "boot the live iso, run the installer, and within minutes /mnt/kryonux holds a ready system. openrc, the kryonk kernel, firewall on from the first boot.",
 "читать справочник": "read the handbook",
 "скачать live iso": "download the live iso",
 "x86_64, uefi и bios, ext4 и btrfs": "x86_64, uefi and bios, ext4 and btrfs",
@@ -23,7 +23,7 @@ if(window.I18N)window.I18N.add({
 "одной командой или вручную по справочнику.": "with one command or by hand following the handbook.",
 "live iso": "live iso",
 "запиши на флешку и загрузись": "write it to a stick and boot",
-"kryounix-install": "kryounix-install",
+"kryonux-install": "kryonux-install",
 "диск, пароли, всё остальное само": "disk, passwords, the rest is automatic",
 "reboot": "reboot",
 "вход, сеть, пакеты": "login, network, packages",

@@ -3,12 +3,12 @@ set -eu
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 REPO=${KPKG_REPO:-wh1laye/Kryonux}
 BRANCH=${KPKG_BRANCH:-main}
-PD=${KRYOUNIX_PKG:-/var/db/kpkg}
+PD=${KRYONUX_PKG:-/var/db/kpkg}
 FILES_ONLY=0
 for a in "$@"; do
   case $a in
     --files) FILES_ONLY=1 ;;
-    *) echo "использование: kryounix-fix [--files]" >&2; exit 1 ;;
+    *) echo "использование: kryonux-fix [--files]" >&2; exit 1 ;;
   esac
 done
 say() { printf '==> %s\n' "$*"; }
@@ -16,10 +16,10 @@ say() { printf '==> %s\n' "$*"; }
 
 purge_env() {
   local f n=0
-  for f in "$PD/env/kryounix-noreconf" "$PD"/env/*/*; do
+  for f in "$PD/env/kryonux-noreconf" "$PD"/env/*/*; do
     [ -f "$f" ] || continue
     case $f in *.bak) continue ;; esac
-    if [ "${f##*/}" = kryounix-noreconf ] || grep -qF 'eautoreconf() { :; }' "$f" 2>/dev/null; then
+    if [ "${f##*/}" = kryonux-noreconf ] || grep -qF 'eautoreconf() { :; }' "$f" 2>/dev/null; then
       mv "$f" "$f.bak"
       echo "   $f -> $f.bak"
       n=$((n + 1))
@@ -32,8 +32,8 @@ purge_penv() {
   local f n=0
   for f in "$PD/package.env" "$PD"/package.env/*; do
     [ -f "$f" ] || continue
-    if grep -qF kryounix-noreconf "$f"; then
-      sed -i '/kryounix-noreconf/d' "$f"
+    if grep -qF kryonux-noreconf "$f"; then
+      sed -i '/kryonux-noreconf/d' "$f"
       echo "   почистил $f"
       n=$((n + 1))
     fi

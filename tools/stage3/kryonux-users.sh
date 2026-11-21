@@ -1,6 +1,6 @@
 #!/bin/bash
 set -u
-R=${KRYOUNIX_ROOT:-}
+R=${KRYONUX_ROOT:-}
 bad=0
 say() { printf '==> %s\n' "$*"; }
 err() { printf '!! %s\n' "$*" >&2; bad=1; }
@@ -40,8 +40,8 @@ f=$(find_bin unix_chkpwd) && { chown 0:0 "$f"; chmod 4755 "$f"; }
 pam() {
   local n=$1 f=$R/etc/pam.d/$1
   install -d "$R/etc/pam.d"
-  if [ -e "$f" ] && ! head -n 1 "$f" | grep -q '^# kryounix$' && [ ! -e "$f.pre-1.2" ]; then mv "$f" "$f.pre-1.2"; fi
-  { echo '# kryounix'; cat; } > "$f"
+  if [ -e "$f" ] && ! head -n 1 "$f" | grep -q '^# kryonux$' && [ ! -e "$f.pre-1.2" ]; then mv "$f" "$f.pre-1.2"; fi
+  { echo '# kryonux'; cat; } > "$f"
   chmod 644 "$f"
 }
 
@@ -92,7 +92,7 @@ done
 
 if [ -n "$MOD" ]; then
   for f in "$R"/etc/pam.d/*; do
-    grep -q '^# kryounix$' "$f" || continue
+    grep -q '^# kryonux$' "$f" || continue
     for m in $(grep -o 'pam_[a-z_]*\.so' "$f" | sort -u); do
       [ -e "$MOD/$m" ] || err "$f: нет модуля $m"
     done
@@ -140,8 +140,8 @@ for s in /bin/sh /bin/bash /usr/bin/bash; do grep -qxF "$s" "$R/etc/shells" || e
 
 say "PATH для всех"
 install -d "$R/etc/profile.d"
-printf '%s\n' 'case ":$PATH:" in' '  *:/usr/sbin:*) ;;' '  *) PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin ;;' 'esac' 'export PATH' > "$R/etc/profile.d/kryounix-path.sh"
-chmod 644 "$R/etc/profile.d/kryounix-path.sh"
+printf '%s\n' 'case ":$PATH:" in' '  *:/usr/sbin:*) ;;' '  *) PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin ;;' 'esac' 'export PATH' > "$R/etc/profile.d/kryonux-path.sh"
+chmod 644 "$R/etc/profile.d/kryonux-path.sh"
 if [ ! -e "$R/etc/profile" ]; then
   printf '%s\n' 'export PATH=/usr/local/bin:/usr/bin:/bin' > "$R/etc/profile"
 fi

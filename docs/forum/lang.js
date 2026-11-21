@@ -1,6 +1,6 @@
 (function(){
 var W=window,d=document;
-function cur(){try{return W.CloudTheme?W.CloudTheme.getLang():'ru'}catch(e){return 'ru'}}
+function cur(){try{return W.KryonuxTheme?W.KryonuxTheme.getLang():'ru'}catch(e){return 'ru'}}
 W.tr=function(s){try{return W.I18N?W.I18N.t(s):s}catch(e){return s}};
 W.LOC=function(){return cur()==='en'?'en-GB':'ru'};
 W.nf=function(n){try{return Number(n).toLocaleString(W.LOC())}catch(e){return String(n)}};

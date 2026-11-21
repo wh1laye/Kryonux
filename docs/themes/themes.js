@@ -198,7 +198,7 @@ var T={'норд':'nord','дракула':'dracula','тема: норд':'theme:
 function dict(){if(window.I18N&&window.I18N.add)window.I18N.add(T);else{window.I18N_EXTRA=window.I18N_EXTRA||{};for(var k in T)window.I18N_EXTRA[k]=T[k]}}
 dict();
 var lk=d.createElement('link');lk.rel='stylesheet';lk.href=BASE+'themes.css?v='+V;d.head.appendChild(lk);
-window.CloudSeason={reg:function(id,m){M[id]=m},get:season,set:function(s){ls('season',s);apply();mark()},apply:apply,stats:function(){return {q:q,cost:ema,gap:jank,frames:nf}}};
+window.KryonuxSeason={reg:function(id,m){M[id]=m},get:season,set:function(s){ls('season',s);apply();mark()},apply:apply,stats:function(){return {q:q,cost:ema,gap:jank,frames:nf}}};
 function boot(){
   var fj=d.createElement('script');fj.src=BASE+'fun.js?v='+V;d.head.appendChild(fj);var mj=d.createElement('script');mj.src=BASE+'more.js?v='+V;d.head.appendChild(mj);
   applyCalm();

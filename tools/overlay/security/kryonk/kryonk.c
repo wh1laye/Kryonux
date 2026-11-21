@@ -54,5 +54,5 @@ static int __init kryonk_init(void)
 late_initcall(kryonk_init);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("wh1laye");
+MODULE_AUTHOR("The Kryonux Project");
 MODULE_DESCRIPTION("Kryonux kernel guard");

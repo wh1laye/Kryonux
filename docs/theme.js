@@ -18,7 +18,7 @@
   function set(t){if(!valid(t))return;try{localStorage.removeItem('tauto')}catch(e){}h.setAttribute('data-theme',t);try{localStorage.setItem(K,t)}catch(e){}applyAcc(getAcc())}
   function setAuto(){try{localStorage.setItem('tauto','1')}catch(e){}h.setAttribute('data-theme',get());applyAcc(getAcc());var b=d.getElementById('tb');if(b)paint(b);touch();fire()}
   if(MQ&&MQ.addEventListener)MQ.addEventListener('change',function(){if(auto()){h.setAttribute('data-theme',get());applyAcc(getAcc());var b=d.getElementById('tb');if(b)paint(b)}});
-  function fire(){if(window.CloudTheme&&typeof window.CloudTheme.onChange==='function')window.CloudTheme.onChange()}
+  function fire(){if(window.KryonuxTheme&&typeof window.KryonuxTheme.onChange==='function')window.KryonuxTheme.onChange()}
   var pl=0,pq=0,pt=null,pxx=0,pyy=0;
   var GLK='gls',GLD={b:24,s:180,t:45,h:70,d:55};
   var GLP={ios:{b:24,s:180,t:45,h:70,d:55},clear:{b:10,s:150,t:16,h:95,d:40},frost:{b:42,s:140,t:72,h:35,d:40},deep:{b:30,s:210,t:62,h:55,d:90}};
@@ -58,7 +58,7 @@
     return o;
   }
   function resetGl(){try{localStorage.removeItem(GLK)}catch(e){}applyGlass()}
-  var PS='.top,.toc,.card,.feat,.flow a,.links a,.note,.warn,.post,.trow,.hist,.stat div,.poll,.ann,.hbt,.hlp,.term,.cloud,.vit,.ni,.fpanel,.hbs,.sp .spb';
+  var PS='.top,.toc,.card,.feat,.flow a,.links a,.note,.warn,.post,.trow,.hist,.stat div,.poll,.ann,.hbt,.hlp,.term,.kryonux,.vit,.ni,.fpanel,.hbs,.sp .spb';
   d.addEventListener('pointermove',function(e){
     if(!pl||e.pointerType==='touch')return;
     var n=e.target&&e.target.closest?e.target.closest(PS):null;
@@ -176,7 +176,7 @@
     var b=d.getElementById('tb');if(b)paint(b);
     var s=d.getElementById('sb');if(s)paintS(s);
     if(sp){build();refresh()}
-    try{window.dispatchEvent(new Event('cloudlang'))}catch(e){var ev=d.createEvent('Event');ev.initEvent('cloudlang',false,false);window.dispatchEvent(ev)}
+    try{window.dispatchEvent(new Event('kryonuxlang'))}catch(e){var ev=d.createEvent('Event');ev.initEvent('kryonuxlang',false,false);window.dispatchEvent(ev)}
   }
 
   h.setAttribute('data-theme',get());
@@ -277,7 +277,7 @@
     x+='<div class="sps" data-t="text"><h4>'+T('чтение')+'</h4><p class="spm">'+T('размер текста')+'</p><div class="sgm"><button type="button" data-rfs="0">'+T('обычный')+'</button><button type="button" data-rfs="1">'+T('крупнее')+'</button><button type="button" data-rfs="2">'+T('ещё крупнее')+'</button></div>';
     x+='<label class="spc"><input type="checkbox" data-rk="hc"><span>'+T('высокий контраст')+'</span></label><label class="spc"><input type="checkbox" data-rk="cmd"><span>'+T('только команды в справочнике')+'</span></label></div>';
     x+='<div class="sps" data-t="glass"><h4>'+T('стекло')+'</h4><label class="spc"><input type="checkbox" data-k="gl"><span>'+T('жидкое стекло')+'</span></label>';
-    x+='<div class="gpv" aria-hidden="true"><i class="gp1"></i><i class="gp2"></i><i class="gp3"></i><div class="gpc"><b></b><span>kryounix</span></div></div>';
+    x+='<div class="gpv" aria-hidden="true"><i class="gp1"></i><i class="gp2"></i><i class="gp3"></i><div class="gpc"><b></b><span>kryonux</span></div></div>';
     x+='<p class="spm">'+T('стиль')+'</p><div class="sgm gst">';
     for(i=0;i<GLN.length;i++)x+='<button type="button" data-gp="'+GLN[i][0]+'">'+T(GLN[i][1])+'</button>';
     x+='</div><div class="gsl">';
@@ -343,7 +343,7 @@
           else if(a==='rgl'){resetGl();refresh()}
           return;
         }
-        if(n.hasAttribute('data-th')){var tv=n.getAttribute('data-th');if(tv==='auto')setAuto();else window.CloudTheme.set(tv);refresh();return}
+        if(n.hasAttribute('data-th')){var tv=n.getAttribute('data-th');if(tv==='auto')setAuto();else window.KryonuxTheme.set(tv);refresh();return}
         if(n.hasAttribute('data-tb')){setTab(n.getAttribute('data-tb'));return}
         if(n.hasAttribute('data-gp')){var gn=n.getAttribute('data-gp');var pp=GLP[gn];if(pp){var gq={p:gn};for(var gk in pp)gq[gk]=pp[gk];setGl(gq);if(!glassOn())setGlass(true);refresh()}return}
         if(n.hasAttribute('data-lg')){setLang(n.getAttribute('data-lg'));return}
@@ -423,7 +423,7 @@
     if(sp&&!sp.hidden)refresh();
   });
   function pack(){return {t:get(),gl:glassOn()?1:0,g:getGrad(),a:getAcc(),l:lang(),ts:ts()}}
-  window.CloudTheme={
+  window.KryonuxTheme={
     get:get,
     unlock:function(){try{localStorage.setItem('sec','1')}catch(e){}if(sp){build();refresh()}},
     names:function(){return NM},
@@ -472,7 +472,7 @@
     if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(s).then(done,fb);
     else fb();
   }
-  window.CloudTheme.copy=copyText;
+  window.KryonuxTheme.copy=copyText;
   function addCopy(pre){
     if(pre.dataset.cp||pre.classList.contains('code'))return;
     pre.dataset.cp='1';

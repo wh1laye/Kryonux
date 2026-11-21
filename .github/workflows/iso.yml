@@ -77,7 +77,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.version }}
         run: |
-          if gh release view "$VERSION" --json assets --jq '.assets[].name' 2>/dev/null | grep -qxF "kryounix-live-amd64-$VERSION.iso"; then
+          if gh release view "$VERSION" --json assets --jq '.assets[].name' 2>/dev/null | grep -qxF "kryonux-live-amd64-$VERSION.iso"; then
             echo "::error::iso $VERSION уже опубликован, перезапись запрещена (overwrite=true разрешает)"; exit 1
           fi
 
@@ -96,7 +96,7 @@ jobs:
           if [ "$PUBLISH" = true ] && { [ "$SMOKE" != true ] || [ "$ITEST" != true ]; }; then echo "::error::публикация без smoke и install_test запрещена"; exit 1; fi
       - name: проверка скриптов
         run: |
-          for f in tools/mkiso.sh tools/iso/mkiso-inside.sh tools/iso/init tools/iso/kryounix-install tools/iso/kryounix-secureboot tools/iso/kryounix-uki tools/iso/kryounix-tpm2 tools/iso/dracut-tpm2/*.sh tools/kernel/*.sh tools/stage3/kryounix-firewall tools/stage3/kryounix-audit; do bash -n "$f"; done
+          for f in tools/mkiso.sh tools/iso/mkiso-inside.sh tools/iso/init tools/iso/kryonux-install tools/iso/kryonux-secureboot tools/iso/kryonux-uki tools/iso/kryonux-tpm2 tools/iso/dracut-tpm2/*.sh tools/kernel/*.sh tools/stage3/kryonux-firewall tools/stage3/kryonux-audit; do bash -n "$f"; done
 
       - name: место на диске
         run: |
@@ -111,9 +111,9 @@ jobs:
           BASE_VERSION: ${{ inputs.base_version }}
         run: |
           mkdir -p dl
-          gh release download "$BASE_TAG" --repo "$GITHUB_REPOSITORY" -p "kryounix-stage3-amd64-$BASE_VERSION.tar.xz*" -D dl
+          gh release download "$BASE_TAG" --repo "$GITHUB_REPOSITORY" -p "kryonux-stage3-amd64-$BASE_VERSION.tar.xz*" -D dl
           ls -lh dl
-          ( cd dl && sha256sum -c "kryounix-stage3-amd64-$BASE_VERSION.tar.xz.sha256" )
+          ( cd dl && sha256sum -c "kryonux-stage3-amd64-$BASE_VERSION.tar.xz.sha256" )
 
       - name: сборка iso
         env:
@@ -127,7 +127,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq minisign
           mkdir -p "$PWD/out"
-          sudo -E env WORK=/mnt/iso OUT="$PWD/out" VERSION="$VERSION" KVER="$KVER" KRYONK_VER="$KRYONK_VER" BASE="$PWD/dl/kryounix-stage3-amd64-$BASE_VERSION.tar.xz" \
+          sudo -E env WORK=/mnt/iso OUT="$PWD/out" VERSION="$VERSION" KVER="$KVER" KRYONK_VER="$KRYONK_VER" BASE="$PWD/dl/kryonux-stage3-amd64-$BASE_VERSION.tar.xz" \
             bash tools/mkiso.sh 2>&1 | tee "$RUNNER_TEMP/build.log"
           ls -lh out
 
@@ -139,7 +139,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq qemu-system-x86 xorriso
-          ISO="$PWD/out/kryounix-live-amd64-$VERSION.iso"
+          ISO="$PWD/out/kryonux-live-amd64-$VERSION.iso"
           mkdir -p smoke
           xorriso -osirrox on -indev "$ISO" -extract /boot/vmlinuz smoke/vmlinuz -extract /boot/initramfs.img smoke/initramfs.img 2>&1 | tail -n 5 || true
           [ -s smoke/vmlinuz ] && [ -s smoke/initramfs.img ] || { echo "в iso нет vmlinuz или initramfs"; xorriso -indev "$ISO" -find /boot 2>&1 | tail -n 20; exit 1; }
@@ -147,11 +147,11 @@ jobs:
           if [ -w /dev/kvm ]; then ACCEL="-enable-kvm"; fi
           QRC=0
           timeout 420 qemu-system-x86_64 $ACCEL -cpu max -m 2048 -smp 2 -display none -serial stdio -no-reboot \
-            -kernel smoke/vmlinuz -initrd smoke/initramfs.img -append "console=ttyS0 earlycon=uart8250,io,0x3f8,115200n8 kryounix.smoke" -cdrom "$ISO" > "$PWD/smoke.log" 2>&1 || QRC=$?
+            -kernel smoke/vmlinuz -initrd smoke/initramfs.img -append "console=ttyS0 earlycon=uart8250,io,0x3f8,115200n8 kryonux.smoke" -cdrom "$ISO" > "$PWD/smoke.log" 2>&1 || QRC=$?
           echo "qemu код $QRC, лог $(wc -c < smoke.log) байт"
-          grep -aq 'kryounix-smoke: FAIL' smoke.log && { grep -a 'kryounix-smoke:' smoke.log; echo "живая проверка не прошла"; exit 1; }
-          grep -aq 'kryounix-smoke: ok' smoke.log || { echo "--- конец лога загрузки ---"; tail -n 80 smoke.log | tr -d '\033'; echo "--- ключевые строки ---"; grep -aiE 'panic|oops|bug:|unable to|cannot|failed|не смонт|rescue|kryounix-init|module|signature' smoke.log | tr -d '\033' | head -n 40; echo "нет kryounix-smoke: ok, система не дошла до проверки"; exit 1; }
-          grep -aq 'kryounix-init: switch_root' smoke.log || { echo "initramfs не дошёл до switch_root"; exit 1; }
+          grep -aq 'kryonux-smoke: FAIL' smoke.log && { grep -a 'kryonux-smoke:' smoke.log; echo "живая проверка не прошла"; exit 1; }
+          grep -aq 'kryonux-smoke: ok' smoke.log || { echo "--- конец лога загрузки ---"; tail -n 80 smoke.log | tr -d '\033'; echo "--- ключевые строки ---"; grep -aiE 'panic|oops|bug:|unable to|cannot|failed|не смонт|rescue|kryonux-init|module|signature' smoke.log | tr -d '\033' | head -n 40; echo "нет kryonux-smoke: ok, система не дошла до проверки"; exit 1; }
+          grep -aq 'kryonux-init: switch_root' smoke.log || { echo "initramfs не дошёл до switch_root"; exit 1; }
           grep -aq 'is starting up' smoke.log || { echo "openrc не стартовал"; exit 1; }
           grep -aqE 'nftables|нет службы nftables' smoke.log || { echo "в логе загрузки нет nftables"; exit 1; }
           if grep -aqE 'правила в .* не проходят проверку' smoke.log; then echo "nftables не принял правила"; exit 1; fi
@@ -164,7 +164,7 @@ jobs:
           VERSION: ${{ inputs.version }}
         run: |
           sudo apt-get install -y -qq qemu-system-x86 ovmf
-          ISO="$PWD/out/kryounix-live-amd64-$VERSION.iso"
+          ISO="$PWD/out/kryonux-live-amd64-$VERSION.iso"
           ACCEL=""
           if [ -w /dev/kvm ]; then ACCEL="-enable-kvm"; fi
           RC=0
@@ -185,7 +185,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq qemu-system-x86 qemu-utils xorriso
-          ISO="$PWD/out/kryounix-live-amd64-$VERSION.iso"
+          ISO="$PWD/out/kryonux-live-amd64-$VERSION.iso"
           mkdir -p itest
           xorriso -osirrox on -indev "$ISO" -extract /boot/vmlinuz itest/vmlinuz -extract /boot/initramfs.img itest/initramfs.img 2>/dev/null
           ACCEL=""
@@ -194,10 +194,10 @@ jobs:
             local fs=$1 sfx=$2 extra=$3
             qemu-img create -f raw itest/disk.img 6G
             timeout 1500 qemu-system-x86_64 $ACCEL -cpu max -m 3072 -smp 2 -display none -serial stdio -no-reboot \
-              -kernel itest/vmlinuz -initrd itest/initramfs.img -append "console=ttyS0 kryounix.smoke kryounix.itest$extra" -cdrom "$ISO" \
+              -kernel itest/vmlinuz -initrd itest/initramfs.img -append "console=ttyS0 kryonux.smoke kryonux.itest$extra" -cdrom "$ISO" \
               -drive file=itest/disk.img,format=raw,if=virtio > "$PWD/itest-install$sfx.log" 2>&1 || true
-            grep -a 'kryounix-smoke:' "itest-install$sfx.log" | tail -n 5
-            grep -aq 'kryounix-smoke: itest ok' "itest-install$sfx.log" || { tail -n 80 "itest-install$sfx.log" | tr -d '\033'; echo "установка на диск ($fs) не прошла"; exit 1; }
+            grep -a 'kryonux-smoke:' "itest-install$sfx.log" | tail -n 5
+            grep -aq 'kryonux-smoke: itest ok' "itest-install$sfx.log" || { tail -n 80 "itest-install$sfx.log" | tr -d '\033'; echo "установка на диск ($fs) не прошла"; exit 1; }
             timeout 600 qemu-system-x86_64 $ACCEL -cpu max -m 2048 -smp 2 -display none -serial stdio -no-reboot \
               -drive file=itest/disk.img,format=raw,if=virtio -boot c > "$PWD/itest-boot$sfx.log" 2>&1 || true
             grep -aq 'Kernel panic' "itest-boot$sfx.log" && { echo "паника ядра при загрузке установленной системы ($fs)"; exit 1; }
@@ -205,7 +205,7 @@ jobs:
             echo "установленная система ($fs) загрузилась до openrc"
           }
           itest_run ext4 "" ""
-          if [ "$ITEST_BTRFS" = 1 ]; then itest_run btrfs -btrfs " kryounix.itest.fs=btrfs"; fi
+          if [ "$ITEST_BTRFS" = 1 ]; then itest_run btrfs -btrfs " kryonux.itest.fs=btrfs"; fi
 
       - name: итог в summary
         if: always()
@@ -253,11 +253,11 @@ jobs:
           VERSION: ${{ inputs.version }}
         run: |
           cd out
-          f="kryounix-live-amd64-$VERSION.iso"
+          f="kryonux-live-amd64-$VERSION.iso"
           sha256sum -c "$f.sha256"
           for x in "$f" "$f.sha256"; do
             [ -s "$x.minisig" ] || { echo "::error::нет подписи $x.minisig"; exit 1; }
-            minisign -V -p "$GITHUB_WORKSPACE/docs/kryounix.pub" -m "$x" -x "$x.minisig"
+            minisign -V -p "$GITHUB_WORKSPACE/docs/kryonux.pub" -m "$x" -x "$x.minisig"
           done
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
@@ -276,7 +276,7 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: ${{ !inputs.publish }}
         with:
-          name: kryounix-iso-${{ inputs.version }}
+          name: kryonux-iso-${{ inputs.version }}
           path: out/*
           compression-level: 0
 
@@ -287,11 +287,11 @@ jobs:
           VERSION: ${{ inputs.version }}
           OVERWRITE: ${{ inputs.overwrite }}
         run: |
-          SIZE=$(stat -c %s "out/kryounix-live-amd64-$VERSION.iso")
+          SIZE=$(stat -c %s "out/kryonux-live-amd64-$VERSION.iso")
           [ "$SIZE" -lt 2147483648 ] || { echo "iso $SIZE байт, лимит github releases 2 гб"; exit 1; }
           gh release view "$VERSION" >/dev/null 2>&1 || gh release create "$VERSION" --title "Kryonux $VERSION" \
-            --notes "kryounix live iso $VERSION. установка: загрузись с iso и выполни doas kryounix-install. проверка: sha256sum -c kryounix-live-amd64-$VERSION.iso.sha256"
-          FILES=("out/kryounix-live-amd64-$VERSION.iso" "out/kryounix-live-amd64-$VERSION.iso.sha256")
+            --notes "kryonux live iso $VERSION. установка: загрузись с iso и выполни doas kryonux-install. проверка: sha256sum -c kryonux-live-amd64-$VERSION.iso.sha256"
+          FILES=("out/kryonux-live-amd64-$VERSION.iso" "out/kryonux-live-amd64-$VERSION.iso.sha256")
           for s in out/*.minisig; do [ -e "$s" ] && FILES+=("$s"); done
           CLOBBER=()
           if [ "$OVERWRITE" = true ]; then CLOBBER=(--clobber); fi

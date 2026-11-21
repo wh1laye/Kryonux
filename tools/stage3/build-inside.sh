@@ -11,7 +11,7 @@ ST=/var/tmp/s3stamp
 SRC=/var/tmp/s3src
 PKG=/var/tmp/kpkg-src
 L=/var/tmp/s3log
-REPORT=/var/tmp/kryounix-report.txt
+REPORT=/var/tmp/kryonux-report.txt
 
 mkdir -p "$ST" "$L"
 rm -f "$REPORT"
@@ -67,22 +67,22 @@ install_set() {
       echo "$line" >> "$REPORT"
       tail -20 "$L/$(printf '%s' "$line" | tr / -).log" >&2 || true
     fi
-  done < "$F/kryounix-packages.list"
+  done < "$F/kryonux-packages.list"
   say "packages: installed $ok, failed $fail"
   [ "$fail" = 0 ]
 }
 
 layout() {
-  install -d /usr/share/kryounix
-  [ -f "$F/logo.txt" ] && install -m644 "$F/logo.txt" /usr/share/kryounix/logo.txt
-  [ -f "$F/logo.ansi" ] && install -m644 "$F/logo.ansi" /usr/share/kryounix/logo.ansi
-  [ -f "$F/logo.png" ] && install -m644 "$F/logo.png" /usr/share/kryounix/logo.png
-  for f in kryounix-users kryounix-adduser kryounix-fix kryounix-firewall kryounix-audit; do
+  install -d /usr/share/kryonux
+  [ -f "$F/logo.txt" ] && install -m644 "$F/logo.txt" /usr/share/kryonux/logo.txt
+  [ -f "$F/logo.ansi" ] && install -m644 "$F/logo.ansi" /usr/share/kryonux/logo.ansi
+  [ -f "$F/logo.png" ] && install -m644 "$F/logo.png" /usr/share/kryonux/logo.png
+  for f in kryonux-users kryonux-adduser kryonux-fix kryonux-firewall kryonux-audit; do
     [ -f "$F/$f" ] && install -m755 "$F/$f" /usr/sbin/$f
   done
-  [ -f "$F/kryounix-audit" ] || true
-  printf 'kryounix\n' > /etc/hostname
-  grep -q '^ID=kryounix' /etc/os-release
+  [ -f "$F/kryonux-audit" ] || true
+  printf 'kryonux\n' > /etc/hostname
+  grep -q '^ID=kryonux' /etc/os-release
 }
 
 clean() {
@@ -92,8 +92,8 @@ clean() {
 
 step kpkg-setup setup_kpkg || exit 1
 step kpkg-recipes fetch_recipes || exit 1
-step kryounix-package-set install_set || exit 1
-step kryounix-layout layout || exit 1
+step kryonux-package-set install_set || exit 1
+step kryonux-layout layout || exit 1
 clean
 
 if [ -s "$REPORT" ]; then

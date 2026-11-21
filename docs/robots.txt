@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://wh1laye.github.io/Kryonux/sitemap.xml
+Sitemap: https://kryonux.pages.dev/sitemap.xml

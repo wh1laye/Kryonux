@@ -101,7 +101,7 @@ function render(text){
 }
 var QI='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 9a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.1.9-1.1 1.8M12 17h.01"/></svg>';
 function init(){
-  [].forEach.call(d.querySelectorAll('#cloud .cw'),function(cw){
+  [].forEach.call(d.querySelectorAll('#kryonux .cw'),function(cw){
     var pre=cw.querySelector('pre');
     if(!pre||cw.querySelector('.hqb'))return;
     if(!explain(pre.textContent).length)return;

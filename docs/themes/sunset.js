@@ -3,7 +3,7 @@ function bird(c,ph){
   var f=Math.sin(ph)*4;
   c.beginPath();c.moveTo(-8,f);c.quadraticCurveTo(-4,-2,0,0);c.quadraticCurveTo(4,-2,8,f);c.stroke();
 }
-window.CloudSeason.reg('sk',{
+window.KryonuxSeason.reg('sk',{
   init:function(k){
     var m=k.mobile(),CL=[],BD=[],j,gh=m?100:170;
     k.el('',k.strip(gh,[{d:k.hill(1000,60,46,6,3),fill:'rgba(130,40,90,.78)',line:'rgba(255,160,120,.5)',w:2},{d:k.hill(1000,92,34,8,9),fill:'rgba(80,22,66,.92)',line:'rgba(255,130,100,.4)',w:2},{d:k.hill(1000,120,20,11,5),fill:'rgba(40,10,40,.97)',line:'rgba(255,110,90,.3)',w:2}]),'left:0;right:0;bottom:0;height:'+gh+'px',true);

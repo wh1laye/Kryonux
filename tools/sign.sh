@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
-PUB=${PUB:-$(dirname "$HERE")/docs/kryounix.pub}
+PUB=${PUB:-$(dirname "$HERE")/docs/kryonux.pub}
 
 [ $# -ge 1 ] || { echo "использование: MINISIGN_KEY=... [MINISIGN_PASSWORD=...] $0 файл..." >&2; exit 1; }
 if [ -z "${MINISIGN_KEY:-}" ]; then
@@ -18,7 +18,7 @@ printf '%s\n' "$MINISIGN_KEY" > "$K"
 for f in "$@"; do
   [ -f "$f" ] || { echo "нет файла $f" >&2; exit 1; }
   rm -f "$f.minisig"
-  printf '%s\n' "${MINISIGN_PASSWORD:-}" | minisign -S -s "$K" -m "$f" -x "$f.minisig" -t "kryounix $(basename "$f")" >/dev/null
+  printf '%s\n' "${MINISIGN_PASSWORD:-}" | minisign -S -s "$K" -m "$f" -x "$f.minisig" -t "kryonux $(basename "$f")" >/dev/null
   [ -s "$f.minisig" ] || { echo "подпись $f не создалась" >&2; exit 1; }
   if [ -f "$PUB" ]; then
     minisign -V -p "$PUB" -m "$f" -x "$f.minisig" >/dev/null || { echo "подпись $f не сходится с $PUB" >&2; exit 1; }

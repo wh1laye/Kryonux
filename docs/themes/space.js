@@ -10,7 +10,7 @@
       c.lineWidth=1;c.strokeStyle='rgba(255,255,255,.75)';c.stroke();
     });
   }
-  window.CloudSeason.reg('cs',{
+  window.KryonuxSeason.reg('cs',{
     init:function(k){
       var m=k.mobile(),wd=k.wide(),gh=m?30:40,i;
       for(i=0;i<(m?2:4);i++)k.el('zs-cloud',k.svg('0 0 136 86',NEB),'left:'+k.rnd(-30,40).toFixed(1)+'%;top:'+Math.round(k.rnd(gh*.35,gh*.8))+'px;width:'+(m?140:240)+'px;animation-duration:'+(m?150:200)+'s;animation-delay:'+(-i*34).toFixed(1)+'s;opacity:.95');

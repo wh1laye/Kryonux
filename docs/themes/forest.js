@@ -13,7 +13,7 @@ function pines(gh,seed,c1,c2,sc){
 function layer(gh,seed,c1,c2,sc,op){
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 '+gh+'" preserveAspectRatio="xMidYMax slice" width="100%" height="100%" style="display:block"><g opacity="'+op+'">'+pines(gh,seed,c1,c2,sc)+'</g></svg>';
 }
-window.CloudSeason.reg('fo',{
+window.KryonuxSeason.reg('fo',{
   init:function(k){
     var m=k.mobile(),gh=m?90:150,j;
     k.el('',k.svg('0 0 100 100','<circle cx="50" cy="50" r="22" fill="#e8f5d0" opacity=".85"/><circle cx="50" cy="50" r="34" fill="#cdeea0" opacity=".16"/><circle cx="50" cy="50" r="48" fill="#cdeea0" opacity=".07"/>'),'left:10%;top:'+(m?50:60)+'px;width:'+(m?90:150)+'px;height:'+(m?90:150)+'px',true);

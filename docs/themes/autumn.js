@@ -25,7 +25,7 @@ function goose(c,ph){
   var f=Math.sin(ph)*5;
   c.beginPath();c.moveTo(-8,f);c.quadraticCurveTo(-4,-1,0,0);c.quadraticCurveTo(4,-1,8,f);c.stroke();
 }
-window.CloudSeason.reg('au',{
+window.KryonuxSeason.reg('au',{
   init:function(k){
     var m=k.mobile(),gh=m?90:150,gs={x:-.3,w:8},G=[],j,o;
     var h2=Math.round(gh*.72),t1=k.el('','','left:0;bottom:0;width:100%;height:'+gh+'px;overflow:hidden',true),t2=k.el('','','left:0;bottom:0;width:100%;height:'+h2+'px;overflow:hidden',true);

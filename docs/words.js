@@ -29,7 +29,7 @@ function tr(s,to){
 var SEL=".txt,.bio,.trow strong,.trow .tt";
 var SKIP="pre,code,kbd,a,textarea,script,style,.un,[data-nw]";
 var orig=new WeakMap(),obs=null,busy=false;
-function lang(){try{return W.CloudTheme?W.CloudTheme.getLang():"ru"}catch(e){return"ru"}}
+function lang(){try{return W.KryonuxTheme?W.KryonuxTheme.getLang():"ru"}catch(e){return"ru"}}
 function node(n,to){
   var p=n.parentNode;
   if(!p||p.nodeType!==1||(p.closest&&p.closest(SKIP)))return;
@@ -73,7 +73,7 @@ function apply(){
     obs.observe(d.body,{childList:true,subtree:true});
   }
 }
-W.CloudWords={tr:tr,count:Object.keys(R).length,apply:apply};
-W.addEventListener("cloudlang",apply);
+W.KryonuxWords={tr:tr,count:Object.keys(R).length,apply:apply};
+W.addEventListener("kryonuxlang",apply);
 if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",apply);else apply();
 })();

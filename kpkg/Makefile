@@ -13,7 +13,7 @@ kpkg: $(SRCS) kpkg.h
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(SRCS)
 
 install: kpkg
-	@if [ -z "$(DESTDIR)" ] && [ -z "$$KPKG_FORCE" ] && ! grep -q '^ID="\?kryounix' /etc/os-release 2>/dev/null; then \
+	@if [ -z "$(DESTDIR)" ] && [ -z "$$KPKG_FORCE" ] && ! grep -q '^ID="\?kryonux' /etc/os-release 2>/dev/null; then \
 	  echo "kpkg: refusing to install into a non-Kryonux system; use DESTDIR for stage3/iso staging" >&2; \
 	  exit 1; \
 	fi
@@ -24,7 +24,7 @@ install-box:
 
 conf:
 	install -d $(DESTDIR)/etc/kpkg
-	@if [ -f etc/kpkg/kryounix.pub ]; then install -m644 etc/kpkg/kryounix.pub $(DESTDIR)/etc/kpkg/kryounix.pub; fi
+	@if [ -f etc/kpkg/kryonux.pub ]; then install -m644 etc/kpkg/kryonux.pub $(DESTDIR)/etc/kpkg/kryonux.pub; fi
 	@if [ ! -e $(DESTDIR)/etc/kpkg/kpkg.conf ]; then \
 	  install -m644 etc/kpkg/kpkg.conf $(DESTDIR)/etc/kpkg/kpkg.conf; \
 	elif ! cmp -s etc/kpkg/kpkg.conf $(DESTDIR)/etc/kpkg/kpkg.conf; then \

@@ -76,9 +76,9 @@ let uiT=null;
 function pushUi(){
   if(!me)return;
   clearTimeout(uiT);
-  uiT=setTimeout(()=>{const T=window.CloudTheme;sb.rpc('set_ui',{j:T.pack()}).then(r=>{if(r&&r.error)console.warn(r.error.message)})},700);
+  uiT=setTimeout(()=>{const T=window.KryonuxTheme;sb.rpc('set_ui',{j:T.pack()}).then(r=>{if(r&&r.error)console.warn(r.error.message)})},700);
 }
-window.CloudTheme.onChange=pushUi;
+window.KryonuxTheme.onChange=pushUi;
 const who=(p,ln)=>{
   const r=p&&p.roles;
   const hx=/^#[0-9a-fA-F]{6}$/;
@@ -139,7 +139,7 @@ function presence(){
     if(ch)sb.removeChannel(ch);
     pk=key;
     online={};
-    const c=sb.channel('kryounix-online',{config:{presence:{key}}});
+    const c=sb.channel('kryonux-online',{config:{presence:{key}}});
     ch=c;
     c.on('presence',{event:'sync'},()=>{online=c.presenceState();renderOnline()});
     c.subscribe(st=>{if(st==='SUBSCRIBED')c.track(meta())});
@@ -154,7 +154,7 @@ async function auth(){
   if(me){
     const r=await sb.from('profiles').select('*,roles(*)').eq('id',me.id).maybeSingle();
     prof=r.data;
-    if(prof&&prof.ui&&(+prof.ui.ts||0)>=window.CloudTheme.ts())window.CloudTheme.apply(prof.ui);
+    if(prof&&prof.ui&&(+prof.ui.ts||0)>=window.KryonuxTheme.ts())window.KryonuxTheme.apply(prof.ui);
     else pushUi();
   }
   drawBar();
@@ -423,7 +423,7 @@ GP.night=GP.nord=GP.dracula=GP.matrix=GP.amber=GP.gray;GP.sepia=GP.light;
 const NMF={light:'светлая',gray:'серая',night:'ночь',nord:'nord',dracula:'dracula',sepia:'сепия',matrix:'матрица',amber:'янтарь'};
 const TL=()=>{const l=['light','gray','night','nord','dracula','sepia'];try{if(localStorage.getItem('sec')==='1')l.push('matrix','amber')}catch(e){}return l};
 function settings(){
-  const T=window.CloudTheme,g=T.getGrad(),th=T.get();
+  const T=window.KryonuxTheme,g=T.getGrad(),th=T.get();
   const grad=(c1,c2,a)=>'linear-gradient('+a+'deg,'+c1+','+c2+')';
   app.innerHTML='<p><a href="#/">форум</a> / настройки</p><h1>настройки</h1><div class="sg2">'+
     '<section class="sc"><h3>тема</h3><div class="seg">'+TL().map(v=>'<button class="sgb'+(th===v?' on':'')+'" data-a="th" data-i="'+v+'"><span class="tp tp-'+v+'"><b>Aa</b></span>'+NMF[v]+'</button>').join('')+'</div></section>'+
@@ -1111,7 +1111,7 @@ async function route(){
     else if(k[1]==='messages'){if(k[2]&&/^[0-9a-f-]{36}$/i.test(k[2]))await dmChat(k[2]);else await dmList()}
     else if(k[1]==='bookmarks')await bookmarks();
     else if(k[1]==='reports')await reports();
-    else if(k[1]==='settings'){window.CloudTheme.openSettings();location.replace('#/')}
+    else if(k[1]==='settings'){window.KryonuxTheme.openSettings();location.replace('#/')}
     else if(k[1]==='notifications')await notifs();
     else if(k[1]==='admin'&&k[2]==='badges')await badgesAdmin();
     else if(k[1]==='admin')await admin();
@@ -1318,7 +1318,7 @@ document.addEventListener('click',async e=>{
     if(r.error)return alert(r.error.message);
     thread(+app.dataset.t);
   }
-  else if(a==='gang'){window.CloudTheme.setGrad({a:+i});settings()}
+  else if(a==='gang'){window.KryonuxTheme.setGrad({a:+i});settings()}
   else if(a==='annx'){try{localStorage.setItem('ann_x',i)}catch(x){}const el=$('#ann');if(el)el.innerHTML=''}
   else if(a==='ureset'){
     if(!confirm(tr('сбросить аватар, баннер, о себе и статус этого участника?')))return;
@@ -1348,9 +1348,9 @@ document.addEventListener('click',async e=>{
     if(r.error)return alert(r.error.message);
     admin();
   }
-  else if(a==='th'){window.CloudTheme.set(i);settings()}
-  else if(a==='gr'){window.CloudTheme.resetGrad();settings()}
-  else if(a==='gp'){const q=GP[window.CloudTheme.get()][+i];window.CloudTheme.setGrad({on:true,c1:q[1],c2:q[2],a:q[3]});settings()}
+  else if(a==='th'){window.KryonuxTheme.set(i);settings()}
+  else if(a==='gr'){window.KryonuxTheme.resetGrad();settings()}
+  else if(a==='gp'){const q=GP[window.KryonuxTheme.get()][+i];window.KryonuxTheme.setGrad({on:true,c1:q[1],c2:q[2],a:q[3]});settings()}
   else if(a==='nopen'){await sb.from('notifications').update({read:true}).eq('id',i);refreshBell()}
   else if(a==='nreadall'){await sb.from('notifications').update({read:true}).eq('user_id',me.id).eq('read',false);await refreshBell();notifs()}
   else if(a==='nclear'){if(confirm(tr('удалить все уведомления?'))){await sb.from('notifications').delete().eq('user_id',me.id);await refreshBell();notifs()}}

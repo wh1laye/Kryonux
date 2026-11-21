@@ -10,15 +10,15 @@ need() { [ "$(id -u)" = 0 ] || die "нужен root"; command -v nft >/dev/null 
 
 usage() {
   cat <<EOU
-kryounix-firewall status
-kryounix-firewall check
-kryounix-firewall reload
-kryounix-firewall on
-kryounix-firewall off
-kryounix-firewall list
-kryounix-firewall allow ssh|http|https|tcp/ПОРТ|udp/ПОРТ [from АДРЕС]
-kryounix-firewall remove ssh|http|https|tcp/ПОРТ|udp/ПОРТ
-kryounix-firewall log
+kryonux-firewall status
+kryonux-firewall check
+kryonux-firewall reload
+kryonux-firewall on
+kryonux-firewall off
+kryonux-firewall list
+kryonux-firewall allow ssh|http|https|tcp/ПОРТ|udp/ПОРТ [from АДРЕС]
+kryonux-firewall remove ssh|http|https|tcp/ПОРТ|udp/ПОРТ
+kryonux-firewall log
 EOU
 }
 
@@ -52,9 +52,9 @@ cmd=${1:-}
 case $cmd in
   status)
     need
-    if nft list table inet kryounix >/dev/null 2>&1; then
+    if nft list table inet kryonux >/dev/null 2>&1; then
       echo "фаервол: включён"
-      pol=$(nft list chain inet kryounix input | grep policy || true)
+      pol=$(nft list chain inet kryonux input | grep policy || true)
       echo "политика input:${pol##*type filter hook input priority filter;}"
       for f in "$DIR"/*.nft; do [ -e "$f" ] && echo "правило: ${f##*/}"; done || true
     else
@@ -63,7 +63,7 @@ case $cmd in
     fi ;;
   check) need; nft -c -f "$CONF" && echo "правила корректны" ;;
   reload|on) need; apply && echo "правила загружены" ;;
-  off) need; nft flush ruleset; echo "правила сброшены до перезагрузки или kryounix-firewall on" ;;
+  off) need; nft flush ruleset; echo "правила сброшены до перезагрузки или kryonux-firewall on" ;;
   list) need; nft list ruleset ;;
   log) tail -n 50 /var/log/messages 2>/dev/null | grep 'nft-drop' || echo "записей нет" ;;
   allow)

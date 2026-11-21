@@ -1,5 +1,5 @@
 (function(){
-var d=document,h=d.documentElement,main=d.getElementById('cloud');
+var d=document,h=d.documentElement,main=d.getElementById('kryonux');
 if(!main)return;
 h.classList.add('js');
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}

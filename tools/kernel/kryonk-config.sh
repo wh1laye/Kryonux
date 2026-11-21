@@ -49,7 +49,7 @@ kryonk_config() {
   for s in $KRYONK_OPT_N $KRYONK_REQ_N; do scripts/config -d "$s"; done
   for s in $KRYONK_OPT_V; do scripts/config --set-val "${s%%=*}" "${s#*=}"; done
   scripts/config --set-str LOCALVERSION "-kryonk-$KRYONK_VER"
-  scripts/config --set-str DEFAULT_HOSTNAME kryounix
+  scripts/config --set-str DEFAULT_HOSTNAME kryonux
   scripts/config --set-str MODULE_SIG_HASH sha512
   scripts/config --set-str DEFAULT_TCP_CONG bbr
   scripts/config --set-str LSM "landlock,lockdown,yama,apparmor,bpf"

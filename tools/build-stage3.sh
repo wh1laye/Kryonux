@@ -7,10 +7,10 @@ VERSION=${VERSION:-0.0.0}
 BASE_TAG=${BASE_TAG:-1.6}
 BASE_VERSION=${BASE_VERSION:-1.6}
 BASE_VERIFY=${BASE_VERIFY:-1}
-PUB=${PUB:-$REPO/docs/kryounix.pub}
+PUB=${PUB:-$REPO/docs/kryonux.pub}
 MINISIGN_KEY=${MINISIGN_KEY:-}
 BASE=${BASE:-https://github.com/wh1laye/Kryonux/releases/download/$BASE_TAG/kryonux-stage3-amd64-$BASE_VERSION.tar.xz}
-WORK=${WORK:-/var/tmp/kryounix-stage3-build}
+WORK=${WORK:-/var/tmp/kryonux-stage3-build}
 OUT=${OUT:-$PWD}
 ROOT=$WORK/root
 
@@ -61,7 +61,7 @@ else
   rm -rf "$ROOT"; mkdir -p "$ROOT"
   xz -dc "$BASEFILE" | tar -xpf - -C "$ROOT" --numeric-owner --xattrs --xattrs-include='*'
 fi
-grep -qE '^ID="?(kryounix|kryonux)"?' "$ROOT/etc/os-release" || die "the base does not look like Kryonux stage 3"
+grep -qE '^ID="?(kryonux|kryonux)"?' "$ROOT/etc/os-release" || die "the base does not look like Kryonux stage 3"
 
 say "sources (sha256 verified)"
 while IFS='|' read -r name sum url; do
@@ -91,26 +91,26 @@ exec chroot "$R" /usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/
 say "building packages with kpkg"
 enter bash /var/tmp/s3files/build-inside.sh "$VERSION" "${STRICT:-0}" \
   || {
-    if [ -s "$ROOT/var/tmp/kryounix-report.txt" ]; then cp "$ROOT/var/tmp/kryounix-report.txt" "$OUT/kryounix-stage3-amd64-$VERSION.failed.txt"; fi
+    if [ -s "$ROOT/var/tmp/kryonux-report.txt" ]; then cp "$ROOT/var/tmp/kryonux-report.txt" "$OUT/kryonux-stage3-amd64-$VERSION.failed.txt"; fi
     die "the chroot build stopped, see the reason above; fix it and rerun with RESUME=1"
   }
 
 rm -f "$ROOT/etc/resolv.conf"
-NAME=kryounix-stage3-amd64-$VERSION.tar.xz
+NAME=kryonux-stage3-amd64-$VERSION.tar.xz
 
-if [ -s "$ROOT/var/tmp/kryounix-report.txt" ]; then
-  cp "$ROOT/var/tmp/kryounix-report.txt" "$OUT/kryounix-stage3-amd64-$VERSION.failed.txt"
-  printf 'warning: some packages failed, list in %s\n' "$OUT/kryounix-stage3-amd64-$VERSION.failed.txt" >&2
-  cat "$ROOT/var/tmp/kryounix-report.txt" >&2
+if [ -s "$ROOT/var/tmp/kryonux-report.txt" ]; then
+  cp "$ROOT/var/tmp/kryonux-report.txt" "$OUT/kryonux-stage3-amd64-$VERSION.failed.txt"
+  printf 'warning: some packages failed, list in %s\n' "$OUT/kryonux-stage3-amd64-$VERSION.failed.txt" >&2
+  cat "$ROOT/var/tmp/kryonux-report.txt" >&2
   if [ "${STRICT:-0}" = 1 ]; then die "STRICT=1: the report has problems, the base is not released"; fi
 fi
-rm -f "$ROOT/var/tmp/kryounix-report.txt"
+rm -f "$ROOT/var/tmp/kryonux-report.txt"
 
 {
-  echo "# kryounix $VERSION stage 3: composition"
+  echo "# kryonux $VERSION stage 3: composition"
   echo "# built from source, tracked by kpkg"
   ( cd "$ROOT/var/db/kpkg/installed" 2>/dev/null && for d in */*/*/; do echo "${d%/}"; done | sort )
-} > "$OUT/kryounix-stage3-amd64-$VERSION.packages.txt"
+} > "$OUT/kryonux-stage3-amd64-$VERSION.packages.txt"
 
 say "packing: $OUT/$NAME"
 tar -C "$ROOT" --numeric-owner --xattrs --xattrs-include='*' \
@@ -124,8 +124,8 @@ tar -tf "$OUT/$NAME" > "$LIST"
 miss=0
 for f in sbin/init sbin/openrc-init etc/os-release etc/init.d/syslog-ng etc/runlevels/default/syslog-ng \
          etc/syslog-ng/syslog-ng.conf usr/bin/fastfetch usr/bin/kpkg etc/kpkg/kpkg.conf \
-         usr/share/kryounix/logo.txt usr/share/kryounix/logo.ansi usr/share/kryounix/logo.png \
-         etc/xdg/fastfetch/config.jsonc usr/bin/neofetch usr/sbin/kryounix-users usr/sbin/kryounix-adduser usr/sbin/kryounix-fix \
+         usr/share/kryonux/logo.txt usr/share/kryonux/logo.ansi usr/share/kryonux/logo.png \
+         etc/xdg/fastfetch/config.jsonc usr/bin/neofetch usr/sbin/kryonux-users usr/sbin/kryonux-adduser usr/sbin/kryonux-fix \
          etc/login.defs etc/doas.conf; do
   grep -qxE "(\./)?(usr/)?$f" "$LIST" || { printf 'the archive has no %s\n' "$f" >&2; miss=1; }
 done

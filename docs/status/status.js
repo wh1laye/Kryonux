@@ -2,7 +2,7 @@
 var d=document,REPO='wh1laye/Kryonux',API='https://api.github.com/repos/'+REPO+'/';
 var WF=[['iso.yml','сборка iso','iso build'],['stage3.yml','сборка stage 3','stage 3 build'],['kpkg-release.yml','релиз kpkg','kpkg release']];
 function $(i){return d.getElementById(i)}
-function en(){return window.CloudTheme&&window.CloudTheme.getLang()==='en'}
+function en(){return window.KryonuxTheme&&window.KryonuxTheme.getLang()==='en'}
 function L(r,e){return en()?e:r}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function ago(t){
@@ -69,5 +69,5 @@ Promise.all([Promise.all(jobs),get('commits?per_page=1').catch(function(){return
   data={wf:a[0],commit:a[1],rel:a[2]};
   draw();
 }).catch(lim);
-window.addEventListener('cloudlang',draw);
+window.addEventListener('kryonuxlang',draw);
 })();

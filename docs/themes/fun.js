@@ -89,13 +89,13 @@ var WD='Kryonux',wi=0,wt=0;
 function secret(){
   var first=ls('sec')!=='1';
   ls('sec','1');
-  if(window.CloudTheme&&window.CloudTheme.unlock)window.CloudTheme.unlock();
+  if(window.KryonuxTheme&&window.KryonuxTheme.unlock)window.KryonuxTheme.unlock();
   toast('root@Kryonux:~# '+t('доступ root получен'));
   h.setAttribute('data-rbw','1');
   spawn(innerWidth/2,innerHeight/2,160,'c');
   setTimeout(apply,6000);
-  function go(){if(window.CloudSecret)window.CloudSecret.open(first)}
-  if(window.CloudSecret){go();return}
+  function go(){if(window.KryonuxSecret)window.KryonuxSecret.open(first)}
+  if(window.KryonuxSecret){go();return}
   var s=d.createElement('script');s.src=BASE+'secret.js?v=2';s.onload=go;d.head.appendChild(s);
 }
 d.addEventListener('keydown',function(e){

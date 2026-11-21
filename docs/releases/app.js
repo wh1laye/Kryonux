@@ -8,7 +8,7 @@ const IC={
 };
 const GH='https://github.com/'+R.repo+'/releases';
 
-function EN(){return window.CloudTheme&&window.CloudTheme.getLang()==='en'}
+function EN(){return window.KryonuxTheme&&window.KryonuxTheme.getLang()==='en'}
 function size(b){
   const e=EN();
   if(b>=1073741824)return (b/1073741824).toFixed(2)+(e?' gb':' гб');
@@ -80,7 +80,7 @@ async function render(){
   let rels;
   try{rels=await load()}catch(e){return fail(e.message)}
   const S3=/stage\s*-?3/i;
-  rels=rels.filter(r=>!r.draft&&!/^base\b/i.test(r.name||'')&&!S3.test((r.name||'')+' '+r.tag_name)).map(r=>Object.assign({},r,{assets:(r.assets||[]).filter(a=>/^kryounix-live-.*\.iso$/i.test(a.name))})).filter(r=>r.assets.length).sort((a,b)=>new Date(b.published_at)-new Date(a.published_at));
+  rels=rels.filter(r=>!r.draft&&!/^base\b/i.test(r.name||'')&&!S3.test((r.name||'')+' '+r.tag_name)).map(r=>Object.assign({},r,{assets:(r.assets||[]).filter(a=>/^kryonux-live-.*\.iso$/i.test(a.name))})).filter(r=>r.assets.length).sort((a,b)=>new Date(b.published_at)-new Date(a.published_at));
   const newest=rels[0]?rels[0].id:null;
   const tags=r=>(r.id===newest?' · <span class="tag lt">последний</span>':'')+((r.prerelease||/beta|бета/i.test((r.name||'')+' '+r.tag_name))?' · <span class="tag">бета</span>':'');
   const groups=R.groups.map(g=>({n:g.n,d:g.d})).concat([{n:'другое',d:'остальные релизы'}]).filter(g=>rels.some(r=>groupOf(r)===g.n));
@@ -116,12 +116,12 @@ async function render(){
       const b=box.querySelector('button');
       b.onclick=()=>{
         const done=()=>{b.textContent=EN()?'copied':'скопировано';setTimeout(()=>{b.textContent=EN()?'copy':'копировать'},1500)};
-        if(window.CloudTheme&&window.CloudTheme.copy)window.CloudTheme.copy(v.h,done);else if(navigator.clipboard)navigator.clipboard.writeText(v.h).then(done);
+        if(window.KryonuxTheme&&window.KryonuxTheme.copy)window.KryonuxTheme.copy(v.h,done);else if(navigator.clipboard)navigator.clipboard.writeText(v.h).then(done);
       };
     }
   }
 }
 
 window.addEventListener('hashchange',render);
-window.addEventListener('cloudlang',render);
+window.addEventListener('kryonuxlang',render);
 render();

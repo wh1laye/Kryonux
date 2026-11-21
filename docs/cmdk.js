@@ -1,13 +1,13 @@
 (function(){
 if(/\/handbook\//.test(location.pathname)&&false)return;
 var d=document,sc=d.currentScript,root=sc?sc.src.replace(/cmdk\.js.*$/,''):'';
-if(window.I18N&&window.I18N.add)window.I18N.add({"действие": "action", "статус сборок": "build status", "безопасность": "security", "песочница": "sandbox", "тема: светлая": "theme: light", "тема: серая": "theme: gray", "тема: авто": "theme: auto", "язык: english": "language: english", "язык: русский": "language: russian", "текст крупнее": "larger text", "текст мельче": "smaller text", "высокий контраст: переключить": "high contrast: toggle", "только команды в справочнике: переключить": "commands only in the handbook: toggle", "открыть настройки": "open settings", "скопировать ссылку на страницу": "copy page link"});
-var P=[["", "главная"], ["handbook/", "справочник"], ["compare/", "сравнение"], ["news/", "новое"], ["forum/", "форум"], ["releases/", "релизы"], ["hardware/", "железо"], ["status/", "статус сборок"], ["security/", "безопасность"], ["sandbox/", "песочница"]];
-var C=[["about", "1. о kryounix"], ["prep", "2. подготовка"], ["quick", "3. установка одной командой"], ["manual", "4. установка вручную"], ["after", "5. после установки"], ["cpkg", "6. пакеты и kpkg"], ["kernel", "7. своё ядро (по желанию)"], ["maint", "8. обслуживание"], ["errors", "9. ошибки и решения"], ["cheat", "10. шпаргалка"], ["faq", "11. вопросы и ответы"]];
+if(window.I18N&&window.I18N.add)window.I18N.add({"действие": "action", "статус сборок": "build status", "безопасность": "security", "тема: светлая": "theme: light", "тема: серая": "theme: gray", "тема: авто": "theme: auto", "язык: english": "language: english", "язык: русский": "language: russian", "текст крупнее": "larger text", "текст мельче": "smaller text", "высокий контраст: переключить": "high contrast: toggle", "только команды в справочнике: переключить": "commands only in the handbook: toggle", "открыть настройки": "open settings", "скопировать ссылку на страницу": "copy page link"});
+var P=[["", "главная"], ["handbook/", "справочник"], ["compare/", "сравнение"], ["news/", "новое"], ["forum/", "форум"], ["releases/", "релизы"], ["hardware/", "железо"], ["status/", "статус сборок"], ["security/", "безопасность"]];
+var C=[["about", "1. о kryonux"], ["prep", "2. подготовка"], ["quick", "3. установка одной командой"], ["manual", "4. установка вручную"], ["after", "5. после установки"], ["cpkg", "6. пакеты и kpkg"], ["kernel", "7. своё ядро (по желанию)"], ["maint", "8. обслуживание"], ["errors", "9. ошибки и решения"], ["cheat", "10. шпаргалка"], ["faq", "11. вопросы и ответы"]];
 var el=null,inp=null,ls=null,sel=0,cur=[];
-function lg(){return window.CloudTheme?window.CloudTheme.getLang():'ru'}
+function lg(){return window.KryonuxTheme?window.KryonuxTheme.getLang():'ru'}
 function tr(s){return window.I18N&&window.I18N.t?window.I18N.t(s):s}
-function CT(){return window.CloudTheme||{}}
+function CT(){return window.KryonuxTheme||{}}
 function acts(){
   var T=CT(),r=T.getRd?T.getRd():{fs:0,hc:0,cmd:0};
   return [

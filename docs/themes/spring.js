@@ -101,7 +101,7 @@ function beeSprite(k,up){
     c.beginPath();c.arc(-9,2,1.6,0,6.283);c.fillStyle='#222';c.fill();
   });
 }
-window.CloudSeason.reg('sp',{
+window.KryonuxSeason.reg('sp',{
   init:function(k){
     var m=k.mobile(),wd=k.wide(),gh=m?38:46,i,bl,rb;
     rb=k.el('',k.svg('0 0 300 152',RAINBOW),'right:'+(m?'-60px':'6%')+';width:'+(m?280:420)+'px;opacity:.5',true);

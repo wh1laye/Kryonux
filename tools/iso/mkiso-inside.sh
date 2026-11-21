@@ -3,7 +3,7 @@ set -eu
 
 VERSION=${1:-0.0.0}
 KVER=${2:-6.18.10}
-NAME=${3:-kryounix-live-amd64-$VERSION.iso}
+NAME=${3:-kryonux-live-amd64-$VERSION.iso}
 MARCH=${4:-x86-64-v3}
 KRYONK_VER=${5:-0.0.0}
 
@@ -11,7 +11,7 @@ ISOSRC=/var/tmp/isosrc
 ISOFILES=/var/tmp/isofiles
 ISOOUT=/var/tmp/isoout
 CK=kryonk-$KRYONK_VER-$MARCH
-CMDLINE="root=live:CDLABEL=KRYOUNIX_LIVE rd.live.image apparmor=1 security=apparmor quiet init=/init"
+CMDLINE="root=live:CDLABEL=KRYONUX_LIVE rd.live.image apparmor=1 security=apparmor quiet init=/init"
 
 say() { printf '==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -92,7 +92,7 @@ CONF
     -isohybrid-mbr "$ISOFILES/limine/limine-bios.sys" \
     -c boot.cat -b limine-bios-cd.bin -no-emul-boot -boot-load-size 4 -boot-info-table \
     -eltorito-alt-boot -e efi/boot/limine-uefi-cd.bin -no-emul-boot \
-    -isohybrid-gpt-basdat -V KRYOUNIX_LIVE "$ISOOUT"
+    -isohybrid-gpt-basdat -V KRYONUX_LIVE "$ISOOUT"
 }
 
 kernel_hardening

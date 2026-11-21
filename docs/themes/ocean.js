@@ -14,7 +14,7 @@ function whale(c){
   c.beginPath();c.moveTo(70,0);c.bezierCurveTo(60,-26,10,-34,-30,-18);c.bezierCurveTo(-55,-8,-70,-4,-92,-20);c.lineTo(-84,-2);c.lineTo(-96,16);
   c.bezierCurveTo(-70,8,-50,8,-30,14);c.bezierCurveTo(10,28,56,22,70,0);c.fill();
 }
-window.CloudSeason.reg('oc',{
+window.KryonuxSeason.reg('oc',{
   init:function(k){
     var m=k.mobile(),nb=k.n(34),nf=m?3:7,nj=m?2:4,nk=m?7:14,B=[],F=[],J=[],K=[],j,wh={x:-.4,d:1,y:.4,w:5};
     for(j=0;j<nb;j++)B.push({x:Math.random(),y:Math.random(),v:k.rnd(18,48),r:k.rnd(1.5,5),p:k.rnd(0,6.28),s:k.rnd(.8,2)});

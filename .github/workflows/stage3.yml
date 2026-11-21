@@ -7,7 +7,7 @@ on:
         description: версия
         default: "0.0.0"
       refresh_list:
-        description: список пакетов берётся из tools/stage3/kryounix-packages.list
+        description: список пакетов берётся из tools/stage3/kryonux-packages.list
         type: boolean
         default: true
       strict:
@@ -60,7 +60,7 @@ jobs:
 
       - name: проверка скриптов и kpkg
         run: |
-          for f in tools/build-stage3.sh tools/test-kpkg.sh tools/stage3/*.sh tools/stage3/kryounix-adduser tools/stage3/neofetch tools/stage3/kryounix-firewall tools/stage3/kryounix-audit tools/test-firewall.sh tools/test-forum.sh kpkg/*.sh; do bash -n "$f"; done
+          for f in tools/build-stage3.sh tools/test-kpkg.sh tools/stage3/*.sh tools/stage3/kryonux-adduser tools/stage3/neofetch tools/stage3/kryonux-firewall tools/stage3/kryonux-audit tools/test-firewall.sh tools/test-forum.sh kpkg/*.sh; do bash -n "$f"; done
           make -C kpkg clean all CC="gcc -Wextra -Werror"
           ./kpkg/kpkg version
           sudo bash tools/test-kpkg.sh
@@ -134,16 +134,16 @@ jobs:
           VERSION: ${{ inputs.version }}
         run: |
           cd out
-          f="kryounix-stage3-amd64-$VERSION.tar.xz"
+          f="kryonux-stage3-amd64-$VERSION.tar.xz"
           sha256sum -c "$f.sha256"
           for x in "$f" "$f.sha256"; do
             [ -s "$x.minisig" ] || { echo "::error::нет подписи $x.minisig"; exit 1; }
-            minisign -V -p "$GITHUB_WORKSPACE/docs/kryounix.pub" -m "$x" -x "$x.minisig"
+            minisign -V -p "$GITHUB_WORKSPACE/docs/kryonux.pub" -m "$x" -x "$x.minisig"
           done
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: kryounix-stage3-${{ inputs.version }}
+          name: kryonux-stage3-${{ inputs.version }}
           path: out/*
           compression-level: 0
 
@@ -170,5 +170,5 @@ jobs:
           TAG: ${{ inputs.release_tag }}
         run: |
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --prerelease --title "base $TAG (внутренняя база для сборки iso)" \
-            --notes "внутренний артефакт сборки live iso, для установки не предназначен. ставь систему с live iso через kryounix-install."
+            --notes "внутренний артефакт сборки live iso, для установки не предназначен. ставь систему с live iso через kryonux-install."
           gh release upload "$TAG" out/* --clobber

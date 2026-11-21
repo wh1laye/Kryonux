@@ -1,13 +1,13 @@
 (function(){
 var d=document,W=window;
 var T={
-i:[['p','doas kryounix-install'],['p','reboot'],['p','doas kryounix-audit']],
+i:[['p','doas kryonux-install'],['p','reboot'],['p','doas kryonux-audit']],
 p:[['p','doas kpkg sync'],['p','doas kpkg install nano'],['p','doas kpkg search htop'],['p','doas kpkg upgrade'],['p','doas kpkg rollback']],
-s:[['p','sha256sum -c kryounix-live-amd64-*.iso.sha256'],['p','doas kryounix-firewall status'],['p','doas kryounix-firewall allow ssh'],['p','doas rc-update add sshd default']]
+s:[['p','sha256sum -c kryonux-live-amd64-*.iso.sha256'],['p','doas kryonux-firewall status'],['p','doas kryonux-firewall allow ssh'],['p','doas rc-update add sshd default']]
 };
 var D={
 "быстрый и усиленный":"fast and hardened",", который ставится одной командой":", that installs with a single command",
-"загружаешься с live iso, запускаешь установщик, через несколько минут в /mnt/kryounix уже готовая система. openrc, ядро kryonk, фаервол включён с первой загрузки.":"boot the live iso, run the installer, and in a few minutes there is a ready system in /mnt/kryounix. openrc, the kryonk kernel, firewall on from the first boot.",
+"загружаешься с live iso, запускаешь установщик, через несколько минут в /mnt/kryonux уже готовая система. openrc, ядро kryonk, фаервол включён с первой загрузки.":"boot the live iso, run the installer, and in a few minutes there is a ready system in /mnt/kryonux. openrc, the kryonk kernel, firewall on from the first boot.",
 "скачать live iso":"download live iso","читать справочник":"read the handbook","копировать":"copy","скопировано":"copied",
 "установка":"install","пакеты":"packages","защита":"protection","терминал":"terminal","примеры команд":"command examples",
 "версия проекта":"project version","размер iso":"ISO size","uefi и bios":"UEFI and BIOS","лицензия":"license",
@@ -22,11 +22,11 @@ var D={
 "secure boot и tpm2":"secure boot and tpm2","свои ключи secure boot, подписанный uki, разблокировка luks через tpm2 с запасным паролем. на реальном железе скрипты пока не проверены.":"your own secure boot keys, a signed uki, luks unlock through tpm2 with a fallback password. the scripts have not been tested on real hardware yet.",
 "проверка защиты":"protection audit","одна команда показывает, что включено в системе: фаервол, ssh, sysctl, ядро.":"one command shows what is enabled in the system: firewall, ssh, sysctl, kernel.",
 "установка в три шага":"installation in three steps","одной командой или вручную по справочнику.":"with one command or manually by the handbook.",
-"live iso":"live iso","скачай, проверь сумму, запиши на флешку и загрузись. вход в live: kryounix / kryounix.":"download, check the sum, write it to a usb stick and boot. live login: kryounix / kryounix.",
-"kryounix-install":"kryounix-install","диск, пароли, всё остальное само: форматирование, распаковка, limine, пользователи.":"disk, passwords, the rest is automatic: formatting, unpacking, limine, users.",
+"live iso":"live iso","скачай, проверь сумму, запиши на флешку и загрузись. вход в live: kryonux / kryonux.":"download, check the sum, write it to a usb stick and boot. live login: kryonux / kryonux.",
+"kryonux-install":"kryonux-install","диск, пароли, всё остальное само: форматирование, распаковка, limine, пользователи.":"disk, passwords, the rest is automatic: formatting, unpacking, limine, users.",
 "reboot":"reboot","вход, сеть, пакеты. чистая консоль и обычный пользователь с doas.":"login, network, packages. a clean console and a regular user with doas.",
 "безопасность по умолчанию":"secure by default","защита включена сразу после установки, а не спрятана в главе «потом настроишь».":"protection is on right after install, not hidden in a «configure it later» chapter.",
-"фаервол с первой загрузки":"firewall from the first boot","nftables: входящие закрыты, исходящие открыты. управление через kryounix-firewall.":"nftables: incoming closed, outgoing open. managed through kryounix-firewall.",
+"фаервол с первой загрузки":"firewall from the first boot","nftables: входящие закрыты, исходящие открыты. управление через kryonux-firewall.":"nftables: incoming closed, outgoing open. managed through kryonux-firewall.",
 "подписанные релизы":"signed releases","sha256 всех файлов и подпись minisign для iso, публичный ключ лежит на сайте.":"sha256 of all files and a minisign signature for the iso, the public key is on the site.",
 "attestation в github actions":"attestation in github actions","происхождение сборки подтверждается в самом github, а не только словами.":"build provenance is confirmed by github itself, not just by words.",
 "sshd выключен":"sshd is off","openssh стоит, но не запущен. root по ssh закрыт, включается двумя командами.":"OpenSSH is installed but not running. root over ssh is closed, it is enabled with two commands.",
@@ -45,12 +45,11 @@ var D={
 "безопасно ли в live пароль Kryonux?":"is the Kryonux password in live safe?","пароль Kryonux известен всем и нужен только для live, ssh в live закрыт. в установленной системе такого пароля нет.":"the Kryonux password is public and only for live, ssh is closed in live. the installed system has no such password.",
 "дальше":"next","справочник":"handbook","релизы":"releases","форум":"forum","железо":"hardware",
 "установка, первые шаги и ошибки":"install, first steps and errors","live iso и контрольные суммы":"live iso and checksums","вопросы и обсуждение":"questions and discussion","что в работе и что в планах":"what is in progress and what is planned","на чём проверено, добавь своё":"what it was tested on, add yours",
-"статус сборок":"build status","состояние github actions":"GitHub Actions state","сравнение":"comparison","чем Kryonux отличается от других":"how Kryonux differs from others","песочница":"sandbox","попробуй команды в браузере":"try commands in the browser",
-"поставь Kryonux сегодня":"install Kryonux today","скачай live iso, проверь сумму и запусти установщик. хватит флешки и десяти минут.":"download the live iso, check the sum and run the installer. a usb stick and ten minutes are enough.",
+"статус сборок":"build status","состояние github actions":"GitHub Actions state","сравнение":"comparison","чем Kryonux отличается от других":"how Kryonux differs from others","поставь Kryonux сегодня":"install Kryonux today","скачай live iso, проверь сумму и запусти установщик. хватит флешки и десяти минут.":"download the live iso, check the sum and run the installer. a usb stick and ten minutes are enough.",
 "нет новостей":"no news"
 };
 if(W.I18N&&W.I18N.add)W.I18N.add(D);
-function lang(){return W.CloudTheme&&W.CloudTheme.getLang?W.CloudTheme.getLang():'ru'}
+function lang(){return W.KryonuxTheme&&W.KryonuxTheme.getLang?W.KryonuxTheme.getLang():'ru'}
 function tr(s){return W.I18N&&W.I18N.t?W.I18N.t(s):s}
 function $(s,r){return (r||d).querySelector(s)}
 function el(t,c,x){var e=d.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
@@ -81,7 +80,7 @@ if(tb){
     });
   });
   draw('i');
-  W.addEventListener('cloudlang',function(){draw(cur)});
+  W.addEventListener('kryonuxlang',function(){draw(cur)});
 }
 
 [].forEach.call(d.querySelectorAll('[data-copy]'),function(b){
@@ -122,7 +121,7 @@ if(W.fetch){
     for(var k=0;k<rs.length;k++){
       var r=rs[k];
       if(r.draft)continue;
-      var f=(r.assets||[]).filter(function(x){return /^kryounix-live-.*\.iso$/.test(x.name)})[0];
+      var f=(r.assets||[]).filter(function(x){return /^kryonux-live-.*\.iso$/.test(x.name)})[0];
       if(!f)continue;
       var m=f.name.match(/(\d+(?:\.\d+)+)\.iso$/);
       if(a)a.href=f.browser_download_url;

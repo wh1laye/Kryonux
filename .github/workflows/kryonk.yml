@@ -71,7 +71,7 @@ jobs:
           sha256sum -c kryonk-*.sha256
           for x in kryonk-*.sha256; do
             [ -s "$x.minisig" ] || { echo "::error::нет подписи $x.minisig"; exit 1; }
-            minisign -V -p "$GITHUB_WORKSPACE/docs/kryounix.pub" -m "$x" -x "$x.minisig"
+            minisign -V -p "$GITHUB_WORKSPACE/docs/kryonux.pub" -m "$x" -x "$x.minisig"
           done
       - uses: actions/upload-artifact@v4
         with:

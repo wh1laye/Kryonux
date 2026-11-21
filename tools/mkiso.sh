@@ -10,15 +10,15 @@ KRYONK_VER=${KRYONK_VER:-0.0.0}
 KRYONK_TAG=${KRYONK_TAG:-kryonk-$KRYONK_VER}
 KRYONK=${KRYONK:-https://github.com/wh1laye/Kryonux/releases/download/$KRYONK_TAG}
 KRYONK_VERIFY=${KRYONK_VERIFY:-1}
-PUB=${PUB:-$(dirname "$HERE")/docs/kryounix.pub}
+PUB=${PUB:-$(dirname "$HERE")/docs/kryonux.pub}
 MINISIGN_KEY=${MINISIGN_KEY:-}
 BASE_VERSION=${BASE_VERSION:-0.0.0}
 BASE_VERIFY=${BASE_VERIFY:-1}
-BASE=${BASE:-https://github.com/wh1laye/Kryonux/releases/download/$BASE_TAG/kryounix-stage3-amd64-$BASE_VERSION.tar.xz}
-WORK=${WORK:-/var/tmp/kryounix-iso-build}
+BASE=${BASE:-https://github.com/wh1laye/Kryonux/releases/download/$BASE_TAG/kryonux-stage3-amd64-$BASE_VERSION.tar.xz}
+WORK=${WORK:-/var/tmp/kryonux-iso-build}
 OUT=${OUT:-$PWD}
 ROOT=$WORK/root
-NAME=kryounix-live-amd64-$VERSION.iso
+NAME=kryonux-live-amd64-$VERSION.iso
 
 say() { printf '==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -27,7 +27,7 @@ case $MARCH in x86-64|x86-64-v2|x86-64-v3|x86-64-v4) ;; *) die "MARCH: x86-64, x
 [ "$(uname -m)" = x86_64 ] || die "x86_64 is required"
 for c in curl tar xz sha256sum unshare mount chroot awk; do command -v "$c" >/dev/null || die "missing command: $c"; done
 case $WORK in /|/usr*|/etc*|/home|/root|/var|/boot) die "unsafe work directory: $WORK" ;; esac
-for f in iso/init iso/mkiso-inside.sh iso/kryounix-install iso/kryounix-secureboot iso/kryounix-uki iso/kryounix-tpm2 iso/dracut-tpm2/module-setup.sh iso/dracut-tpm2/kryounix-tpm2-unlock.sh iso/sysctl-perf.conf stage3/kryounix-audit; do
+for f in iso/init iso/mkiso-inside.sh iso/kryonux-install iso/kryonux-secureboot iso/kryonux-uki iso/kryonux-tpm2 iso/dracut-tpm2/module-setup.sh iso/dracut-tpm2/kryonux-tpm2-unlock.sh iso/sysctl-perf.conf stage3/kryonux-audit; do
   [ -f "$HERE/$f" ] || die "no $HERE/$f"
 done
 
@@ -97,12 +97,12 @@ say "unpacking the base into $ROOT"
 rm -rf "$ROOT"
 mkdir -p "$ROOT"
 xz -dc "$BASEFILE" | tar -xpf - -C "$ROOT" --numeric-owner --xattrs --xattrs-include='*'
-grep -qE '^ID="?(kryounix|kryonux)"?' "$ROOT/etc/os-release" || die "the base does not look like Kryonux"
+grep -qE '^ID="?(kryonux|kryonux)"?' "$ROOT/etc/os-release" || die "the base does not look like Kryonux"
 
 mkdir -p "$ROOT/var/tmp/isosrc" "$ROOT/var/tmp/isofiles"
 cp "$WORK/kryonk/$CK-vmlinuz" "$WORK/kryonk/$CK-modules.tar.zst" "$ROOT/var/tmp/isosrc/"
 cp -R "$HERE"/iso/. "$ROOT/var/tmp/isofiles/"
-cp "$HERE/stage3/kryounix-audit" "$ROOT/var/tmp/isofiles/"
+cp "$HERE/stage3/kryonux-audit" "$ROOT/var/tmp/isofiles/"
 
 enter() {
   unshare -m sh -c '

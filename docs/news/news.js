@@ -3,7 +3,7 @@ var d=document,box=d.getElementById("nwn"),pl=d.getElementById("nwp");
 if(!box)return;
 var NEW=3,OLD=7,items=null;
 if(window.I18N)window.I18N.add({"новые":"new","старые":"older","в работе и планы":"in progress and plans","сегодня":"today","вчера":"yesterday"});
-function en(){return window.CloudTheme&&window.CloudTheme.getLang()==="en"}
+function en(){return window.KryonuxTheme&&window.KryonuxTheme.getLang()==="en"}
 function age(s){
   var p=s.split("-"),t=new Date(+p[0],+p[1]-1,+p[2]).getTime(),n=new Date();
   var z=new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime();
@@ -38,5 +38,5 @@ function draw(){
   if(pl){pl.hidden=!a.length;pl.textContent=en()?"in progress and plans":"в работе и планы"}
 }
 fetch("news.json",{cache:"no-cache"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){items=j;draw()}).catch(function(){});
-window.addEventListener("cloudlang",function(){if(items)draw()});
+window.addEventListener("kryonuxlang",function(){if(items)draw()});
 })();

@@ -31,7 +31,7 @@ jobs:
           case "$BASE_TAG$BASE_VERSION" in *[!0-9A-Za-z._-]*) echo "::error::неверная версия"; exit 1 ;; esac
           bash -n tools/pack-fetch.sh
           mkdir -p dl out
-          gh release download "$BASE_TAG" -p "kryounix-stage3-amd64-$BASE_VERSION.tar.xz*" -D dl
-          ( cd dl && sha256sum -c "kryounix-stage3-amd64-$BASE_VERSION.tar.xz.sha256" )
-          OUT="$PWD/out" bash tools/pack-fetch.sh "dl/kryounix-stage3-amd64-$BASE_VERSION.tar.xz" "$BASE_VERSION"
+          gh release download "$BASE_TAG" -p "kryonux-stage3-amd64-$BASE_VERSION.tar.xz*" -D dl
+          ( cd dl && sha256sum -c "kryonux-stage3-amd64-$BASE_VERSION.tar.xz.sha256" )
+          OUT="$PWD/out" bash tools/pack-fetch.sh "dl/kryonux-stage3-amd64-$BASE_VERSION.tar.xz" "$BASE_VERSION"
           gh release upload "$BASE_TAG" out/* --clobber

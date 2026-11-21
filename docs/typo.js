@@ -10,11 +10,11 @@ var ABBR={
   'проч':1,'ред':1,'изд':1,'пер':1,'ст':1,'пп':1
 };
 var CANON={
-  'kryounix':'Kryonux','kpkg':'kpkg','kryounix-install':'kryounix-install',
-  'kryounix-firewall':'kryounix-firewall','kryounix-audit':'kryounix-audit',
-  'kryounix-uki':'kryounix-uki','kryounix-tpm2':'kryounix-tpm2',
-  'kryounix-secureboot':'kryounix-secureboot','kryounix-users':'kryounix-users',
-  'kryounix-adduser':'kryounix-adduser','kryounix-fix':'kryounix-fix',
+  'kryonux':'Kryonux','kpkg':'kpkg','kryonux-install':'kryonux-install',
+  'kryonux-firewall':'kryonux-firewall','kryonux-audit':'kryonux-audit',
+  'kryonux-uki':'kryonux-uki','kryonux-tpm2':'kryonux-tpm2',
+  'kryonux-secureboot':'kryonux-secureboot','kryonux-users':'kryonux-users',
+  'kryonux-adduser':'kryonux-adduser','kryonux-fix':'kryonux-fix',
   'gcc':'GCC','openrc':'OpenRC','uefi':'UEFI','bios':'BIOS','iso':'ISO',
   'ssh':'SSH','sshd':'sshd','tpm2':'TPM2','uki':'UKI','luks2':'LUKS2','cis':'CIS',
   'kspp':'KSPP','linux':'Linux','limine':'Limine','apparmor':'AppArmor',
@@ -28,7 +28,7 @@ var CANON={
   'man-db':'man-db','dosfstools':'dosfstools','syslog-ng':'syslog-ng','minisign':'minisign',
   'openssh':'OpenSSH','opendoas':'OpenDoas','mit':'MIT','gpl':'GPL','arm':'ARM',
   'sysv':'SysV','noatime':'noatime','libc':'libc','systemd':'systemd',
-  'fstab':'fstab','sysctl':'sysctl','wh1laye':'wh1laye'
+  'fstab':'fstab','sysctl':'sysctl'
 };
 var last=new WeakMap(), unitCache=new WeakMap(), obs=null, pending=new Set(), queued=false;
 
@@ -176,7 +176,7 @@ function start(){
   });
   obs.observe(d.body,{childList:true,subtree:true,characterData:true});
 }
-W.addEventListener('cloudlang',function(){W.setTimeout(function(){process(d.body);capAttrs(d.body);capTitle()},0)});
-W.CloudTypo={fix:fix,run:start};
+W.addEventListener('kryonuxlang',function(){W.setTimeout(function(){process(d.body);capAttrs(d.body);capTitle()},0)});
+W.KryonuxTypo={fix:fix,run:start};
 if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',start);else start();
 })();

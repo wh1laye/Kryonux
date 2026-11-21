@@ -1,5 +1,5 @@
 #!/sbin/openrc-run
-description="фаервол kryounix на nftables"
+description="фаервол kryonux на nftables"
 extra_commands="check"
 extra_started_commands="reload"
 conf=${conf:-/etc/nftables.conf}

@@ -23,7 +23,7 @@ die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
 [ "$(id -u)" = 0 ] || die "root is required"
 
-if [ -r /etc/os-release ] && ! grep -q '^ID=.\?kryounix' /etc/os-release && [ -z "${KPKG_FORCE:-}" ]; then
+if [ -r /etc/os-release ] && ! grep -q '^ID=.\?kryonux' /etc/os-release && [ -z "${KPKG_FORCE:-}" ]; then
   die "this is not Kryonux; on another distribution use install.sh (isolated box mode), it does not touch your system"
 fi
 

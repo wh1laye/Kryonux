@@ -43,7 +43,7 @@ function icicles(W){
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' 34" width="'+W+'" height="34" style="display:block">'+o+'</svg>';
 }
 function armPath(c,R){var i;c.beginPath();for(i=0;i<6;i++){c.save();c.rotate(i*Math.PI/3);c.moveTo(0,0);c.lineTo(0,-R);c.moveTo(0,-R*.55);c.lineTo(R*.28,-R*.8);c.moveTo(0,-R*.55);c.lineTo(-R*.28,-R*.8);c.restore()}}
-window.CloudSeason.reg('ny',{
+window.KryonuxSeason.reg('ny',{
   init:function(k){
     var m=k.mobile(),wd=k.wide(),gh=m?34:44,i;
     var gar=k.el('',garland(k.W()),'left:0;top:0;width:100%;height:40px');

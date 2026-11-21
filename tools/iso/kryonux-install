@@ -2,12 +2,12 @@
 set -euo pipefail
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-T=${KRYOUNIX_TARGET:-/mnt/kryounix}
-SQ=${KRYOUNIX_SQUASHFS:-/media/cdrom/kryounix/rootfs.squashfs}
-BS=${KRYOUNIX_BOOTSRC:-/media/cdrom/boot}
+T=${KRYONUX_TARGET:-/mnt/kryonux}
+SQ=${KRYONUX_SQUASHFS:-/media/cdrom/kryonux/rootfs.squashfs}
+BS=${KRYONUX_BOOTSRC:-/media/cdrom/boot}
 LS=/usr/share/limine
 HARDEN='apparmor=1 security=apparmor slab_nomerge init_on_alloc=1 page_alloc.shuffle=1 randomize_kstack_offset=on vsyscall=none debugfs=off pti=on module.sig_enforce=1 efi=disable_early_pci_dma iommu.strict=1'
-EXTRA=${KRYOUNIX_CMDLINE_EXTRA:-}
+EXTRA=${KRYONUX_CMDLINE_EXTRA:-}
 MOUNTED=0
 LUKSOPEN=0
 
@@ -16,10 +16,10 @@ die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
 usage() {
   cat <<'EOU'
-kryounix-install: install kryounix to disk
+kryonux-install: install kryonux to disk
 
-  kryounix-install                interactive
-  kryounix-install --help         this help
+  kryonux-install                interactive
+  kryonux-install --help         this help
 
 modes:
   auto     the whole disk is wiped and partitioned automatically (boot + root)
@@ -27,28 +27,28 @@ modes:
            partitions; only those two partitions are touched, the rest of the disk stays intact
 
 variables for unattended install:
-  KRYOUNIX_MODE=auto|manual       install mode (manual if KRYOUNIX_ROOT is set, auto if KRYOUNIX_DISK is set)
-  KRYOUNIX_DISK=/dev/sda          auto mode: disk to wipe completely
-  KRYOUNIX_ROOT=/dev/sda3         manual mode: root partition, it will be formatted
-  KRYOUNIX_BOOT=/dev/sda1         manual mode: boot partition (efi system partition on uefi)
-  KRYOUNIX_FORMAT_BOOT=1|0        manual mode: format the boot partition (0 keeps an existing vfat and its files)
-  KRYOUNIX_FS=ext4|btrfs          root filesystem
-  KRYOUNIX_HOST=name              hostname
-  KRYOUNIX_USER=name              regular user (group wheel, doas)
-  KRYOUNIX_PASS=password          user password
-  KRYOUNIX_ROOTPASS=password      root password
-  KRYOUNIX_FW=uefi|bios           boot mode, detected automatically by default
-  KRYOUNIX_YES=1                  skip the erase confirmation
-  KRYOUNIX_LUKS=1                 encrypt root with luks2 (needs cryptsetup and dracut)
-  KRYOUNIX_LUKSPASS=password      disk encryption password
-  KRYOUNIX_PROFILE=balanced|secure|fast  secure: no smt, lockdown, init_on_free; fast: no watchdog and audit
-  KRYOUNIX_SECUREBOOT=1           own secure boot keys, signed limine, kernel hashes (uefi only)
-  KRYOUNIX_UKI=1                  signed unified kernel image as first entry (needs KRYOUNIX_SECUREBOOT=1)
-  KRYOUNIX_KEYMAP=us|ru|name      keyboard: us (english only, default), ru (english + russian, english by default), or any kbd keymap
-  KRYOUNIX_SWITCH=alt_shift|ctrl_shift|caps  ru only: key combination that switches the layout (default alt_shift)
-  KRYOUNIX_LOCALE=en_US.UTF-8     system language (en_US.UTF-8, ru_RU.UTF-8, C.UTF-8)
-  KRYOUNIX_TZ=UTC                 time zone, for example Europe/Moscow
-  KRYOUNIX_CMDLINE_EXTRA="..."    extra kernel parameters
+  KRYONUX_MODE=auto|manual       install mode (manual if KRYONUX_ROOT is set, auto if KRYONUX_DISK is set)
+  KRYONUX_DISK=/dev/sda          auto mode: disk to wipe completely
+  KRYONUX_ROOT=/dev/sda3         manual mode: root partition, it will be formatted
+  KRYONUX_BOOT=/dev/sda1         manual mode: boot partition (efi system partition on uefi)
+  KRYONUX_FORMAT_BOOT=1|0        manual mode: format the boot partition (0 keeps an existing vfat and its files)
+  KRYONUX_FS=ext4|btrfs          root filesystem
+  KRYONUX_HOST=name              hostname
+  KRYONUX_USER=name              regular user (group wheel, doas)
+  KRYONUX_PASS=password          user password
+  KRYONUX_ROOTPASS=password      root password
+  KRYONUX_FW=uefi|bios           boot mode, detected automatically by default
+  KRYONUX_YES=1                  skip the erase confirmation
+  KRYONUX_LUKS=1                 encrypt root with luks2 (needs cryptsetup and dracut)
+  KRYONUX_LUKSPASS=password      disk encryption password
+  KRYONUX_PROFILE=balanced|secure|fast  secure: no smt, lockdown, init_on_free; fast: no watchdog and audit
+  KRYONUX_SECUREBOOT=1           own secure boot keys, signed limine, kernel hashes (uefi only)
+  KRYONUX_UKI=1                  signed unified kernel image as first entry (needs KRYONUX_SECUREBOOT=1)
+  KRYONUX_KEYMAP=us|ru|name      keyboard: us (english only, default), ru (english + russian, english by default), or any kbd keymap
+  KRYONUX_SWITCH=alt_shift|ctrl_shift|caps  ru only: key combination that switches the layout (default alt_shift)
+  KRYONUX_LOCALE=en_US.UTF-8     system language (en_US.UTF-8, ru_RU.UTF-8, C.UTF-8)
+  KRYONUX_TZ=UTC                 time zone, for example Europe/Moscow
+  KRYONUX_CMDLINE_EXTRA="..."    extra kernel parameters
 EOU
 }
 
@@ -58,22 +58,22 @@ cleanup() {
     sync || true
     umount -R "$T" 2>/dev/null || { sleep 1; umount -R -l "$T" 2>/dev/null || true; }
   fi
-  if [ "$LUKSOPEN" = 1 ]; then cryptsetup close cloudcrypt 2>/dev/null || true; fi
+  if [ "$LUKSOPEN" = 1 ]; then cryptsetup close kryonuxcrypt 2>/dev/null || true; fi
   exit "$rc"
 }
 trap cleanup EXIT
 
 case "${1:-}" in -h|--help) usage; exit 0 ;; esac
 
-[ "$(id -u)" = 0 ] || die "root is required: doas kryounix-install"
+[ "$(id -u)" = 0 ] || die "root is required: doas kryonux-install"
 [ "$(uname -m)" = x86_64 ] || die "x86_64 is required"
-if [ "$(cat /etc/kryounix-march 2>/dev/null)" = x86-64-v3 ]; then
+if [ "$(cat /etc/kryonux-march 2>/dev/null)" = x86-64-v3 ]; then
   for f in avx2 fma bmi1 bmi2 movbe f16c; do grep -qw "$f" /proc/cpuinfo || die "this iso is built for x86-64-v3, the cpu lacks $f"; done
 fi
 for c in sfdisk wipefs blkid lsblk findmnt mount umount unsquashfs mkfs.vfat mkfs.ext4 limine chroot install awk sed blockdev; do
   command -v "$c" >/dev/null || die "missing command $c"
 done
-[ -f "$SQ" ] || die "no $SQ, boot from the kryounix live iso"
+[ -f "$SQ" ] || die "no $SQ, boot from the kryonux live iso"
 [ -f "$BS/vmlinuz" ] || die "no $BS/vmlinuz"
 for f in limine-bios.sys BOOTX64.EFI BOOTIA32.EFI; do [ -f "$LS/$f" ] || die "no $LS/$f"; done
 if findmnt -rn "$T" >/dev/null 2>&1; then die "$T is already mounted"; fi
@@ -100,7 +100,7 @@ askpass() {
 
 askdef() {
   local var=$1
-  if [ -z "${!var:-}" ] && [ "${KRYOUNIX_YES:-0}" = 1 ]; then printf -v "$var" '%s' "$3"; return 0; fi
+  if [ -z "${!var:-}" ] && [ "${KRYONUX_YES:-0}" = 1 ]; then printf -v "$var" '%s' "$3"; return 0; fi
   ask "$@"
 }
 
@@ -112,9 +112,9 @@ findfont() {
   find /usr/share/consolefonts /usr/share/kbd/consolefonts -name "$1.*" -print -quit 2>/dev/null | grep -q .
 }
 
-FW=${KRYOUNIX_FW:-}
+FW=${KRYONUX_FW:-}
 if [ -z "$FW" ]; then if [ -d /sys/firmware/efi ]; then FW=uefi; else FW=bios; fi; fi
-case $FW in uefi|bios) ;; *) die "KRYOUNIX_FW must be uefi or bios" ;; esac
+case $FW in uefi|bios) ;; *) die "KRYONUX_FW must be uefi or bios" ;; esac
 say "boot mode: $FW"
 
 LIVEDISK=
@@ -183,10 +183,10 @@ checkpart() {
   [ "/dev/$pk" != "$LIVEDISK" ] || die "$what $p is on the live iso medium"
 }
 
-MODE=${KRYOUNIX_MODE:-}
+MODE=${KRYONUX_MODE:-}
 if [ -z "$MODE" ]; then
-  if [ -n "${KRYOUNIX_ROOT:-}" ]; then MODE=manual
-  elif [ -n "${KRYOUNIX_DISK:-}" ]; then MODE=auto
+  if [ -n "${KRYONUX_ROOT:-}" ]; then MODE=manual
+  elif [ -n "${KRYONUX_DISK:-}" ]; then MODE=auto
   else
     echo "install mode:"
     echo "  auto    wipe a whole disk and install (simple)"
@@ -194,15 +194,15 @@ if [ -z "$MODE" ]; then
     ask MODE "mode (auto or manual)" auto
   fi
 fi
-case $MODE in auto|manual) ;; *) die "KRYOUNIX_MODE must be auto or manual" ;; esac
+case $MODE in auto|manual) ;; *) die "KRYONUX_MODE must be auto or manual" ;; esac
 say "install mode: $MODE"
 
 FB=1
 if [ "$MODE" = auto ]; then
-  KRYOUNIX_DISK=${KRYOUNIX_DISK:-}
-  if [ -z "$KRYOUNIX_DISK" ]; then echo "disks:"; showdisks; fi
-  ask KRYOUNIX_DISK "disk to install to (it will be wiped)"
-  DISK=$KRYOUNIX_DISK
+  KRYONUX_DISK=${KRYONUX_DISK:-}
+  if [ -z "$KRYONUX_DISK" ]; then echo "disks:"; showdisks; fi
+  ask KRYONUX_DISK "disk to install to (it will be wiped)"
+  DISK=$KRYONUX_DISK
   [ -b "$DISK" ] || die "$DISK is not a block device"
   [ "$(lsblk -dno TYPE "$DISK")" = disk ] || die "$DISK is not a whole disk"
   [ "$DISK" != "$LIVEDISK" ] || die "$DISK is the medium the live iso booted from"
@@ -211,15 +211,15 @@ if [ "$MODE" = auto ]; then
   BOOTDEV=${P}1
   ROOTPART=${P}2
 else
-  if [ -z "${KRYOUNIX_ROOT:-}" ] || [ -z "${KRYOUNIX_BOOT:-}" ]; then
+  if [ -z "${KRYONUX_ROOT:-}" ] || [ -z "${KRYONUX_BOOT:-}" ]; then
     partition_disks
     echo "partitions:"
     showparts
   fi
-  ask KRYOUNIX_BOOT "boot partition (efi system partition on uefi, about 512M, fat32)"
-  ask KRYOUNIX_ROOT "root partition (it will be formatted)"
-  BOOTDEV=$KRYOUNIX_BOOT
-  ROOTPART=$KRYOUNIX_ROOT
+  ask KRYONUX_BOOT "boot partition (efi system partition on uefi, about 512M, fat32)"
+  ask KRYONUX_ROOT "root partition (it will be formatted)"
+  BOOTDEV=$KRYONUX_BOOT
+  ROOTPART=$KRYONUX_ROOT
   [ "$BOOTDEV" != "$ROOTPART" ] || die "boot and root must be different partitions"
   checkpart "$BOOTDEV" boot
   checkpart "$ROOTPART" root
@@ -227,90 +227,90 @@ else
   [ "$(blockdev --getsize64 "$BOOTDEV")" -ge 104857600 ] || die "boot partition is smaller than 100 MiB"
   DISK=/dev/$(lsblk -no PKNAME "$BOOTDEV" | head -n1)
   BT=$(blkid -s TYPE -o value "$BOOTDEV" 2>/dev/null || true)
-  FB=${KRYOUNIX_FORMAT_BOOT:-}
+  FB=${KRYONUX_FORMAT_BOOT:-}
   if [ -z "$FB" ]; then
     if [ "$BT" = vfat ]; then
-      if [ "${KRYOUNIX_YES:-0}" = 1 ]; then FB=0; else ask FB "format the boot partition? no keeps the existing vfat and its files (yes/no)" no; fi
+      if [ "${KRYONUX_YES:-0}" = 1 ]; then FB=0; else ask FB "format the boot partition? no keeps the existing vfat and its files (yes/no)" no; fi
     else
       FB=1
     fi
   fi
-  case $FB in 1|yes|y) FB=1 ;; 0|no|n) FB=0 ;; *) die "KRYOUNIX_FORMAT_BOOT: 1 or 0" ;; esac
+  case $FB in 1|yes|y) FB=1 ;; 0|no|n) FB=0 ;; *) die "KRYONUX_FORMAT_BOOT: 1 or 0" ;; esac
   if [ "$FB" = 0 ] && [ "$BT" != vfat ]; then die "$BOOTDEV is not vfat, it has to be formatted"; fi
 fi
 
-FS=${KRYOUNIX_FS:-}
+FS=${KRYONUX_FS:-}
 if [ -z "$FS" ]; then
   if command -v mkfs.btrfs >/dev/null; then ask FS "root filesystem (ext4 or btrfs)" ext4; else FS=ext4; fi
 fi
 case $FS in ext4) ;; btrfs) command -v mkfs.btrfs >/dev/null || die "this iso has no mkfs.btrfs, use ext4" ;; *) die "filesystem: ext4 or btrfs" ;; esac
 
-LUKS=${KRYOUNIX_LUKS:-}
+LUKS=${KRYONUX_LUKS:-}
 if [ -z "$LUKS" ]; then
-  if [ "${KRYOUNIX_YES:-0}" = 1 ]; then LUKS=0; else ask LUKS "encrypt root with luks (yes/no)" no; fi
+  if [ "${KRYONUX_YES:-0}" = 1 ]; then LUKS=0; else ask LUKS "encrypt root with luks (yes/no)" no; fi
 fi
-case $LUKS in 1|yes|y) LUKS=1 ;; 0|no|n) LUKS=0 ;; *) die "KRYOUNIX_LUKS: 1 or 0" ;; esac
+case $LUKS in 1|yes|y) LUKS=1 ;; 0|no|n) LUKS=0 ;; *) die "KRYONUX_LUKS: 1 or 0" ;; esac
 if [ "$LUKS" = 1 ]; then
   for c in cryptsetup dracut; do command -v "$c" >/dev/null || die "luks needs the command $c"; done
-  askpass KRYOUNIX_LUKSPASS "disk encryption password"
+  askpass KRYONUX_LUKSPASS "disk encryption password"
 fi
 
-PROFILE=${KRYOUNIX_PROFILE:-balanced}
+PROFILE=${KRYONUX_PROFILE:-balanced}
 case $PROFILE in
   balanced) PA= ;;
   secure) PA='mitigations=auto,nosmt lockdown=integrity init_on_free=1' ;;
   fast) PA='nowatchdog audit=0' ;;
-  *) die "KRYOUNIX_PROFILE: balanced, secure or fast" ;;
+  *) die "KRYONUX_PROFILE: balanced, secure or fast" ;;
 esac
 EXTRA="$EXTRA $PA"
-SB=${KRYOUNIX_SECUREBOOT:-0}
-case $SB in 0|1) ;; *) die "KRYOUNIX_SECUREBOOT: 1 or 0" ;; esac
-UKI=${KRYOUNIX_UKI:-0}
-case $UKI in 0|1) ;; *) die "KRYOUNIX_UKI: 1 or 0" ;; esac
-[ "$UKI" = 0 ] || [ "$SB" = 1 ] || die "KRYOUNIX_UKI needs KRYOUNIX_SECUREBOOT=1"
+SB=${KRYONUX_SECUREBOOT:-0}
+case $SB in 0|1) ;; *) die "KRYONUX_SECUREBOOT: 1 or 0" ;; esac
+UKI=${KRYONUX_UKI:-0}
+case $UKI in 0|1) ;; *) die "KRYONUX_UKI: 1 or 0" ;; esac
+[ "$UKI" = 0 ] || [ "$SB" = 1 ] || die "KRYONUX_UKI needs KRYONUX_SECUREBOOT=1"
 if [ "$SB" = 1 ]; then
   [ "$FW" = uefi ] || die "secure boot works only in uefi mode"
-  for c in kryounix-secureboot sbsign sbverify cert-to-efi-sig-list sign-efi-sig-list b2sum openssl; do command -v "$c" >/dev/null || die "secure boot needs the command $c"; done
+  for c in kryonux-secureboot sbsign sbverify cert-to-efi-sig-list sign-efi-sig-list b2sum openssl; do command -v "$c" >/dev/null || die "secure boot needs the command $c"; done
 fi
 
-ask KRYOUNIX_HOST "hostname" kryounix
-HOSTN=$KRYOUNIX_HOST
+ask KRYONUX_HOST "hostname" kryonux
+HOSTN=$KRYONUX_HOST
 printf '%s' "$HOSTN" | grep -Eq '^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$' || die "invalid hostname"
-ask KRYOUNIX_USER "username"
-USERN=$KRYOUNIX_USER
+ask KRYONUX_USER "username"
+USERN=$KRYONUX_USER
 printf '%s' "$USERN" | grep -Eq '^[a-z_][a-z0-9_-]{0,30}$' || die "invalid username"
-case $USERN in root|kryounix) die "this name is reserved, pick another" ;; esac
-askpass KRYOUNIX_PASS "password for $USERN"
-askpass KRYOUNIX_ROOTPASS "root password"
+case $USERN in root|kryonux) die "this name is reserved, pick another" ;; esac
+askpass KRYONUX_PASS "password for $USERN"
+askpass KRYONUX_ROOTPASS "root password"
 
-if [ -z "${KRYOUNIX_KEYMAP:-}" ] && [ "${KRYOUNIX_YES:-0}" != 1 ]; then
+if [ -z "${KRYONUX_KEYMAP:-}" ] && [ "${KRYONUX_YES:-0}" != 1 ]; then
   echo "keyboard layout:"
   echo "  us   english only (default)"
   echo "  ru   english and russian, english is the default, a key combination switches"
   echo "  or the name of any kbd keymap, for example de, fr, ua"
 fi
-askdef KRYOUNIX_KEYMAP "layout" us
-KEYMAP=$KRYOUNIX_KEYMAP
+askdef KRYONUX_KEYMAP "layout" us
+KEYMAP=$KRYONUX_KEYMAP
 case $KEYMAP in 1|en) KEYMAP=us ;; 2) KEYMAP=ru ;; esac
 printf '%s' "$KEYMAP" | grep -Eq '^[A-Za-z0-9_.+-]{1,40}$' || die "invalid keymap name"
 SWITCH=
 KMAP=$KEYMAP
 KFONT=
 if [ "$KEYMAP" = ru ]; then
-  if [ -z "${KRYOUNIX_SWITCH:-}" ] && [ "${KRYOUNIX_YES:-0}" != 1 ]; then
+  if [ -z "${KRYONUX_SWITCH:-}" ] && [ "${KRYONUX_YES:-0}" != 1 ]; then
     echo "layout switch key:"
     echo "  alt_shift    left alt + shift (default)"
     echo "  ctrl_shift   ctrl + shift"
     echo "  caps         caps lock"
   fi
-  askdef KRYOUNIX_SWITCH "switch layout with" alt_shift
-  SWITCH=$KRYOUNIX_SWITCH
+  askdef KRYONUX_SWITCH "switch layout with" alt_shift
+  SWITCH=$KRYONUX_SWITCH
   case $SWITCH in 1|alt_shift|alt+shift) SWITCH=alt_shift ;; 2|ctrl_shift|ctrl+shift) SWITCH=ctrl_shift ;; 3|caps) SWITCH=caps ;; esac
   case $SWITCH in
     alt_shift) KMAP=ruwin_alt_sh-UTF-8 ;;
     ctrl_shift) KMAP=ruwin_ct_sh-UTF-8 ;;
     caps) KMAP=ruwin_cplk-UTF-8 ;;
-    *) die "KRYOUNIX_SWITCH: alt_shift, ctrl_shift or caps" ;;
+    *) die "KRYONUX_SWITCH: alt_shift, ctrl_shift or caps" ;;
   esac
 fi
 if [ "$KMAP" != us ]; then
@@ -323,17 +323,17 @@ if [ "$KEYMAP" = ru ]; then
   [ -n "$KFONT" ] || echo "warning: no cyrillic console font on this iso, russian letters will not be shown on the console"
 fi
 
-askdef KRYOUNIX_LOCALE "system language (locale)" en_US.UTF-8
-LOC=$KRYOUNIX_LOCALE
+askdef KRYONUX_LOCALE "system language (locale)" en_US.UTF-8
+LOC=$KRYONUX_LOCALE
 printf '%s' "$LOC" | grep -Eq '^([a-z]{2,3}_[A-Z]{2}\.UTF-8|C\.UTF-8)$' || die "invalid locale, use for example en_US.UTF-8 or ru_RU.UTF-8"
 
-askdef KRYOUNIX_TZ "time zone" UTC
-TZN=$KRYOUNIX_TZ
+askdef KRYONUX_TZ "time zone" UTC
+TZN=$KRYONUX_TZ
 printf '%s' "$TZN" | grep -Eq '^[A-Za-z0-9_+/-]{1,64}$' || die "invalid time zone"
 case $TZN in *..*|/*) die "invalid time zone" ;; esac
 [ -f "/usr/share/zoneinfo/$TZN" ] || die "unknown time zone $TZN, see /usr/share/zoneinfo"
 
-if [ "${KRYOUNIX_YES:-0}" != 1 ]; then
+if [ "${KRYONUX_YES:-0}" != 1 ]; then
   echo
   if [ "$MODE" = auto ]; then
     echo "disk $DISK will be wiped completely: $(lsblk -dno SIZE,MODEL "$DISK")"
@@ -369,20 +369,20 @@ else
 fi
 
 say "filesystems"
-if [ "$FB" = 1 ]; then mkfs.vfat -F32 -n CLOUDBOOT "$BOOTDEV" >/dev/null; fi
+if [ "$FB" = 1 ]; then mkfs.vfat -F32 -n KRYONUXBOOT "$BOOTDEV" >/dev/null; fi
 ROOTDEV=$ROOTPART
 if [ "$LUKS" = 1 ]; then
   say "luks2 encryption (aes-xts, argon2id)"
-  printf '%s' "$KRYOUNIX_LUKSPASS" | cryptsetup luksFormat --type luks2 --cipher aes-xts-plain64 --key-size 512 --hash sha512 --pbkdf argon2id --batch-mode "$ROOTPART" -
-  printf '%s' "$KRYOUNIX_LUKSPASS" | cryptsetup open --type luks2 "$ROOTPART" cloudcrypt -
+  printf '%s' "$KRYONUX_LUKSPASS" | cryptsetup luksFormat --type luks2 --cipher aes-xts-plain64 --key-size 512 --hash sha512 --pbkdf argon2id --batch-mode "$ROOTPART" -
+  printf '%s' "$KRYONUX_LUKSPASS" | cryptsetup open --type luks2 "$ROOTPART" kryonuxcrypt -
   LUKSOPEN=1
-  ROOTDEV=/dev/mapper/cloudcrypt
+  ROOTDEV=/dev/mapper/kryonuxcrypt
 fi
 if [ "$FS" = ext4 ]; then
-  mkfs.ext4 -q -F -L kryounix "$ROOTDEV"
+  mkfs.ext4 -q -F -L kryonux "$ROOTDEV"
   ROPTS=noatime,errors=remount-ro
 else
-  mkfs.btrfs -q -f -L kryounix "$ROOTDEV"
+  mkfs.btrfs -q -f -L kryonux "$ROOTDEV"
   ROPTS=noatime,compress=zstd:1
 fi
 
@@ -470,19 +470,19 @@ fi
 
 if [ "$SB" = 1 ]; then
   say "secure boot: keys, kernel hashes, limine signature"
-  export KRYOUNIX_SBDIR="$T/etc/kryounix/secureboot" KRYOUNIX_BOOT="$T/boot" KRYOUNIX_LIMINE_EFI="$LS/BOOTX64.EFI"
-  kryounix-secureboot init
+  export KRYONUX_SBDIR="$T/etc/kryonux/secureboot" KRYONUX_BOOT="$T/boot" KRYONUX_LIMINE_EFI="$LS/BOOTX64.EFI"
+  kryonux-secureboot init
   if [ "$UKI" = 1 ]; then
     say "unified kernel image"
-    KRYOUNIX_OSREL="$T/etc/os-release" kryounix-uki build
+    KRYONUX_OSREL="$T/etc/os-release" kryonux-uki build
   fi
-  kryounix-secureboot sign
+  kryonux-secureboot sign
 fi
 
-rm -f "$T/etc/init.d/kryounix-smoke" "$T/etc/runlevels/default/kryounix-smoke" "$T/etc/conf.d/agetty.tty1" \
-  "$T/etc/ssh/sshd_config.d/05-kryounix-live.conf" "$T/etc/machine-id" "$T/var/lib/dbus/machine-id"
+rm -f "$T/etc/init.d/kryonux-smoke" "$T/etc/runlevels/default/kryonux-smoke" "$T/etc/conf.d/agetty.tty1" \
+  "$T/etc/ssh/sshd_config.d/05-kryonux-live.conf" "$T/etc/machine-id" "$T/var/lib/dbus/machine-id"
 rm -f "$T"/etc/ssh/ssh_host_*
-if inroot id kryounix >/dev/null 2>&1; then inroot userdel -r kryounix >/dev/null 2>&1 || inroot userdel kryounix; fi
+if inroot id kryonux >/dev/null 2>&1; then inroot userdel -r kryonux >/dev/null 2>&1 || inroot userdel kryonux; fi
 for g in wheel users video audio netdev; do inroot getent group "$g" >/dev/null || inroot groupadd "$g"; done
 if inroot getent passwd "$USERN" >/dev/null 2>&1; then
   say "user $USERN is already in the image: $(grep "^$USERN:" "$T/etc/passwd" | head -n1)"
@@ -492,8 +492,8 @@ if inroot getent passwd "$USERN" >/dev/null 2>&1; then
 else
   inroot useradd -m -G wheel,users,video,audio,netdev -s /bin/bash "$USERN"
 fi
-printf '%s:%s\n' "$USERN" "$KRYOUNIX_PASS" | inroot chpasswd
-printf 'root:%s\n' "$KRYOUNIX_ROOTPASS" | inroot chpasswd
+printf '%s:%s\n' "$USERN" "$KRYONUX_PASS" | inroot chpasswd
+printf 'root:%s\n' "$KRYONUX_ROOTPASS" | inroot chpasswd
 say "keyboard, language, time zone"
 install -d "$T/etc/conf.d" "$T/etc/runlevels/boot" "$T/etc/profile.d"
 printf 'keymap="%s"\n' "$KMAP" > "$T/etc/conf.d/keymaps"
@@ -506,8 +506,8 @@ if [ "$LOC" != C.UTF-8 ]; then
   inroot localedef -i "${LOC%%.*}" -f UTF-8 "$LOC" >/dev/null 2>&1 || { echo "warning: locale $LOC is not available, using C.UTF-8"; LOC=C.UTF-8; }
 fi
 printf 'LANG=%s\n' "$LOC" > "$T/etc/locale.conf"
-printf 'export LANG=%s\n' "$LOC" > "$T/etc/profile.d/kryounix-locale.sh"
-chmod 644 "$T/etc/profile.d/kryounix-locale.sh"
+printf 'export LANG=%s\n' "$LOC" > "$T/etc/profile.d/kryonux-locale.sh"
+chmod 644 "$T/etc/profile.d/kryonux-locale.sh"
 ln -sf "/usr/share/zoneinfo/$TZN" "$T/etc/localtime"
 printf '%s\n' "$TZN" > "$T/etc/timezone"
 [ "$(readlink "$T/etc/localtime")" = "/usr/share/zoneinfo/$TZN" ] && [ -f "$T/usr/share/zoneinfo/$TZN" ] || die "time zone $TZN was not set"
@@ -517,7 +517,7 @@ chmod 600 "$T/etc/doas.conf"
 cat > "$T/etc/motd" <<EOM
 
 Kryonux ${VER}. login: ${USERN}, root rights: doas -s
-firewall is on: kryounix-firewall status
+firewall is on: kryonux-firewall status
 packages: kpkg search name, kpkg install name
 https://wh1laye.github.io/Kryonux/
 
@@ -525,19 +525,19 @@ EOM
 inroot passwd -S root | grep -q ' P ' || die "root password was not set"
 inroot passwd -S "$USERN" | grep -q ' P ' || die "password for $USERN was not set"
 grep -q "^$USERN:" "$T/etc/passwd" || die "user $USERN was not created"
-! grep -q '^kryounix:' "$T/etc/passwd" || die "live user was not removed"
+! grep -q '^kryonux:' "$T/etc/passwd" || die "live user was not removed"
 [ -s "$T/boot/limine/limine.conf" ] && [ -s "$T/boot/vmlinuz" ] || die "bootloader was not written"
 
-say "done: kryounix installed (root $ROOTPART, boot $BOOTDEV, $FW, $FS$([ "$LUKS" = 1 ] && echo ', luks2'))"
+say "done: kryonux installed (root $ROOTPART, boot $BOOTDEV, $FW, $FS$([ "$LUKS" = 1 ] && echo ', luks2'))"
 say "kernel: $(ls "$T/lib/modules" | grep kryonk | head -n1)"
 say "keyboard: $KEYMAP${SWITCH:+ (switch: $SWITCH)}, language: $LOC, time zone: $TZN"
 if [ "$MODE" = manual ] && [ "$FW" = uefi ] && [ "$FB" = 0 ]; then
   echo "the previous fallback loader was saved as EFI/BOOT/BOOTX64.EFI.bak on $BOOTDEV, add other systems to the limine menu if needed"
 fi
-if [ "${KRYOUNIX_YES:-0}" != 1 ]; then
+if [ "${KRYONUX_YES:-0}" != 1 ]; then
   echo "run reboot and remove the install medium"
   if [ "$SB" = 1 ]; then
-    echo "secure boot: save a copy of /etc/kryounix/secureboot, enter uefi setup, clear the secure boot keys (setup mode),"
-    echo "boot kryounix, run doas kryounix-secureboot enroll, then enable secure boot in the firmware"
+    echo "secure boot: save a copy of /etc/kryonux/secureboot, enter uefi setup, clear the secure boot keys (setup mode),"
+    echo "boot kryonux, run doas kryonux-secureboot enroll, then enable secure boot in the firmware"
   fi
 fi

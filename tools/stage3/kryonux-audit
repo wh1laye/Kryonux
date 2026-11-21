@@ -1,10 +1,10 @@
 #!/bin/bash
 set -u
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-R=${KRYOUNIX_ROOT:-}
+R=${KRYONUX_ROOT:-}
 ok=0; bad=0; warn=0
 CIS=0
-case "${1:-}" in --cis) CIS=1 ;; "") ;; *) echo "kryounix-audit [--cis]" >&2; exit 2 ;; esac
+case "${1:-}" in --cis) CIS=1 ;; "") ;; *) echo "kryonux-audit [--cis]" >&2; exit 2 ;; esac
 
 good() { printf '[ ok ] %s\n' "$*"; ok=$((ok + 1)); }
 fail() { printf '[ !! ] %s\n' "$*"; bad=$((bad + 1)); }
@@ -13,10 +13,10 @@ note() { printf '[ .. ] %s\n' "$*"; warn=$((warn + 1)); }
 [ -n "$R" ] || [ "$(id -u)" = 0 ] || { echo "нужен root" >&2; exit 2; }
 
 echo "== фаервол"
-if command -v nft >/dev/null && nft list chain inet kryounix input 2>/dev/null | grep -q 'policy drop'; then
+if command -v nft >/dev/null && nft list chain inet kryonux input 2>/dev/null | grep -q 'policy drop'; then
   good "nftables загружен, input drop"
 else
-  fail "нет правил nftables с policy drop (kryounix-firewall on)"
+  fail "нет правил nftables с policy drop (kryonux-firewall on)"
 fi
 
 echo "== ядро"
@@ -56,7 +56,7 @@ u=$(awk -F: '$3 == 0 && $1 != "root" { print $1 }' "$R/etc/passwd" | tr '\n' ' '
 [ -z "$u" ] && good "uid 0 только у root" || fail "лишний uid 0: $u"
 
 echo "== вход и ssh"
-SC=$R/etc/ssh/sshd_config.d/10-kryounix.conf
+SC=$R/etc/ssh/sshd_config.d/10-kryonux.conf
 if [ -e "$SC" ]; then
   grep -q '^PasswordAuthentication no' "$SC" && good "ssh: вход по паролю закрыт" || fail "ssh: вход по паролю не закрыт"
   grep -q '^AuthenticationMethods publickey' "$SC" && good "ssh: только ключи" || fail "ssh: не только ключи"
@@ -69,7 +69,7 @@ if [ -r "$R/etc/shadow" ]; then
   case $r in '!'*|'*'*|'') good "root без пароля для входа (заблокирован)" ;; *) note "у root задан пароль" ;; esac
 fi
 grep -qs 'pam_faillock.so' "$R/etc/pam.d/system-auth" && good "pam: блокировка после 5 неудачных входов" || note "pam_faillock не включён"
-[ -e "$R/etc/modprobe.d/kryounix.conf" ] && good "modprobe: редкие протоколы и fs отключены" || note "нет /etc/modprobe.d/kryounix.conf"
+[ -e "$R/etc/modprobe.d/kryonux.conf" ] && good "modprobe: редкие протоколы и fs отключены" || note "нет /etc/modprobe.d/kryonux.conf"
 [ "$(stat -c %a "$R/root" 2>/dev/null)" = 700 ] && good "/root права 700" || fail "/root права не 700"
 
 echo "== файлы"
@@ -95,7 +95,7 @@ echo "== загрузка и диск"
 if [ -z "$R" ]; then
   gv=8be4df61-93ca-11d2-aa0d-00e098032b8c
   if [ -r /sys/firmware/efi/efivars/SecureBoot-$gv ]; then
-    [ "$(od -An -t u1 /sys/firmware/efi/efivars/SecureBoot-$gv | awk '{ print $NF }')" = 1 ] && good "secure boot включён" || note "secure boot выключен (kryounix-secureboot)"
+    [ "$(od -An -t u1 /sys/firmware/efi/efivars/SecureBoot-$gv | awk '{ print $NF }')" = 1 ] && good "secure boot включён" || note "secure boot выключен (kryonux-secureboot)"
   else
     note "загрузка не через uefi, secure boot недоступен"
   fi

@@ -35,7 +35,7 @@ function batSprite(k,f){
     c.fillStyle='#ffd23f';c.beginPath();c.arc(-2.8,0,1.7,0,6.283);c.arc(2.8,0,1.7,0,6.283);c.fill();
   });
 }
-window.CloudSeason.reg('hw',{
+window.KryonuxSeason.reg('hw',{
   init:function(k){
     var m=k.mobile(),wd=k.wide(),gh=m?40:50,i,pw=m?64:92,web,spd,moon,wch,wch2;
     k.el('zs-fog','');

@@ -36,4 +36,7 @@
   - CLI output and repository docs (`README.md`, `CHANGELOG.md`): English only.
   - Website (`docs/`): Russian and English synchronized via `docs/i18n.js`.
 - **Website Assets:** No emojis on the website; use SVG/PNG icons, `docs/logo.png`, `docs/logo.svg`, and ASCII art from `docs/config.jsonc` (keep `docs/config.jsonc` in the repo). Emojis are allowed in `README.md`.
-- **Website Domains:** `https://wh1laye.github.io` and `https://kryonux.pages.dev`.
+- **Website Domains:** `https://wh1laye.github.io/Kryonux/` and `https://kryonux.pages.dev/`; keep `docs/sitemap.xml` and `docs/robots.txt` in sync with both.
+- **Changelog:** Record every change in `CHANGELOG.md`, grouped by component and version (`v0.0.0` for the website, ISO, stage 3, kernel and project; kpkg keeps its own version).
+- **Authorship:** Use `The Kryonux Project` instead of personal nicknames in copyright, author and license text. GitHub URLs keep the repository path.
+- **Removed:** The browser sandbox page no longer exists; do not reintroduce it.

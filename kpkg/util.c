@@ -184,7 +184,7 @@ int host_allowed(char *id, size_t n)
 	const char *f = getenv("KPKG_FORCE");
 	osid(id, n);
 	if (allow_host || (f && *f && strcmp(f, "0"))) return 1;
-	return !strcmp(id, "kryounix");
+	return !strcmp(id, "kryonux");
 }
 int host_ok(void)
 {

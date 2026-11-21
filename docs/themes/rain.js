@@ -1,5 +1,5 @@
 (function(){
-window.CloudSeason.reg('rn',{
+window.KryonuxSeason.reg('rn',{
   init:function(k){
     var n=k.n(110),R=[],S=[],CL=[],j,fl=0,bolt=null,nx=k.rnd(5,12);
     for(j=0;j<n;j++)R.push({x:Math.random(),y:Math.random(),v:k.rnd(700,1100),l:k.rnd(10,22),z:k.rnd(.4,1)});

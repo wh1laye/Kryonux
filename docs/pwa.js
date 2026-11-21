@@ -66,7 +66,7 @@ function mount(){
 }
 W.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;paint()});
 W.addEventListener('appinstalled',function(){dp=null;paint()});
-W.addEventListener('cloudlang',paint);
+W.addEventListener('kryonuxlang',paint);
 new MutationObserver(mount).observe(d.documentElement,{childList:true,subtree:true});
 mount();
 var toast=null;

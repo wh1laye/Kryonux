@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-D=${KRYOUNIX_TPMDIR:-/etc/kryounix/tpm2}
-PCR=${KRYOUNIX_TPM_PCR:-7}
+D=${KRYONUX_TPMDIR:-/etc/kryonux/tpm2}
+PCR=${KRYONUX_TPM_PCR:-7}
 
 say() { printf '==> %s\n' "$*"; }
 die() { printf 'ошибка: %s\n' "$*" >&2; exit 1; }
@@ -10,7 +10,7 @@ need() { for c in "$@"; do command -v "$c" >/dev/null || die "нет коман�
 
 usage() {
   cat <<'EOU'
-kryounix-tpm2: разблокировка luks2 через tpm2 без пароля
+kryonux-tpm2: разблокировка luks2 через tpm2 без пароля
 
   enroll    запечатать ключ в tpm2 (pcr 7, состояние secure boot), добавить слот luks, пересобрать initramfs
   remove    убрать слот и запечатанный ключ
@@ -18,17 +18,17 @@ kryounix-tpm2: разблокировка luks2 через tpm2 без паро�
 
 запускать после того, как secure boot включён и система загружена с ним:
 pcr 7 хранит состояние ключей и включения secure boot, при смене ключей или выключении secure boot
-tpm ключ не отдаст, и kryounix спросит обычный пароль luks. пароль остаётся рабочим всегда
+tpm ключ не отдаст, и kryonux спросит обычный пароль luks. пароль остаётся рабочим всегда
 EOU
 }
 
 luksdev() {
   local src dev
-  if [ -n "${KRYOUNIX_LUKSDEV:-}" ]; then printf '%s' "$KRYOUNIX_LUKSDEV"; return; fi
+  if [ -n "${KRYONUX_LUKSDEV:-}" ]; then printf '%s' "$KRYONUX_LUKSDEV"; return; fi
   src=$(findmnt -no SOURCE / 2>/dev/null || true)
   [ -n "$src" ] || die "не удалось определить корень"
   dev=$(lsblk -srno NAME,TYPE "$src" 2>/dev/null | awk '$2 == "part" { print "/dev/" $1; exit }')
-  [ -n "$dev" ] || die "корень не на luks, укажи KRYOUNIX_LUKSDEV=/dev/раздел"
+  [ -n "$dev" ] || die "корень не на luks, укажи KRYONUX_LUKSDEV=/dev/раздел"
   printf '%s' "$dev"
 }
 
@@ -36,18 +36,18 @@ kver() { ls /lib/modules | sort -V | tail -1; }
 
 rebuild() {
   local kv
-  kv=${KRYOUNIX_KVER:-$(kver)}
+  kv=${KRYONUX_KVER:-$(kver)}
   say "initramfs с модулем tpm2"
-  dracut --force --no-hostonly --kver "$kv" --add "crypt kryounix-tpm2" --compress zstd /boot/initramfs.img
-  if [ -f /boot/EFI/Linux/kryounix.efi ] && command -v kryounix-uki >/dev/null; then kryounix-uki build; fi
-  if [ -f /etc/kryounix/secureboot/db.key ] && command -v kryounix-secureboot >/dev/null; then kryounix-secureboot sign; fi
+  dracut --force --no-hostonly --kver "$kv" --add "crypt kryonux-tpm2" --compress zstd /boot/initramfs.img
+  if [ -f /boot/EFI/Linux/kryonux.efi ] && command -v kryonux-uki >/dev/null; then kryonux-uki build; fi
+  if [ -f /etc/kryonux/secureboot/db.key ] && command -v kryonux-secureboot >/dev/null; then kryonux-secureboot sign; fi
 }
 
 enroll() {
   local dev w
   need tpm2_createprimary tpm2_createpolicy tpm2_create cryptsetup dracut shred
   [ -c /dev/tpmrm0 ] || die "нет /dev/tpmrm0, tpm2 не найден или выключен в прошивке"
-  [ -d /usr/lib/dracut/modules.d/91kryounix-tpm2 ] || die "нет модуля dracut kryounix-tpm2"
+  [ -d /usr/lib/dracut/modules.d/91kryonux-tpm2 ] || die "нет модуля dracut kryonux-tpm2"
   dev=$(luksdev)
   cryptsetup isLuks "$dev" || die "$dev не luks"
   if [ -f /sys/firmware/efi/efivars/SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c ] &&
@@ -90,8 +90,8 @@ remove() {
 
 status() {
   [ -c /dev/tpmrm0 ] && echo "tpm2: найден" || echo "tpm2: не найден"
-  if [ -f "$D/seal.pub" ]; then echo "запечатанный ключ: есть (pcr $(cat "$D/pcr" 2>/dev/null || echo ?), диск $(cat "$D/device" 2>/dev/null || echo ?))"; else echo "запечатанный ключ: нет (kryounix-tpm2 enroll)"; fi
-  [ -d /usr/lib/dracut/modules.d/91kryounix-tpm2 ] && echo "модуль dracut: есть" || echo "модуль dracut: нет"
+  if [ -f "$D/seal.pub" ]; then echo "запечатанный ключ: есть (pcr $(cat "$D/pcr" 2>/dev/null || echo ?), диск $(cat "$D/device" 2>/dev/null || echo ?))"; else echo "запечатанный ключ: нет (kryonux-tpm2 enroll)"; fi
+  [ -d /usr/lib/dracut/modules.d/91kryonux-tpm2 ] && echo "модуль dracut: есть" || echo "модуль dracut: нет"
 }
 
 [ "$(id -u)" = 0 ] || die "нужен root"

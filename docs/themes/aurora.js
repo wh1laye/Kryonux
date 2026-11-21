@@ -1,7 +1,7 @@
 (function(){
 function rg(s){return function(){s=(s*9301+49297)%233280;return s/233280}}
 var COLS=[['77,240,176','60,200,255'],['120,255,200','170,120,255'],['60,220,255','255,120,220']];
-window.CloudSeason.reg('ar',{
+window.KryonuxSeason.reg('ar',{
   init:function(k){
     var m=k.phone()||k.mobile(),r=rg(17),S=[],ns=k.n(60),j,sh={x:0,y:0,l:0,w:6},gh=m?80:130,sc=m?.18:.35,ow=0,oh=0,pw=0,ph=0,G=[],nr=m?2:3;
     var off=document.createElement('canvas'),oc=off.getContext('2d');

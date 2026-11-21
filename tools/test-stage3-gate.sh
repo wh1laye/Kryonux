@@ -29,7 +29,7 @@ if [ -n "$ARCHIVE" ]; then
   need_entry etc/os-release
   need_entry sbin/openrc-init
   need_entry etc/doas.conf
-  need_entry usr/sbin/kryounix-install
+  need_entry usr/sbin/kryonux-install
   forbid_entry usr/bin/emerge
   forbid_entry usr/bin/emaint
   forbid_entry etc/portage/make.conf
@@ -43,7 +43,7 @@ else
   printf '==> stage3 gate: repository\n'
   need_file tools/build-stage3.sh
   need_file tools/stage3/build-inside.sh
-  need_file tools/stage3/kryounix-packages.list
+  need_file tools/stage3/kryonux-packages.list
   need_file tools/stage3/SOURCES.txt
   need_file kpkg/kpkg.c
   need_file kpkg/Makefile
@@ -54,8 +54,8 @@ else
   forbid_file tools/stage3/refresh-list.sh
   need_text tools/stage3/build-inside.sh 'kpkg' "build-inside uses kpkg"
   forbid_text tools/stage3/build-inside.sh 'portageq|/etc/portage|/var/db/repos/gentoo' "build-inside has no foreign package manager paths"
-  need_text tools/stage3/kryounix-packages.list '^(system|fs|network|toolchain|build|tools|libs|boot|init|admin)/' "package list uses our categories"
-  forbid_text tools/stage3/kryounix-packages.list '^(sys-apps|sys-libs|sys-devel|dev-libs|dev-build|dev-lang|app-|net-|virtual|acct-)' "package list has no foreign categories"
+  need_text tools/stage3/kryonux-packages.list '^(system|fs|network|toolchain|build|tools|libs|boot|init|admin)/' "package list uses our categories"
+  forbid_text tools/stage3/kryonux-packages.list '^(sys-apps|sys-libs|sys-devel|dev-libs|dev-build|dev-lang|app-|net-|virtual|acct-)' "package list has no foreign categories"
   need_text kpkg/Makefile 'non-Kryonux' "make install refuses foreign systems"
   need_text tools/kernel/kryonk.config 'CONFIG_SECURITY_KRYONK=y' "kernel has the kryonk layer"
 fi

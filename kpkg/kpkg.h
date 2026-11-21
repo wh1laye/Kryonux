@@ -23,7 +23,7 @@
 #define DBDIR "/var/db/kpkg"
 #endif
 #ifndef PUBKEY
-#define PUBKEY "/etc/kpkg/kryounix.pub"
+#define PUBKEY "/etc/kpkg/kryonux.pub"
 #endif
 #define INSTALLED DBDIR "/installed"
 #define WORLD DBDIR "/world"

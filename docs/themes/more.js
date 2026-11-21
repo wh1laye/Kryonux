@@ -86,7 +86,7 @@ function exp(){
   var o={},i,v,s;
   for(i=0;i<KEYS.length;i++){v=ls(KEYS[i]);if(typeof v==='string')o[KEYS[i]]=v}
   s=JSON.stringify(o);
-  if(window.CloudTheme&&window.CloudTheme.copy)window.CloudTheme.copy(s,function(){toast(t('настройки скопированы'))});
+  if(window.KryonuxTheme&&window.KryonuxTheme.copy)window.KryonuxTheme.copy(s,function(){toast(t('настройки скопированы'))});
 }
 function imp(){
   var r=window.prompt(t('вставь экспортированные настройки'),''),o,i,n=0;

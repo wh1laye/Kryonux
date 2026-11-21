@@ -41,4 +41,4 @@ if [ -n "$KEY" ]; then
 else
   say "MINISIGN_KEY is not set, the pin is unsigned"
 fi
-say "commit $PIN and $PIN.minisig, public key: $REPO/docs/kryounix.pub"
+say "commit $PIN and $PIN.minisig, public key: $REPO/docs/kryonux.pub"

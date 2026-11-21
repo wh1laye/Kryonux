@@ -7,7 +7,7 @@ main() {
 	INSTALL_URL=${KPKG_INSTALL_URL:-https://raw.githubusercontent.com/$REPO/$BRANCH/kpkg/install.sh}
 	S3_TAG=${KPKG_STAGE3_TAG:-base-0.0.0}
 	S3_VER=${KPKG_STAGE3_VER:-0.0.0}
-	S3_NAME=kryounix-stage3-amd64-$S3_VER.tar.xz
+	S3_NAME=kryonux-stage3-amd64-$S3_VER.tar.xz
 	S3=${KPKG_STAGE3:-https://github.com/$REPO/releases/download/$S3_TAG/$S3_NAME}
 	BOX=${KPKG_BOX:-/var/lib/kpkg/box}
 	MODE=${KPKG_MODE:-auto}
@@ -41,7 +41,7 @@ main() {
 
 	case $(uname -m) in
 		x86_64 | amd64) ;;
-		*) die "kryounix работает только на x86_64, у тебя $(uname -m)" "kryounix runs on x86_64 only, this is $(uname -m)" ;;
+		*) die "kryonux работает только на x86_64, у тебя $(uname -m)" "kryonux runs on x86_64 only, this is $(uname -m)" ;;
 	esac
 	[ "$(uname -s)" = Linux ] || die "нужен linux" "linux is required"
 
@@ -54,13 +54,13 @@ main() {
 	done
 
 	if [ "$MODE" = auto ]; then
-		if [ "$OSID" = kryounix ]; then MODE=native; else MODE=box; fi
+		if [ "$OSID" = kryonux ]; then MODE=native; else MODE=box; fi
 	fi
 	case $MODE in
 		box | native) ;;
 		*) die "режим должен быть auto, box или native" "mode must be auto, box or native" ;;
 	esac
-	if [ "$MODE" = native ] && [ "$OSID" != kryounix ] && [ -z "${KPKG_FORCE:-}" ]; then
+	if [ "$MODE" = native ] && [ "$OSID" != kryonux ] && [ -z "${KPKG_FORCE:-}" ]; then
 		die "режим native пишет прямо в /, это ломает менеджер пакетов системы ($OSID). используй --box или задай KPKG_FORCE=1" \
 			"native mode writes straight into /, which breaks the package manager of $OSID. use --box or set KPKG_FORCE=1"
 	fi
@@ -73,15 +73,15 @@ usage() {
 	t "установка kpkg одной командой
   curl -fsSL https://raw.githubusercontent.com/wh1laye/Kryonux/main/kpkg/install.sh | sh
 
-  --box       изолированный режим (по умолчанию на любом дистрибутиве, кроме kryounix)
-  --native    поставить прямо в систему (по умолчанию в kryounix)
+  --box       изолированный режим (по умолчанию на любом дистрибутиве, кроме kryonux)
+  --native    поставить прямо в систему (по умолчанию в kryonux)
   --insecure  не требовать подпись minisign (по умолчанию она обязательна)
   --update    обновить kpkg, бокс и пакеты не трогать
   -h          эта справка" "install kpkg with one command
   curl -fsSL https://raw.githubusercontent.com/wh1laye/Kryonux/main/kpkg/install.sh | sh
 
-  --box       isolated mode (default on every distro except kryounix)
-  --native    install straight into the system (default on kryounix)
+  --box       isolated mode (default on every distro except kryonux)
+  --native    install straight into the system (default on kryonux)
   --insecure  do not require the minisign signature (required by default)
   --update    update kpkg, keep the box and packages
   -h          this help"
@@ -214,7 +214,7 @@ get_src() {
 
 install_native() {
 	for c in python3 curl tar xz gcc make bash; do
-		has "$c" || die "нет команды $c (в stage 3 kryounix она есть, проверь PATH)" "command $c is missing (stage 3 has it, check PATH)"
+		has "$c" || die "нет команды $c (в stage 3 kryonux она есть, проверь PATH)" "command $c is missing (stage 3 has it, check PATH)"
 	done
 	get_src
 	KPKG_SRC=$SRC bash "$SRC/kpkg-setup.sh" </dev/null && rc=0 || rc=$?
@@ -231,7 +231,7 @@ get_stage3() {
 	S3SIG=
 	case $S3 in
 		http://* | https://*)
-			say "загрузка stage 3 kryounix, около 260 МБ" "downloading kryounix stage 3, about 260 MB"
+			say "загрузка stage 3 kryonux, около 260 МБ" "downloading kryonux stage 3, about 260 MB"
 			dl "$S3" "$DL/stage3.part" || { rm -f "$DL/stage3.part"; dl "$S3" "$DL/stage3.part"; } \
 				|| die "не удалось скачать $S3 (повтори или скачай файл сам и задай KPKG_STAGE3=/путь/к/файлу)" \
 				"could not download $S3 (retry, or download it yourself and set KPKG_STAGE3=/path/to/file)"
@@ -277,9 +277,9 @@ get_stage3() {
 		rm -rf "$BOX.new"
 		die "не удалось распаковать stage 3" "could not unpack stage 3"
 	fi
-	if ! grep -q '^ID=.\?kryounix' "$BOX.new/etc/os-release" 2>/dev/null; then
+	if ! grep -q '^ID=.\?kryonux' "$BOX.new/etc/os-release" 2>/dev/null; then
 		rm -rf "$BOX.new"
-		die "это не stage 3 kryounix" "this is not a kryounix stage 3"
+		die "это не stage 3 kryonux" "this is not a kryonux stage 3"
 	fi
 	rmdir "$BOX" 2>/dev/null || true
 	mv "$BOX.new" "$BOX"

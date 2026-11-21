@@ -14,7 +14,7 @@ function wave(fill,y,hl){
   if(hl)for(i=0;i<24;i+=2)s+='<path d="M'+(i*100+30)+' '+(y+12)+'q14 -8 30 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>';
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 80" preserveAspectRatio="none" width="200%" height="100%" style="display:block"><path d="'+p+'V80H0z" fill="'+fill+'"/><path d="'+p+'" fill="none" stroke="#1d8fc4" stroke-width="3" vector-effect="non-scaling-stroke"/>'+s+'</svg>';
 }
-window.CloudSeason.reg('su',{
+window.KryonuxSeason.reg('su',{
   init:function(k){
     var m=k.mobile(),wd=k.wide(),gh=m?44:56,i,sunw=m?78:140,sun,bal;
     sun=k.el('','<div style="position:absolute;left:-30%;top:-30%;width:160%;height:160%;border-radius:50%;background:radial-gradient(circle,rgba(255,220,80,.5),rgba(255,220,80,0) 66%)"></div><div class="zs-rays" style="position:absolute;inset:0">'+k.svg('0 0 160 160',RAYS)+'</div><div style="position:absolute;inset:0">'+k.svg('0 0 160 160',SUNFACE)+'</div>','right:'+(m?'-16px':'3%')+';width:'+sunw+'px;height:'+sunw+'px');
