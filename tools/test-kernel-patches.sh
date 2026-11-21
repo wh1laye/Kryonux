@@ -8,8 +8,8 @@ T=$(mktemp -d)
 GNUPGHOME=$(mktemp -d)
 WORK="$T/w"
 OUT="$T/o"
-CLOUDK_VER=${CLOUDK_VER:-0.5}
-export T SRC_HOME REPO GNUPGHOME WORK OUT CLOUDK_VER
+KRYONK_VER=${KRYONK_VER:-0.0.0}
+export T SRC_HOME REPO GNUPGHOME WORK OUT KRYONK_VER
 mkdir -p "$WORK" "$OUT"
 trap 'rm -rf "$T" "$GNUPGHOME"' EXIT
 
@@ -23,7 +23,7 @@ export -f say die fetch
 for c in python3 curl gpg tar patch find; do
   command -v "$c" >/dev/null || fail "нужен $c"
 done
-[ -f "$SRC_HOME/cloudk-source.sh" ] || fail "нет $SRC_HOME/cloudk-source.sh"
+[ -f "$SRC_HOME/kryonk-source.sh" ] || fail "нет $SRC_HOME/kryonk-source.sh"
 [ -f "$SRC_HOME/cachyos.pubkey.asc" ] || fail "нет $SRC_HOME/cachyos.pubkey.asc"
 
 api() { curl -fsSL --retry 3 --retry-delay 5 --connect-timeout 20 -H 'Accept: application/vnd.github+json' "$1" 2>/dev/null || true; }
@@ -69,10 +69,10 @@ cp -a "$T/src/." "$T/check-src/"
   say() { printf '==> %s\n' "$*"; }
   die() { printf 'error: %s\n' "$*" >&2; exit 1; }
   fetch() { curl -fL --retry 3 --retry-delay 5 --connect-timeout 20 -sS -o "$2" "$1"; }
-  . "$SRC_HOME/cloudk-source.sh"
-  cloudk_source
-) || fail "cloudk_source не отработал на исходнике cachyos"
-ok "cloudk_source применяет наши правки"
+  . "$SRC_HOME/kryonk-source.sh"
+  kryonk_source
+) || fail "kryonk_source не отработал на исходнике cachyos"
+ok "kryonk_source применяет наши правки"
 
 printf 'fake sig\n' > "$T/dl/bad.asc"
 if gpg --batch --verify "$T/dl/bad.asc" "$T/dl/$TAR" >/dev/null 2>&1; then

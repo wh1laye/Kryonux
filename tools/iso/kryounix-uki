@@ -1,15 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-K=${CLOUDOS_SBDIR:-/etc/cloudos/secureboot}
-B=${CLOUDOS_BOOT:-/boot}
-KERNEL=${CLOUDOS_KERNEL:-$B/vmlinuz}
-INITRD=${CLOUDOS_INITRD:-$B/initramfs.img}
+K=${KRYOUNIX_SBDIR:-/etc/kryounix/secureboot}
+B=${KRYOUNIX_BOOT:-/boot}
+KERNEL=${KRYOUNIX_KERNEL:-$B/vmlinuz}
+INITRD=${KRYOUNIX_INITRD:-$B/initramfs.img}
 CONF=$B/limine/limine.conf
-OUT=$B/EFI/Linux/cloudos.efi
-OSREL=${CLOUDOS_OSREL:-/etc/os-release}
-STUB=${CLOUDOS_STUB:-}
-MARK='/cloudos (uki)'
+OUT=$B/EFI/Linux/kryounix.efi
+OSREL=${KRYOUNIX_OSREL:-/etc/os-release}
+STUB=${KRYOUNIX_STUB:-}
+MARK='/kryounix (uki)'
 
 say() { printf '==> %s\n' "$*"; }
 die() { printf 'ошибка: %s\n' "$*" >&2; exit 1; }
@@ -17,15 +17,15 @@ need() { for c in "$@"; do command -v "$c" >/dev/null || die "нет коман�
 
 usage() {
   cat <<'EOU'
-cloudos-uki: подписанный unified kernel image (ядро, initramfs и параметры в одном файле)
+kryounix-uki: подписанный unified kernel image (ядро, initramfs и параметры в одном файле)
 
-  build     собрать /boot/EFI/Linux/cloudos.efi, подписать ключом db, добавить пункт в limine.conf
+  build     собрать /boot/EFI/Linux/kryounix.efi, подписать ключом db, добавить пункт в limine.conf
   status    проверить файл и подпись
 
 параметры ядра зашиты в образ и не меняются при загрузке.
-после каждого обновления ядра или initramfs: cloudos-uki build && cloudos-secureboot sign
-нужны ключи (cloudos-secureboot init), objcopy, sbsign и systemd efi stub
-(sys-apps/systemd-utils с USE boot, файл linuxx64.efi.stub или CLOUDOS_STUB=путь)
+после каждого обновления ядра или initramfs: kryounix-uki build && kryounix-secureboot sign
+нужны ключи (kryounix-secureboot init), objcopy, sbsign и systemd efi stub
+(sys-apps/systemd-utils с USE boot, файл linuxx64.efi.stub или KRYOUNIX_STUB=путь)
 EOU
 }
 
@@ -39,7 +39,7 @@ find_stub() {
 }
 
 cmdline() {
-  if [ -n "${CLOUDOS_CMDLINE:-}" ]; then printf '%s' "$CLOUDOS_CMDLINE"; return; fi
+  if [ -n "${KRYOUNIX_CMDLINE:-}" ]; then printf '%s' "$KRYOUNIX_CMDLINE"; return; fi
   [ -f "$CONF" ] || die "нет $CONF"
   awk '/^[[:space:]]+cmdline:/ { sub(/^[[:space:]]*cmdline:[[:space:]]*/, ""); print; exit }' "$CONF"
 }
@@ -54,11 +54,11 @@ limine_entry() {
   ' "$CONF" > "$t"
   awk -v m="$MARK" '
     !done && /^\// {
-      print m; print "    protocol: efi"; print "    path: boot():/EFI/Linux/cloudos.efi"; print ""
+      print m; print "    protocol: efi"; print "    path: boot():/EFI/Linux/kryounix.efi"; print ""
       done = 1
     }
     { print }
-    END { if (!done) { print m; print "    protocol: efi"; print "    path: boot():/EFI/Linux/cloudos.efi" } }
+    END { if (!done) { print m; print "    protocol: efi"; print "    path: boot():/EFI/Linux/kryounix.efi" } }
   ' "$t" > "$CONF.new"
   rm -f "$t"
   mv "$CONF.new" "$CONF"
@@ -68,7 +68,7 @@ build() {
   local w cl
   need objcopy sbsign sbverify
   find_stub
-  [ -f "$K/db.key" ] || die "нет ключей, сначала: cloudos-secureboot init"
+  [ -f "$K/db.key" ] || die "нет ключей, сначала: kryounix-secureboot init"
   [ -f "$KERNEL" ] || die "нет $KERNEL"
   [ -f "$OSREL" ] || die "нет $OSREL"
   cl=$(cmdline)
@@ -88,11 +88,11 @@ build() {
   install -m755 "$w/uki.signed" "$OUT"
   if [ -f "$CONF" ]; then limine_entry; fi
   say "готово: $OUT подписан, пункт добавлен первым в limine.conf"
-  say "дальше: cloudos-secureboot sign (хеш uki попадёт в конфиг)"
+  say "дальше: kryounix-secureboot sign (хеш uki попадёт в конфиг)"
 }
 
 status() {
-  [ -f "$OUT" ] || { echo "uki: не собран (cloudos-uki build)"; return 0; }
+  [ -f "$OUT" ] || { echo "uki: не собран (kryounix-uki build)"; return 0; }
   echo "uki: $OUT"
   if [ -f "$K/db.crt" ] && command -v sbverify >/dev/null; then
     sbverify --cert "$K/db.crt" "$OUT" >/dev/null 2>&1 && echo "подпись db верна" || echo "подпись не совпадает, запусти build"

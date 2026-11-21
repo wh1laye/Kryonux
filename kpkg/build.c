@@ -1,4 +1,4 @@
-#include "cloudpkg.h"
+#include "kpkg.h"
 struct build_ctx {
 	struct recipe r;
 	char base[BUF]; char srcdir[BUF]; char image[BUF]; char log[BUF];
@@ -100,7 +100,7 @@ static int manifest_check(const struct build_ctx *c, const char *filename, const
 	snprintf(path, sizeof path, "%s/Manifest", c->r.dir);
 	f = fopen(path, "r");
 	if (!f) {
-		fprintf(stderr, "cloudpkg: no Manifest for %s/%s-%s, checksum verification skipped\n", c->r.category, c->r.name, c->r.version);
+		fprintf(stderr, "kpkg: no Manifest for %s/%s-%s, checksum verification skipped\n", c->r.category, c->r.name, c->r.version);
 		return 1;
 	}
 	while (fgets(line, sizeof line, f)) {
@@ -109,7 +109,7 @@ static int manifest_check(const struct build_ctx *c, const char *filename, const
 		if (strcmp(dname, filename)) continue;
 		matched = 1;
 		if (stat(full, &st) == 0 && (long long)st.st_size != dsize) {
-			fprintf(stderr, "cloudpkg: size mismatch for %s: Manifest says %lld, got %lld\n", filename, dsize, (long long)st.st_size);
+			fprintf(stderr, "kpkg: size mismatch for %s: Manifest says %lld, got %lld\n", filename, dsize, (long long)st.st_size);
 			ok = 0;
 			break;
 		}
@@ -122,7 +122,7 @@ static int manifest_check(const struct build_ctx *c, const char *filename, const
 				want[128] = 0;
 				a[0] = "sha512sum"; a[1] = (char *)full; a[2] = NULL;
 				if (capture(a, got, sizeof got) == 0 && strncasecmp(got, want, 128)) {
-					fprintf(stderr, "cloudpkg: SHA512 mismatch for %s\n", filename);
+					fprintf(stderr, "kpkg: SHA512 mismatch for %s\n", filename);
 					ok = 0;
 				}
 			}
@@ -130,7 +130,7 @@ static int manifest_check(const struct build_ctx *c, const char *filename, const
 		break;
 	}
 	fclose(f);
-	if (!matched) fprintf(stderr, "cloudpkg: no Manifest entry for %s, checksum verification skipped\n", filename);
+	if (!matched) fprintf(stderr, "kpkg: no Manifest entry for %s, checksum verification skipped\n", filename);
 	return ok;
 }
 static int fetch_one(struct build_ctx *c, const char *url, const char *filename)
@@ -139,42 +139,42 @@ static int fetch_one(struct build_ctx *c, const char *url, const char *filename)
 	struct stat st;
 	char *a[5];
 	if (!distfile_name_ok(filename)) {
-		fprintf(stderr, "cloudpkg: unsafe distfile name: %s\n", filename);
+		fprintf(stderr, "kpkg: unsafe distfile name: %s\n", filename);
 		return 0;
 	}
 	if (c->ndist >= 16) {
-		fputs("cloudpkg: too many source files in one recipe\n", stderr);
+		fputs("kpkg: too many source files in one recipe\n", stderr);
 		return 0;
 	}
 	snprintf(out, sizeof out, "%s/%s", distdir, filename);
 	snprintf(part, sizeof part, "%s.part", out);
 	if (stat(out, &st) == 0 && st.st_size > 0) {
-		printf("cloudpkg: using cached %s\n", filename);
+		printf("kpkg: using cached %s\n", filename);
 	} else {
-		printf("cloudpkg: downloading %s\n", url);
+		printf("kpkg: downloading %s\n", url);
 		fflush(stdout);
 		unlink(part);
 		if (url[0] == '/') {
 			a[0] = "cp"; a[1] = (char *)url; a[2] = part; a[3] = NULL;
 			if (run(a) != 0) {
-				fprintf(stderr, "cloudpkg: cannot copy local source %s\n", url);
+				fprintf(stderr, "kpkg: cannot copy local source %s\n", url);
 				unlink(part);
 				return 0;
 			}
 		} else if (fetch(url, part) != 0) {
-			fprintf(stderr, "cloudpkg: download failed: %s\n", url);
+			fprintf(stderr, "kpkg: download failed: %s\n", url);
 			unlink(part);
 			return 0;
 		}
 		if (rename(part, out) != 0) {
-			perror("cloudpkg: rename");
+			perror("kpkg: rename");
 			unlink(part);
 			return 0;
 		}
 	}
 	if (!manifest_check(c, filename, out)) {
 		unlink(out);
-		fputs("cloudpkg: checksum verification failed, the file was removed\n", stderr);
+		fputs("kpkg: checksum verification failed, the file was removed\n", stderr);
 		return 0;
 	}
 	snprintf(c->distfiles[c->ndist++], sizeof c->distfiles[0], "%s", filename);
@@ -185,7 +185,7 @@ static int fetch_distfiles(struct build_ctx *c)
 	char buf[2048], *tok, *save = NULL, pending[1024] = "", name[256];
 	int ok = 1;
 	if (!mkdirs(distdir)) {
-		fprintf(stderr, "cloudpkg: cannot create %s\n", distdir);
+		fprintf(stderr, "kpkg: cannot create %s\n", distdir);
 		return 0;
 	}
 	snprintf(buf, sizeof buf, "%s", c->r.src_uri);
@@ -193,7 +193,7 @@ static int fetch_distfiles(struct build_ctx *c)
 		if (!strcmp(tok, "->")) {
 			tok = strtok_r(NULL, " \t\n", &save);
 			if (!tok || !pending[0]) {
-				fputs("cloudpkg: malformed SRC_URI arrow rename\n", stderr);
+				fputs("kpkg: malformed SRC_URI arrow rename\n", stderr);
 				return 0;
 			}
 			ok = fetch_one(c, pending, tok);
@@ -229,7 +229,7 @@ static int extract_sources(struct build_ctx *c)
 			a[0] = "tar"; a[1] = "-xf"; a[2] = full; a[3] = "-C"; a[4] = srcbase; a[5] = "--no-same-owner"; a[6] = NULL;
 		}
 		if (run(a) != 0) {
-			fprintf(stderr, "cloudpkg: cannot extract %s\n", full);
+			fprintf(stderr, "kpkg: cannot extract %s\n", full);
 			return 0;
 		}
 	}
@@ -250,7 +250,7 @@ static int run_phase(struct build_ctx *c, const char *name, const char *body, co
 	char buf[4096], jobsval[16], makeflags[24];
 	ssize_t r;
 	FILE *log;
-	printf("cloudpkg: %s/%s-%s: phase %s\n", c->r.category, c->r.name, c->r.version, name);
+	printf("kpkg: %s/%s-%s: phase %s\n", c->r.category, c->r.name, c->r.version, name);
 	fflush(stdout);
 	if (pipe(fd) < 0) return 1;
 	p = fork();
@@ -299,7 +299,7 @@ static int run_phase(struct build_ctx *c, const char *name, const char *body, co
 	close(fd[0]);
 	if (waitpid(p, &st, 0) < 0) return 1;
 	code = WIFEXITED(st) ? WEXITSTATUS(st) : 1;
-	if (code != 0) fprintf(stderr, "cloudpkg: phase %s failed (exit %d), full log: %s\n", name, code, c->log);
+	if (code != 0) fprintf(stderr, "kpkg: phase %s failed (exit %d), full log: %s\n", name, code, c->log);
 	return code;
 }
 static int run_named_phase(struct build_ctx *c, const char *name)
@@ -353,15 +353,15 @@ static int check_conflicts(struct build_ctx *c, char **files, int nf, int force)
 		if (lstat(full, &st) != 0) continue;
 		owner = find_owner(files[i]);
 		if (owner && !strcmp(owner, self)) continue;
-		if (conflicts < 20) fprintf(stderr, "cloudpkg: conflict: /%s (%s)\n", files[i], owner ? owner : "untracked");
+		if (conflicts < 20) fprintf(stderr, "kpkg: conflict: /%s (%s)\n", files[i], owner ? owner : "untracked");
 		conflicts++;
 	}
 	if (!conflicts) return 1;
 	if (!force) {
-		fprintf(stderr, "cloudpkg: %d file conflicts detected, rerun with --force to overwrite\n", conflicts);
+		fprintf(stderr, "kpkg: %d file conflicts detected, rerun with --force to overwrite\n", conflicts);
 		return 0;
 	}
-	fprintf(stderr, "cloudpkg: overwriting %d conflicting files (--force)\n", conflicts);
+	fprintf(stderr, "kpkg: overwriting %d conflicting files (--force)\n", conflicts);
 	return 1;
 }
 static int resolve_jobs(void)
@@ -387,16 +387,16 @@ int pkg_build_install(const char *cat, const char *name, const char *ver, int ex
 	memset(&c, 0, sizeof c);
 	recipe_init(&c.r);
 	if (!recipe_path(cat, name, ver, path, sizeof path)) {
-		fprintf(stderr, "cloudpkg: recipe not found: %s/%s-%s\n", cat, name, ver);
+		fprintf(stderr, "kpkg: recipe not found: %s/%s-%s\n", cat, name, ver);
 		return 1;
 	}
 	if (!recipe_load(path, &c.r)) goto out;
 	if (c.r.name[0] && strcmp(c.r.name, name)) {
-		fprintf(stderr, "cloudpkg: %s: PACKAGE field %s does not match directory name %s\n", path, c.r.name, name);
+		fprintf(stderr, "kpkg: %s: PACKAGE field %s does not match directory name %s\n", path, c.r.name, name);
 		goto out;
 	}
 	if (c.r.version[0] && strcmp(c.r.version, ver)) {
-		fprintf(stderr, "cloudpkg: %s: VERSION field %s does not match directory version %s\n", path, c.r.version, ver);
+		fprintf(stderr, "kpkg: %s: VERSION field %s does not match directory version %s\n", path, c.r.version, ver);
 		goto out;
 	}
 	snprintf(c.r.category, sizeof c.r.category, "%s", cat);
@@ -406,7 +406,7 @@ int pkg_build_install(const char *cat, const char *name, const char *ver, int ex
 	recipe_expand(&c.r);
 	was_installed = db_installed_version(cat, name, oldver, sizeof oldver);
 	if (was_installed && !strcmp(oldver, ver) && !force) {
-		printf("cloudpkg: %s/%s-%s is already installed\n", cat, name, ver);
+		printf("kpkg: %s/%s-%s is already installed\n", cat, name, ver);
 		r = 0;
 		goto out;
 	}
@@ -417,15 +417,15 @@ int pkg_build_install(const char *cat, const char *name, const char *ver, int ex
 	if (snprintf(c.log, sizeof c.log, "%s/build.log", c.base) >= (int)sizeof c.log) goto out;
 	rm_tree(c.base);
 	if (!mkdirs(c.base) || !mkdirs(c.image)) {
-		fprintf(stderr, "cloudpkg: cannot create build directory %s\n", c.base);
+		fprintf(stderr, "kpkg: cannot create build directory %s\n", c.base);
 		goto out;
 	}
 	if (snprintf(path, sizeof path, "%s/src", c.base) >= (int)sizeof path) goto out;
 	if (!mkdirs(path)) {
-		fprintf(stderr, "cloudpkg: cannot create source directory %s\n", path);
+		fprintf(stderr, "kpkg: cannot create source directory %s\n", path);
 		goto out;
 	}
-	printf("cloudpkg: building %s/%s-%s with %d jobs\n", cat, name, ver, c.jobcount);
+	printf("kpkg: building %s/%s-%s with %d jobs\n", cat, name, ver, c.jobcount);
 	if (!fetch_distfiles(&c)) goto fail;
 	if (!extract_sources(&c)) goto fail;
 	if (run_named_phase(&c, "src_prepare") != 0) goto fail;
@@ -434,18 +434,18 @@ int pkg_build_install(const char *cat, const char *name, const char *ver, int ex
 	if (run_named_phase(&c, "pkg_preinst") != 0) goto fail;
 	if (run_named_phase(&c, "src_install") != 0) goto fail;
 	if (!scan_tree(c.image, "", &files, &nf, &dirs, &nd)) {
-		fprintf(stderr, "cloudpkg: cannot scan the staged image %s\n", c.image);
+		fprintf(stderr, "kpkg: cannot scan the staged image %s\n", c.image);
 		goto fail;
 	}
 	if (!nf) {
-		fputs("cloudpkg: src_install produced no files\n", stderr);
+		fputs("kpkg: src_install produced no files\n", stderr);
 		goto fail;
 	}
 	if (!check_conflicts(&c, files, nf, force)) goto fail;
 	snprintf(srcarg, sizeof srcarg, "%s/.", c.image);
 	a[0] = "cp"; a[1] = "-a"; a[2] = srcarg; a[3] = "/"; a[4] = NULL;
 	if (run(a) != 0) {
-		fputs("cloudpkg: cannot copy the staged image into /\n", stderr);
+		fputs("kpkg: cannot copy the staged image into /\n", stderr);
 		goto fail;
 	}
 	if (have("ldconfig")) {
@@ -455,16 +455,16 @@ int pkg_build_install(const char *cat, const char *name, const char *ver, int ex
 	if (!db_record(&c.r, files, nf, dirs, nd, explicit || old_explicit)) goto fail;
 	if (was_installed && strcmp(oldver, ver)) {
 		db_remove(cat, name, oldver, files, nf);
-		printf("cloudpkg: upgraded %s/%s %s -> %s\n", cat, name, oldver, ver);
+		printf("kpkg: upgraded %s/%s %s -> %s\n", cat, name, oldver, ver);
 	}
 	if (explicit || old_explicit) world_add(cat, name);
-	printf("cloudpkg: installed %s/%s-%s (%d files)\n", cat, name, ver, nf);
+	printf("kpkg: installed %s/%s-%s (%d files)\n", cat, name, ver, nf);
 	if (recipe_phase(&c.r, "pkg_postinst")) run_phase(&c, "pkg_postinst", recipe_phase(&c.r, "pkg_postinst"), "/");
 	if (!keep_workdir) rm_tree(c.base);
 	r = 0;
 	goto out;
 fail:
-	fprintf(stderr, "cloudpkg: build failed for %s/%s-%s, work directory kept: %s\n", cat, name, ver, c.base);
+	fprintf(stderr, "kpkg: build failed for %s/%s-%s, work directory kept: %s\n", cat, name, ver, c.base);
 out:
 	list_free(files, nf);
 	list_free(dirs, nd);

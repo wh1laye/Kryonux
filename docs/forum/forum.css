@@ -297,3 +297,5 @@ html[data-theme=light] pre.code .hl-s,html[data-theme=sepia] pre.code .hl-s{colo
 html[data-theme=light] pre.code .hl-n,html[data-theme=sepia] pre.code .hl-n{color:#a65a10}
 html[data-theme=light] pre.code .hl-k,html[data-theme=sepia] pre.code .hl-k{color:#2450b0}
 html[data-theme=light] pre.code .hl-v,html[data-theme=sepia] pre.code .hl-v{color:#7a3fb0}
+.siteft{max-width:960px;margin:0 auto;padding:0 22px 40px}
+@media(max-width:640px){.siteft{padding:0 14px 30px}}

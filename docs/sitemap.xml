@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://wh1laye.github.io/cloudos-repo/</loc><lastmod>2026-11-01</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/handbook/</loc><lastmod>2026-11-01</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/handbook/en/</loc><lastmod>2026-11-01</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/detect/</loc><lastmod>2026-11-01</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/boot/</loc><lastmod>2026-11-01</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/compare/</loc><lastmod>2026-11-01</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/news/</loc><lastmod>2026-11-01</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/forum/</loc><lastmod>2026-11-01</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/releases/</loc><lastmod>2026-11-01</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/packages/</loc><lastmod>2026-11-01</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/hardware/</loc><lastmod>2026-11-01</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/verify/</loc><lastmod>2026-11-03</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/status/</loc><lastmod>2026-11-03</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/security/</loc><lastmod>2026-11-03</lastmod></url>
-<url><loc>https://wh1laye.github.io/cloudos-repo/sandbox/</loc><lastmod>2026-11-03</lastmod></url>
+<url><loc>https://wh1laye.github.io/Kryonux/</loc><lastmod>2026-11-21</lastmod></url>
+<url><loc>https://wh1laye.github.io/Kryonux/handbook/</loc><lastmod>2026-11-21</lastmod></url>
+<url><loc>https://wh1laye.github.io/Kryonux/handbook/en/</loc><lastmod>2026-11-21</lastmod></url>
+<url><loc>https://wh1laye.github.io/Kryonux/compare/</loc><lastmod>2026-11-21</lastmod></url>
+<url><loc>https://wh1laye.github.io/Kryonux/news/</loc><lastmod>2026-11-21</lastmod></url>
+<url><loc>https://wh1laye.github.io/Kryonux/forum/</loc><lastmod>2026-11-21</lastmod></url>
+<url><loc>https://wh1laye.github.io/Kryonux/releases/</loc><lastmod>2026-11-21</lastmod></url>
+<url><loc>https://wh1laye.github.io/Kryonux/hardware/</loc><lastmod>2026-11-21</lastmod></url>
+<url><loc>https://wh1laye.github.io/Kryonux/status/</loc><lastmod>2026-11-21</lastmod></url>
+<url><loc>https://wh1laye.github.io/Kryonux/security/</loc><lastmod>2026-11-21</lastmod></url>
+<url><loc>https://wh1laye.github.io/Kryonux/sandbox/</loc><lastmod>2026-11-21</lastmod></url>
 </urlset>

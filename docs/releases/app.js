@@ -80,14 +80,14 @@ async function render(){
   let rels;
   try{rels=await load()}catch(e){return fail(e.message)}
   const S3=/stage\s*-?3/i;
-  rels=rels.filter(r=>!r.draft&&!/^base\b/i.test(r.name||'')&&!S3.test((r.name||'')+' '+r.tag_name)).map(r=>Object.assign({},r,{assets:(r.assets||[]).filter(a=>!S3.test(a.name))})).filter(r=>r.assets.some(a=>/\.iso$/i.test(a.name))).sort((a,b)=>new Date(b.published_at)-new Date(a.published_at));
+  rels=rels.filter(r=>!r.draft&&!/^base\b/i.test(r.name||'')&&!S3.test((r.name||'')+' '+r.tag_name)).map(r=>Object.assign({},r,{assets:(r.assets||[]).filter(a=>/^kryounix-live-.*\.iso$/i.test(a.name))})).filter(r=>r.assets.length).sort((a,b)=>new Date(b.published_at)-new Date(a.published_at));
   const newest=rels[0]?rels[0].id:null;
   const tags=r=>(r.id===newest?' · <span class="tag lt">последний</span>':'')+((r.prerelease||/beta|бета/i.test((r.name||'')+' '+r.tag_name))?' · <span class="tag">бета</span>':'');
   const groups=R.groups.map(g=>({n:g.n,d:g.d})).concat([{n:'другое',d:'остальные релизы'}]).filter(g=>rels.some(r=>groupOf(r)===g.n));
 
   if(!path.length){
-    app.innerHTML='<p class="crumbs">releases</p><h1>релизы</h1><p class="mu">архивы и образы CloudOs. файлы хранятся в github releases и скачиваются напрямую оттуда.</p><div class="rlist">'+
-      (groups.map(g=>'<a class="rrow" href="'+link([g.n])+'"><span class="nm">'+IC.d+'<span><strong>'+esc(g.n)+'</strong><em>'+esc(g.d)+'</em></span></span><span class="mu">'+rels.filter(r=>groupOf(r)===g.n).length+'</span></a>').join('')||'<p class="mu">релизов пока нет</p>')+'</div>';
+    app.innerHTML='<p class="crumbs">releases</p><h1>релизы</h1><p class="mu">архивы и образы Kryonux. файлы хранятся в github releases и скачиваются напрямую оттуда.</p><div class="rlist">'+
+      (groups.map(g=>'<a class="rrow" href="'+link([g.n])+'"><span class="nm">'+IC.d+'<span><strong>'+esc(g.n)+'</strong><em>'+esc(g.d)+'</em></span></span><span class="mu">'+rels.filter(r=>groupOf(r)===g.n).length+'</span></a>').join('')||'<p class="mu">образов Kryonux пока нет. первый релиз будет v0.0.0.</p>')+'</div>';
     return;
   }
 

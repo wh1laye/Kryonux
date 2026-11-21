@@ -1,12 +1,12 @@
-#include "cloudpkg.h"
+#include "kpkg.h"
 #define VERSION "2.2.0"
 const char *cp_version = VERSION;
 void usage(void)
 {
-	puts("cloudpkg " VERSION " (standalone source package manager for CloudOS)\n"
-	     "usage: cloudpkg command [options]\n\n"
-	     "  sync                           download the recipe tree (cloudpkg-recipes)\n"
-	     "  update [--force] [--unsigned]  update cloudpkg itself from GitHub releases\n"
+	puts("kpkg " VERSION " (standalone source package manager for Kryonux)\n"
+	     "usage: kpkg command [options]\n\n"
+	     "  sync                           download the recipe tree (kpkg-recipes)\n"
+	     "  update [--force] [--unsigned]  update kpkg itself from GitHub releases\n"
 	     "  fix                            recreate directories, fetch recipes, run doctor\n"
 	     "  install [-p] [-a] [-o] [--jobs N] [--force] package...\n"
 	     "  remove  [-p] [-a] [--force] package...\n"
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 	loadconf();
 	if (!acquire_lock()) return 1;
 	if (!strcmp(c, "version") || !strcmp(c, "--version")) {
-		puts("cloudpkg " VERSION);
+		puts("kpkg " VERSION);
 		r = 0;
 	} else if (!strcmp(c, "help") || !strcmp(c, "--help") || !strcmp(c, "-h")) {
 		usage();
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
 	} else if (!strcmp(c, "doctor")) {
 		r = cmd_doctor();
 	} else {
-		fprintf(stderr, "cloudpkg: unknown command: %s\n", c);
+		fprintf(stderr, "kpkg: unknown command: %s\n", c);
 		usage();
 	}
 	release_lock();

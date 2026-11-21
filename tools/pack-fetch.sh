@@ -4,23 +4,23 @@ set -euo pipefail
 BASE=${1:-}
 VERSION=${2:-}
 OUT=${OUT:-$PWD/out}
-[ -f "$BASE" ] && [ -n "$VERSION" ] || { echo "использование: $0 cloudos-stage3-amd64-<версия>.tar.xz <версия>" >&2; exit 1; }
+[ -f "$BASE" ] && [ -n "$VERSION" ] || { echo "использование: $0 kryounix-stage3-amd64-<версия>.tar.xz <версия>" >&2; exit 1; }
 case "$VERSION" in ''|*[!0-9A-Za-z._-]*) echo "неверная версия" >&2; exit 1 ;; esac
 for c in xz tar sha256sum; do command -v "$c" >/dev/null || { echo "нет команды $c" >&2; exit 1; }; done
 
 T=$(mktemp -d)
 trap 'rm -rf "$T"' EXIT
-N=cloudos-fetch-$VERSION
+N=kryounix-fetch-$VERSION
 mkdir -p "$T/$N" "$OUT"
 
 xz -dc "$BASE" | tar -xpf - -C "$T/$N" --wildcards \
   '*usr/bin/neofetch' \
-  '*usr/share/cloudos/logo.txt' '*usr/share/cloudos/logo.ansi' '*usr/share/cloudos/logo.png' \
-  '*usr/share/cloudos/fastfetch-truecolor.jsonc' '*usr/share/cloudos/fastfetch-image.jsonc' \
+  '*usr/share/kryounix/logo.txt' '*usr/share/kryounix/logo.ansi' '*usr/share/kryounix/logo.png' \
+  '*usr/share/kryounix/fastfetch-truecolor.jsonc' '*usr/share/kryounix/fastfetch-image.jsonc' \
   '*etc/xdg/fastfetch/config.jsonc' '*etc/os-release' 2>/dev/null || true
 
 ( cd "$T/$N" && find . -type f -o -type l | sort | sed 's|^\./||' ) > "$T/list"
-for f in usr/bin/neofetch usr/share/cloudos/logo.txt usr/share/cloudos/logo.ansi usr/share/cloudos/logo.png etc/xdg/fastfetch/config.jsonc etc/os-release; do
+for f in usr/bin/neofetch usr/share/kryounix/logo.txt usr/share/kryounix/logo.ansi usr/share/kryounix/logo.png etc/xdg/fastfetch/config.jsonc etc/os-release; do
   grep -qxF "$f" "$T/list" || { echo "в stage 3 нет $f" >&2; exit 1; }
 done
 

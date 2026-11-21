@@ -1,25 +1,25 @@
-#include "cloudpkg.h"
-char repo[256] = "/var/db/repos/cloudpkg-recipes";
-char distdir[256] = "/var/cache/cloudpkg/distfiles";
-char workdir[256] = "/var/tmp/cloudpkg-build";
+#include "kpkg.h"
+char repo[256] = "/var/db/repos/kpkg-recipes";
+char distdir[256] = "/var/cache/kpkg/distfiles";
+char workdir[256] = "/var/tmp/kpkg-build";
 char recipes_url[512] = RECIPES_URL;
 int jobs; int keep_workdir; int allow_host; int sn_keep = 5;
 void *xcalloc(size_t n, size_t m)
 {
 	void *p = calloc(n, m);
-	if (!p) { fputs("cloudpkg: out of memory\n", stderr); exit(1); }
+	if (!p) { fputs("kpkg: out of memory\n", stderr); exit(1); }
 	return p;
 }
 void *xrealloc(void *p, size_t n)
 {
 	void *r = realloc(p, n);
-	if (!r) { fputs("cloudpkg: out of memory\n", stderr); exit(1); }
+	if (!r) { fputs("kpkg: out of memory\n", stderr); exit(1); }
 	return r;
 }
 char *xstrdup(const char *s)
 {
 	char *p = strdup(s);
-	if (!p) { fputs("cloudpkg: out of memory\n", stderr); exit(1); }
+	if (!p) { fputs("kpkg: out of memory\n", stderr); exit(1); }
 	return p;
 }
 int run(char *const av[])
@@ -29,7 +29,7 @@ int run(char *const av[])
 	if (p < 0) return -1;
 	if (p == 0) {
 		execvp(av[0], av);
-		fprintf(stderr, "cloudpkg: command not found: %s\n", av[0]);
+		fprintf(stderr, "kpkg: command not found: %s\n", av[0]);
 		_exit(127);
 	}
 	if (waitpid(p, &st, 0) < 0) return -1;
@@ -100,7 +100,7 @@ int safe_dir(const char *p)
 		"/", "/usr", "/etc", "/bin", "/sbin", "/lib", "/lib64", "/boot",
 		"/root", "/home", "/dev", "/proc", "/sys", "/var", "/run", "/opt",
 		"/tmp", "/srv", "/mnt", "/var/db", "/var/lib", "/var/cache", "/var/log",
-		"/var/tmp", "/var/db/cloudpkg", "/var/db/repos", "/usr/local", "/usr/lib",
+		"/var/tmp", "/var/db/kpkg", "/var/db/repos", "/usr/local", "/usr/lib",
 		"/usr/share", "/usr/bin", "/usr/sbin", NULL
 	};
 	size_t n = strlen(p), j, depth = 0;
@@ -118,7 +118,7 @@ void rm_tree(const char *path)
 {
 	char *a[4];
 	if (!safe_dir(path)) {
-		fprintf(stderr, "cloudpkg: refusing to remove unsafe path: %s\n", path);
+		fprintf(stderr, "kpkg: refusing to remove unsafe path: %s\n", path);
 		return;
 	}
 	a[0] = "rm"; a[1] = "-rf"; a[2] = (char *)path; a[3] = NULL;
@@ -158,7 +158,7 @@ void loadconf(void)
 	for (sl = strlen(distdir); sl > 1 && distdir[sl - 1] == '/'; sl--) distdir[sl - 1] = 0;
 	for (sl = strlen(workdir); sl > 1 && workdir[sl - 1] == '/'; sl--) workdir[sl - 1] = 0;
 	if (!safe_dir(repo) || !safe_dir(distdir) || !safe_dir(workdir)) {
-		fprintf(stderr, "cloudpkg: unsafe path in %s (repo=%s distdir=%s workdir=%s)\n", CONF, repo, distdir, workdir);
+		fprintf(stderr, "kpkg: unsafe path in %s (repo=%s distdir=%s workdir=%s)\n", CONF, repo, distdir, workdir);
 		exit(1);
 	}
 }
@@ -181,23 +181,23 @@ void osid(char *out, size_t n)
 }
 int host_allowed(char *id, size_t n)
 {
-	const char *f = getenv("CLOUDPKG_FORCE");
+	const char *f = getenv("KPKG_FORCE");
 	osid(id, n);
 	if (allow_host || (f && *f && strcmp(f, "0"))) return 1;
-	return !strcmp(id, "cloudos");
+	return !strcmp(id, "kryounix");
 }
 int host_ok(void)
 {
 	char id[64];
 	if (host_allowed(id, sizeof id)) return 1;
-	fprintf(stderr, "cloudpkg: this system is not CloudOS (ID=%s)\n", id);
-	fprintf(stderr, "cloudpkg: installing into / would break the package manager of this system\n");
-	fprintf(stderr, "cloudpkg: use the isolated box mode, or set CLOUDPKG_FORCE=1 if you know what you are doing\n");
+	fprintf(stderr, "kpkg: this system is not Kryonux (ID=%s)\n", id);
+	fprintf(stderr, "kpkg: installing into / would break the package manager of this system\n");
+	fprintf(stderr, "kpkg: use the isolated box mode, or set KPKG_FORCE=1 if you know what you are doing\n");
 	return 0;
 }
 int need_root(void)
 {
-	if (geteuid() != 0) { fputs("cloudpkg: root privileges are required\n", stderr); return 0; }
+	if (geteuid() != 0) { fputs("kpkg: root privileges are required\n", stderr); return 0; }
 	return 1;
 }
 int have(const char *cmd)

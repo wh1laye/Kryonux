@@ -80,10 +80,6 @@ html[data-hc="1"][data-theme="light"]{--mute:#313d4c;--line:#98a4b6;--ink:#000}
 html[data-cmd="1"] #cloud p,html[data-cmd="1"] #cloud ul,html[data-cmd="1"] #cloud ol,html[data-cmd="1"] #cloud table,html[data-cmd="1"] #cloud .note,html[data-cmd="1"] #cloud .lead{display:none}
 html[data-cmd="1"] #cloud .m-uefi,html[data-cmd="1"] #cloud .m-bios{margin:0}
 
-html[data-mff="manrope"]{--sans:"Manrope","Inter",system-ui,-apple-system,"Segoe UI",sans-serif}
-html[data-mff="plex"]{--sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
-html[data-mff="sys"]{--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-html[data-mff="plex"] body,html[data-mff="sys"] body{font-weight:400}
 html[data-mlh="1"] body,html[data-mlh="1"] main{line-height:1.45}
 html[data-mlh="2"] body,html[data-mlh="2"] main{line-height:1.85}
 html[data-mls="1"] body{letter-spacing:-.012em}

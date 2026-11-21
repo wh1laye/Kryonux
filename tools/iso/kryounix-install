@@ -2,12 +2,12 @@
 set -euo pipefail
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-T=${CLOUDOS_TARGET:-/mnt/cloudos}
-SQ=${CLOUDOS_SQUASHFS:-/media/cdrom/cloudos/rootfs.squashfs}
-BS=${CLOUDOS_BOOTSRC:-/media/cdrom/boot}
+T=${KRYOUNIX_TARGET:-/mnt/kryounix}
+SQ=${KRYOUNIX_SQUASHFS:-/media/cdrom/kryounix/rootfs.squashfs}
+BS=${KRYOUNIX_BOOTSRC:-/media/cdrom/boot}
 LS=/usr/share/limine
 HARDEN='apparmor=1 security=apparmor slab_nomerge init_on_alloc=1 page_alloc.shuffle=1 randomize_kstack_offset=on vsyscall=none debugfs=off pti=on module.sig_enforce=1 efi=disable_early_pci_dma iommu.strict=1'
-EXTRA=${CLOUDOS_CMDLINE_EXTRA:-}
+EXTRA=${KRYOUNIX_CMDLINE_EXTRA:-}
 MOUNTED=0
 LUKSOPEN=0
 
@@ -16,10 +16,10 @@ die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
 usage() {
   cat <<'EOU'
-cloudos-install: install cloudos to disk
+kryounix-install: install kryounix to disk
 
-  cloudos-install                interactive
-  cloudos-install --help         this help
+  kryounix-install                interactive
+  kryounix-install --help         this help
 
 modes:
   auto     the whole disk is wiped and partitioned automatically (boot + root)
@@ -27,28 +27,28 @@ modes:
            partitions; only those two partitions are touched, the rest of the disk stays intact
 
 variables for unattended install:
-  CLOUDOS_MODE=auto|manual       install mode (manual if CLOUDOS_ROOT is set, auto if CLOUDOS_DISK is set)
-  CLOUDOS_DISK=/dev/sda          auto mode: disk to wipe completely
-  CLOUDOS_ROOT=/dev/sda3         manual mode: root partition, it will be formatted
-  CLOUDOS_BOOT=/dev/sda1         manual mode: boot partition (efi system partition on uefi)
-  CLOUDOS_FORMAT_BOOT=1|0        manual mode: format the boot partition (0 keeps an existing vfat and its files)
-  CLOUDOS_FS=ext4|btrfs          root filesystem
-  CLOUDOS_HOST=name              hostname
-  CLOUDOS_USER=name              regular user (group wheel, doas)
-  CLOUDOS_PASS=password          user password
-  CLOUDOS_ROOTPASS=password      root password
-  CLOUDOS_FW=uefi|bios           boot mode, detected automatically by default
-  CLOUDOS_YES=1                  skip the erase confirmation
-  CLOUDOS_LUKS=1                 encrypt root with luks2 (needs cryptsetup and dracut)
-  CLOUDOS_LUKSPASS=password      disk encryption password
-  CLOUDOS_PROFILE=balanced|secure|fast  secure: no smt, lockdown, init_on_free; fast: no watchdog and audit
-  CLOUDOS_SECUREBOOT=1           own secure boot keys, signed limine, kernel hashes (uefi only)
-  CLOUDOS_UKI=1                  signed unified kernel image as first entry (needs CLOUDOS_SECUREBOOT=1)
-  CLOUDOS_KEYMAP=us|ru|name      keyboard: us (english only, default), ru (english + russian, english by default), or any kbd keymap
-  CLOUDOS_SWITCH=alt_shift|ctrl_shift|caps  ru only: key combination that switches the layout (default alt_shift)
-  CLOUDOS_LOCALE=en_US.UTF-8     system language (en_US.UTF-8, ru_RU.UTF-8, C.UTF-8)
-  CLOUDOS_TZ=UTC                 time zone, for example Europe/Moscow
-  CLOUDOS_CMDLINE_EXTRA="..."    extra kernel parameters
+  KRYOUNIX_MODE=auto|manual       install mode (manual if KRYOUNIX_ROOT is set, auto if KRYOUNIX_DISK is set)
+  KRYOUNIX_DISK=/dev/sda          auto mode: disk to wipe completely
+  KRYOUNIX_ROOT=/dev/sda3         manual mode: root partition, it will be formatted
+  KRYOUNIX_BOOT=/dev/sda1         manual mode: boot partition (efi system partition on uefi)
+  KRYOUNIX_FORMAT_BOOT=1|0        manual mode: format the boot partition (0 keeps an existing vfat and its files)
+  KRYOUNIX_FS=ext4|btrfs          root filesystem
+  KRYOUNIX_HOST=name              hostname
+  KRYOUNIX_USER=name              regular user (group wheel, doas)
+  KRYOUNIX_PASS=password          user password
+  KRYOUNIX_ROOTPASS=password      root password
+  KRYOUNIX_FW=uefi|bios           boot mode, detected automatically by default
+  KRYOUNIX_YES=1                  skip the erase confirmation
+  KRYOUNIX_LUKS=1                 encrypt root with luks2 (needs cryptsetup and dracut)
+  KRYOUNIX_LUKSPASS=password      disk encryption password
+  KRYOUNIX_PROFILE=balanced|secure|fast  secure: no smt, lockdown, init_on_free; fast: no watchdog and audit
+  KRYOUNIX_SECUREBOOT=1           own secure boot keys, signed limine, kernel hashes (uefi only)
+  KRYOUNIX_UKI=1                  signed unified kernel image as first entry (needs KRYOUNIX_SECUREBOOT=1)
+  KRYOUNIX_KEYMAP=us|ru|name      keyboard: us (english only, default), ru (english + russian, english by default), or any kbd keymap
+  KRYOUNIX_SWITCH=alt_shift|ctrl_shift|caps  ru only: key combination that switches the layout (default alt_shift)
+  KRYOUNIX_LOCALE=en_US.UTF-8     system language (en_US.UTF-8, ru_RU.UTF-8, C.UTF-8)
+  KRYOUNIX_TZ=UTC                 time zone, for example Europe/Moscow
+  KRYOUNIX_CMDLINE_EXTRA="..."    extra kernel parameters
 EOU
 }
 
@@ -65,15 +65,15 @@ trap cleanup EXIT
 
 case "${1:-}" in -h|--help) usage; exit 0 ;; esac
 
-[ "$(id -u)" = 0 ] || die "root is required: doas cloudos-install"
+[ "$(id -u)" = 0 ] || die "root is required: doas kryounix-install"
 [ "$(uname -m)" = x86_64 ] || die "x86_64 is required"
-if [ "$(cat /etc/cloudos-march 2>/dev/null)" = x86-64-v3 ]; then
+if [ "$(cat /etc/kryounix-march 2>/dev/null)" = x86-64-v3 ]; then
   for f in avx2 fma bmi1 bmi2 movbe f16c; do grep -qw "$f" /proc/cpuinfo || die "this iso is built for x86-64-v3, the cpu lacks $f"; done
 fi
 for c in sfdisk wipefs blkid lsblk findmnt mount umount unsquashfs mkfs.vfat mkfs.ext4 limine chroot install awk sed blockdev; do
   command -v "$c" >/dev/null || die "missing command $c"
 done
-[ -f "$SQ" ] || die "no $SQ, boot from the cloudos live iso"
+[ -f "$SQ" ] || die "no $SQ, boot from the kryounix live iso"
 [ -f "$BS/vmlinuz" ] || die "no $BS/vmlinuz"
 for f in limine-bios.sys BOOTX64.EFI BOOTIA32.EFI; do [ -f "$LS/$f" ] || die "no $LS/$f"; done
 if findmnt -rn "$T" >/dev/null 2>&1; then die "$T is already mounted"; fi
@@ -100,7 +100,7 @@ askpass() {
 
 askdef() {
   local var=$1
-  if [ -z "${!var:-}" ] && [ "${CLOUDOS_YES:-0}" = 1 ]; then printf -v "$var" '%s' "$3"; return 0; fi
+  if [ -z "${!var:-}" ] && [ "${KRYOUNIX_YES:-0}" = 1 ]; then printf -v "$var" '%s' "$3"; return 0; fi
   ask "$@"
 }
 
@@ -112,9 +112,9 @@ findfont() {
   find /usr/share/consolefonts /usr/share/kbd/consolefonts -name "$1.*" -print -quit 2>/dev/null | grep -q .
 }
 
-FW=${CLOUDOS_FW:-}
+FW=${KRYOUNIX_FW:-}
 if [ -z "$FW" ]; then if [ -d /sys/firmware/efi ]; then FW=uefi; else FW=bios; fi; fi
-case $FW in uefi|bios) ;; *) die "CLOUDOS_FW must be uefi or bios" ;; esac
+case $FW in uefi|bios) ;; *) die "KRYOUNIX_FW must be uefi or bios" ;; esac
 say "boot mode: $FW"
 
 LIVEDISK=
@@ -183,10 +183,10 @@ checkpart() {
   [ "/dev/$pk" != "$LIVEDISK" ] || die "$what $p is on the live iso medium"
 }
 
-MODE=${CLOUDOS_MODE:-}
+MODE=${KRYOUNIX_MODE:-}
 if [ -z "$MODE" ]; then
-  if [ -n "${CLOUDOS_ROOT:-}" ]; then MODE=manual
-  elif [ -n "${CLOUDOS_DISK:-}" ]; then MODE=auto
+  if [ -n "${KRYOUNIX_ROOT:-}" ]; then MODE=manual
+  elif [ -n "${KRYOUNIX_DISK:-}" ]; then MODE=auto
   else
     echo "install mode:"
     echo "  auto    wipe a whole disk and install (simple)"
@@ -194,15 +194,15 @@ if [ -z "$MODE" ]; then
     ask MODE "mode (auto or manual)" auto
   fi
 fi
-case $MODE in auto|manual) ;; *) die "CLOUDOS_MODE must be auto or manual" ;; esac
+case $MODE in auto|manual) ;; *) die "KRYOUNIX_MODE must be auto or manual" ;; esac
 say "install mode: $MODE"
 
 FB=1
 if [ "$MODE" = auto ]; then
-  CLOUDOS_DISK=${CLOUDOS_DISK:-}
-  if [ -z "$CLOUDOS_DISK" ]; then echo "disks:"; showdisks; fi
-  ask CLOUDOS_DISK "disk to install to (it will be wiped)"
-  DISK=$CLOUDOS_DISK
+  KRYOUNIX_DISK=${KRYOUNIX_DISK:-}
+  if [ -z "$KRYOUNIX_DISK" ]; then echo "disks:"; showdisks; fi
+  ask KRYOUNIX_DISK "disk to install to (it will be wiped)"
+  DISK=$KRYOUNIX_DISK
   [ -b "$DISK" ] || die "$DISK is not a block device"
   [ "$(lsblk -dno TYPE "$DISK")" = disk ] || die "$DISK is not a whole disk"
   [ "$DISK" != "$LIVEDISK" ] || die "$DISK is the medium the live iso booted from"
@@ -211,15 +211,15 @@ if [ "$MODE" = auto ]; then
   BOOTDEV=${P}1
   ROOTPART=${P}2
 else
-  if [ -z "${CLOUDOS_ROOT:-}" ] || [ -z "${CLOUDOS_BOOT:-}" ]; then
+  if [ -z "${KRYOUNIX_ROOT:-}" ] || [ -z "${KRYOUNIX_BOOT:-}" ]; then
     partition_disks
     echo "partitions:"
     showparts
   fi
-  ask CLOUDOS_BOOT "boot partition (efi system partition on uefi, about 512M, fat32)"
-  ask CLOUDOS_ROOT "root partition (it will be formatted)"
-  BOOTDEV=$CLOUDOS_BOOT
-  ROOTPART=$CLOUDOS_ROOT
+  ask KRYOUNIX_BOOT "boot partition (efi system partition on uefi, about 512M, fat32)"
+  ask KRYOUNIX_ROOT "root partition (it will be formatted)"
+  BOOTDEV=$KRYOUNIX_BOOT
+  ROOTPART=$KRYOUNIX_ROOT
   [ "$BOOTDEV" != "$ROOTPART" ] || die "boot and root must be different partitions"
   checkpart "$BOOTDEV" boot
   checkpart "$ROOTPART" root
@@ -227,90 +227,90 @@ else
   [ "$(blockdev --getsize64 "$BOOTDEV")" -ge 104857600 ] || die "boot partition is smaller than 100 MiB"
   DISK=/dev/$(lsblk -no PKNAME "$BOOTDEV" | head -n1)
   BT=$(blkid -s TYPE -o value "$BOOTDEV" 2>/dev/null || true)
-  FB=${CLOUDOS_FORMAT_BOOT:-}
+  FB=${KRYOUNIX_FORMAT_BOOT:-}
   if [ -z "$FB" ]; then
     if [ "$BT" = vfat ]; then
-      if [ "${CLOUDOS_YES:-0}" = 1 ]; then FB=0; else ask FB "format the boot partition? no keeps the existing vfat and its files (yes/no)" no; fi
+      if [ "${KRYOUNIX_YES:-0}" = 1 ]; then FB=0; else ask FB "format the boot partition? no keeps the existing vfat and its files (yes/no)" no; fi
     else
       FB=1
     fi
   fi
-  case $FB in 1|yes|y) FB=1 ;; 0|no|n) FB=0 ;; *) die "CLOUDOS_FORMAT_BOOT: 1 or 0" ;; esac
+  case $FB in 1|yes|y) FB=1 ;; 0|no|n) FB=0 ;; *) die "KRYOUNIX_FORMAT_BOOT: 1 or 0" ;; esac
   if [ "$FB" = 0 ] && [ "$BT" != vfat ]; then die "$BOOTDEV is not vfat, it has to be formatted"; fi
 fi
 
-FS=${CLOUDOS_FS:-}
+FS=${KRYOUNIX_FS:-}
 if [ -z "$FS" ]; then
   if command -v mkfs.btrfs >/dev/null; then ask FS "root filesystem (ext4 or btrfs)" ext4; else FS=ext4; fi
 fi
 case $FS in ext4) ;; btrfs) command -v mkfs.btrfs >/dev/null || die "this iso has no mkfs.btrfs, use ext4" ;; *) die "filesystem: ext4 or btrfs" ;; esac
 
-LUKS=${CLOUDOS_LUKS:-}
+LUKS=${KRYOUNIX_LUKS:-}
 if [ -z "$LUKS" ]; then
-  if [ "${CLOUDOS_YES:-0}" = 1 ]; then LUKS=0; else ask LUKS "encrypt root with luks (yes/no)" no; fi
+  if [ "${KRYOUNIX_YES:-0}" = 1 ]; then LUKS=0; else ask LUKS "encrypt root with luks (yes/no)" no; fi
 fi
-case $LUKS in 1|yes|y) LUKS=1 ;; 0|no|n) LUKS=0 ;; *) die "CLOUDOS_LUKS: 1 or 0" ;; esac
+case $LUKS in 1|yes|y) LUKS=1 ;; 0|no|n) LUKS=0 ;; *) die "KRYOUNIX_LUKS: 1 or 0" ;; esac
 if [ "$LUKS" = 1 ]; then
   for c in cryptsetup dracut; do command -v "$c" >/dev/null || die "luks needs the command $c"; done
-  askpass CLOUDOS_LUKSPASS "disk encryption password"
+  askpass KRYOUNIX_LUKSPASS "disk encryption password"
 fi
 
-PROFILE=${CLOUDOS_PROFILE:-balanced}
+PROFILE=${KRYOUNIX_PROFILE:-balanced}
 case $PROFILE in
   balanced) PA= ;;
   secure) PA='mitigations=auto,nosmt lockdown=integrity init_on_free=1' ;;
   fast) PA='nowatchdog audit=0' ;;
-  *) die "CLOUDOS_PROFILE: balanced, secure or fast" ;;
+  *) die "KRYOUNIX_PROFILE: balanced, secure or fast" ;;
 esac
 EXTRA="$EXTRA $PA"
-SB=${CLOUDOS_SECUREBOOT:-0}
-case $SB in 0|1) ;; *) die "CLOUDOS_SECUREBOOT: 1 or 0" ;; esac
-UKI=${CLOUDOS_UKI:-0}
-case $UKI in 0|1) ;; *) die "CLOUDOS_UKI: 1 or 0" ;; esac
-[ "$UKI" = 0 ] || [ "$SB" = 1 ] || die "CLOUDOS_UKI needs CLOUDOS_SECUREBOOT=1"
+SB=${KRYOUNIX_SECUREBOOT:-0}
+case $SB in 0|1) ;; *) die "KRYOUNIX_SECUREBOOT: 1 or 0" ;; esac
+UKI=${KRYOUNIX_UKI:-0}
+case $UKI in 0|1) ;; *) die "KRYOUNIX_UKI: 1 or 0" ;; esac
+[ "$UKI" = 0 ] || [ "$SB" = 1 ] || die "KRYOUNIX_UKI needs KRYOUNIX_SECUREBOOT=1"
 if [ "$SB" = 1 ]; then
   [ "$FW" = uefi ] || die "secure boot works only in uefi mode"
-  for c in cloudos-secureboot sbsign sbverify cert-to-efi-sig-list sign-efi-sig-list b2sum openssl; do command -v "$c" >/dev/null || die "secure boot needs the command $c"; done
+  for c in kryounix-secureboot sbsign sbverify cert-to-efi-sig-list sign-efi-sig-list b2sum openssl; do command -v "$c" >/dev/null || die "secure boot needs the command $c"; done
 fi
 
-ask CLOUDOS_HOST "hostname" cloudos
-HOSTN=$CLOUDOS_HOST
+ask KRYOUNIX_HOST "hostname" kryounix
+HOSTN=$KRYOUNIX_HOST
 printf '%s' "$HOSTN" | grep -Eq '^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$' || die "invalid hostname"
-ask CLOUDOS_USER "username"
-USERN=$CLOUDOS_USER
+ask KRYOUNIX_USER "username"
+USERN=$KRYOUNIX_USER
 printf '%s' "$USERN" | grep -Eq '^[a-z_][a-z0-9_-]{0,30}$' || die "invalid username"
-case $USERN in root|cloudos) die "this name is reserved, pick another" ;; esac
-askpass CLOUDOS_PASS "password for $USERN"
-askpass CLOUDOS_ROOTPASS "root password"
+case $USERN in root|kryounix) die "this name is reserved, pick another" ;; esac
+askpass KRYOUNIX_PASS "password for $USERN"
+askpass KRYOUNIX_ROOTPASS "root password"
 
-if [ -z "${CLOUDOS_KEYMAP:-}" ] && [ "${CLOUDOS_YES:-0}" != 1 ]; then
+if [ -z "${KRYOUNIX_KEYMAP:-}" ] && [ "${KRYOUNIX_YES:-0}" != 1 ]; then
   echo "keyboard layout:"
   echo "  us   english only (default)"
   echo "  ru   english and russian, english is the default, a key combination switches"
   echo "  or the name of any kbd keymap, for example de, fr, ua"
 fi
-askdef CLOUDOS_KEYMAP "layout" us
-KEYMAP=$CLOUDOS_KEYMAP
+askdef KRYOUNIX_KEYMAP "layout" us
+KEYMAP=$KRYOUNIX_KEYMAP
 case $KEYMAP in 1|en) KEYMAP=us ;; 2) KEYMAP=ru ;; esac
 printf '%s' "$KEYMAP" | grep -Eq '^[A-Za-z0-9_.+-]{1,40}$' || die "invalid keymap name"
 SWITCH=
 KMAP=$KEYMAP
 KFONT=
 if [ "$KEYMAP" = ru ]; then
-  if [ -z "${CLOUDOS_SWITCH:-}" ] && [ "${CLOUDOS_YES:-0}" != 1 ]; then
+  if [ -z "${KRYOUNIX_SWITCH:-}" ] && [ "${KRYOUNIX_YES:-0}" != 1 ]; then
     echo "layout switch key:"
     echo "  alt_shift    left alt + shift (default)"
     echo "  ctrl_shift   ctrl + shift"
     echo "  caps         caps lock"
   fi
-  askdef CLOUDOS_SWITCH "switch layout with" alt_shift
-  SWITCH=$CLOUDOS_SWITCH
+  askdef KRYOUNIX_SWITCH "switch layout with" alt_shift
+  SWITCH=$KRYOUNIX_SWITCH
   case $SWITCH in 1|alt_shift|alt+shift) SWITCH=alt_shift ;; 2|ctrl_shift|ctrl+shift) SWITCH=ctrl_shift ;; 3|caps) SWITCH=caps ;; esac
   case $SWITCH in
     alt_shift) KMAP=ruwin_alt_sh-UTF-8 ;;
     ctrl_shift) KMAP=ruwin_ct_sh-UTF-8 ;;
     caps) KMAP=ruwin_cplk-UTF-8 ;;
-    *) die "CLOUDOS_SWITCH: alt_shift, ctrl_shift or caps" ;;
+    *) die "KRYOUNIX_SWITCH: alt_shift, ctrl_shift or caps" ;;
   esac
 fi
 if [ "$KMAP" != us ]; then
@@ -323,17 +323,17 @@ if [ "$KEYMAP" = ru ]; then
   [ -n "$KFONT" ] || echo "warning: no cyrillic console font on this iso, russian letters will not be shown on the console"
 fi
 
-askdef CLOUDOS_LOCALE "system language (locale)" en_US.UTF-8
-LOC=$CLOUDOS_LOCALE
+askdef KRYOUNIX_LOCALE "system language (locale)" en_US.UTF-8
+LOC=$KRYOUNIX_LOCALE
 printf '%s' "$LOC" | grep -Eq '^([a-z]{2,3}_[A-Z]{2}\.UTF-8|C\.UTF-8)$' || die "invalid locale, use for example en_US.UTF-8 or ru_RU.UTF-8"
 
-askdef CLOUDOS_TZ "time zone" UTC
-TZN=$CLOUDOS_TZ
+askdef KRYOUNIX_TZ "time zone" UTC
+TZN=$KRYOUNIX_TZ
 printf '%s' "$TZN" | grep -Eq '^[A-Za-z0-9_+/-]{1,64}$' || die "invalid time zone"
 case $TZN in *..*|/*) die "invalid time zone" ;; esac
 [ -f "/usr/share/zoneinfo/$TZN" ] || die "unknown time zone $TZN, see /usr/share/zoneinfo"
 
-if [ "${CLOUDOS_YES:-0}" != 1 ]; then
+if [ "${KRYOUNIX_YES:-0}" != 1 ]; then
   echo
   if [ "$MODE" = auto ]; then
     echo "disk $DISK will be wiped completely: $(lsblk -dno SIZE,MODEL "$DISK")"
@@ -373,16 +373,16 @@ if [ "$FB" = 1 ]; then mkfs.vfat -F32 -n CLOUDBOOT "$BOOTDEV" >/dev/null; fi
 ROOTDEV=$ROOTPART
 if [ "$LUKS" = 1 ]; then
   say "luks2 encryption (aes-xts, argon2id)"
-  printf '%s' "$CLOUDOS_LUKSPASS" | cryptsetup luksFormat --type luks2 --cipher aes-xts-plain64 --key-size 512 --hash sha512 --pbkdf argon2id --batch-mode "$ROOTPART" -
-  printf '%s' "$CLOUDOS_LUKSPASS" | cryptsetup open --type luks2 "$ROOTPART" cloudcrypt -
+  printf '%s' "$KRYOUNIX_LUKSPASS" | cryptsetup luksFormat --type luks2 --cipher aes-xts-plain64 --key-size 512 --hash sha512 --pbkdf argon2id --batch-mode "$ROOTPART" -
+  printf '%s' "$KRYOUNIX_LUKSPASS" | cryptsetup open --type luks2 "$ROOTPART" cloudcrypt -
   LUKSOPEN=1
   ROOTDEV=/dev/mapper/cloudcrypt
 fi
 if [ "$FS" = ext4 ]; then
-  mkfs.ext4 -q -F -L cloudos "$ROOTDEV"
+  mkfs.ext4 -q -F -L kryounix "$ROOTDEV"
   ROPTS=noatime,errors=remount-ro
 else
-  mkfs.btrfs -q -f -L cloudos "$ROOTDEV"
+  mkfs.btrfs -q -f -L kryounix "$ROOTDEV"
   ROPTS=noatime,compress=zstd:1
 fi
 
@@ -396,7 +396,7 @@ unsquashfs -f -d "$T" "$SQ"
 mkdir -p "$T/proc" "$T/sys" "$T/dev" "$T/run" "$T/tmp" "$T/var/tmp" "$T/mnt" "$T/media"
 chmod 1777 "$T/tmp" "$T/var/tmp"
 [ -x "$T/sbin/init" ] || [ -x "$T/usr/sbin/init" ] || die "no init after unpacking, the image is damaged"
-ls "$T/lib/modules" | grep -q cloudk || die "no cloudk kernel modules in the image, the image is damaged"
+ls "$T/lib/modules" | grep -q kryonk || die "no kryonk kernel modules in the image, the image is damaged"
 
 say "limine bootloader"
 mount -o umask=0077,noatime "$BOOTDEV" "$T/boot"
@@ -414,12 +414,12 @@ VER=$(sed -n 's/^VERSION_ID=\(.*\)/\1/p' "$T/etc/os-release" | tr -d '"')
 cat > "$T/boot/limine/limine.conf" <<EOC
 timeout: 3
 
-/CloudOS ${VER}
+/Kryonux ${VER}
     protocol: linux
     path: boot():/vmlinuz
     cmdline: $CMD $EXTRA
 
-/CloudOS ${VER} (verbose)
+/Kryonux ${VER} (verbose)
     protocol: linux
     path: boot():/vmlinuz
     cmdline: $ROOTARG rootfstype=$FS rw $HARDEN $EXTRA
@@ -470,19 +470,19 @@ fi
 
 if [ "$SB" = 1 ]; then
   say "secure boot: keys, kernel hashes, limine signature"
-  export CLOUDOS_SBDIR="$T/etc/cloudos/secureboot" CLOUDOS_BOOT="$T/boot" CLOUDOS_LIMINE_EFI="$LS/BOOTX64.EFI"
-  cloudos-secureboot init
+  export KRYOUNIX_SBDIR="$T/etc/kryounix/secureboot" KRYOUNIX_BOOT="$T/boot" KRYOUNIX_LIMINE_EFI="$LS/BOOTX64.EFI"
+  kryounix-secureboot init
   if [ "$UKI" = 1 ]; then
     say "unified kernel image"
-    CLOUDOS_OSREL="$T/etc/os-release" cloudos-uki build
+    KRYOUNIX_OSREL="$T/etc/os-release" kryounix-uki build
   fi
-  cloudos-secureboot sign
+  kryounix-secureboot sign
 fi
 
-rm -f "$T/etc/init.d/cloudos-smoke" "$T/etc/runlevels/default/cloudos-smoke" "$T/etc/conf.d/agetty.tty1" \
-  "$T/etc/ssh/sshd_config.d/05-cloudos-live.conf" "$T/etc/machine-id" "$T/var/lib/dbus/machine-id"
+rm -f "$T/etc/init.d/kryounix-smoke" "$T/etc/runlevels/default/kryounix-smoke" "$T/etc/conf.d/agetty.tty1" \
+  "$T/etc/ssh/sshd_config.d/05-kryounix-live.conf" "$T/etc/machine-id" "$T/var/lib/dbus/machine-id"
 rm -f "$T"/etc/ssh/ssh_host_*
-if inroot id cloudos >/dev/null 2>&1; then inroot userdel -r cloudos >/dev/null 2>&1 || inroot userdel cloudos; fi
+if inroot id kryounix >/dev/null 2>&1; then inroot userdel -r kryounix >/dev/null 2>&1 || inroot userdel kryounix; fi
 for g in wheel users video audio netdev; do inroot getent group "$g" >/dev/null || inroot groupadd "$g"; done
 if inroot getent passwd "$USERN" >/dev/null 2>&1; then
   say "user $USERN is already in the image: $(grep "^$USERN:" "$T/etc/passwd" | head -n1)"
@@ -492,8 +492,8 @@ if inroot getent passwd "$USERN" >/dev/null 2>&1; then
 else
   inroot useradd -m -G wheel,users,video,audio,netdev -s /bin/bash "$USERN"
 fi
-printf '%s:%s\n' "$USERN" "$CLOUDOS_PASS" | inroot chpasswd
-printf 'root:%s\n' "$CLOUDOS_ROOTPASS" | inroot chpasswd
+printf '%s:%s\n' "$USERN" "$KRYOUNIX_PASS" | inroot chpasswd
+printf 'root:%s\n' "$KRYOUNIX_ROOTPASS" | inroot chpasswd
 say "keyboard, language, time zone"
 install -d "$T/etc/conf.d" "$T/etc/runlevels/boot" "$T/etc/profile.d"
 printf 'keymap="%s"\n' "$KMAP" > "$T/etc/conf.d/keymaps"
@@ -506,8 +506,8 @@ if [ "$LOC" != C.UTF-8 ]; then
   inroot localedef -i "${LOC%%.*}" -f UTF-8 "$LOC" >/dev/null 2>&1 || { echo "warning: locale $LOC is not available, using C.UTF-8"; LOC=C.UTF-8; }
 fi
 printf 'LANG=%s\n' "$LOC" > "$T/etc/locale.conf"
-printf 'export LANG=%s\n' "$LOC" > "$T/etc/profile.d/cloudos-locale.sh"
-chmod 644 "$T/etc/profile.d/cloudos-locale.sh"
+printf 'export LANG=%s\n' "$LOC" > "$T/etc/profile.d/kryounix-locale.sh"
+chmod 644 "$T/etc/profile.d/kryounix-locale.sh"
 ln -sf "/usr/share/zoneinfo/$TZN" "$T/etc/localtime"
 printf '%s\n' "$TZN" > "$T/etc/timezone"
 [ "$(readlink "$T/etc/localtime")" = "/usr/share/zoneinfo/$TZN" ] && [ -f "$T/usr/share/zoneinfo/$TZN" ] || die "time zone $TZN was not set"
@@ -516,28 +516,28 @@ printf 'permit persist :wheel\n' > "$T/etc/doas.conf"
 chmod 600 "$T/etc/doas.conf"
 cat > "$T/etc/motd" <<EOM
 
-CloudOS ${VER}. login: ${USERN}, root rights: doas -s
-firewall is on: cloudos-firewall status
-packages: cloudpkg search name, cloudpkg install name
-https://wh1laye.github.io/cloudos-repo/
+Kryonux ${VER}. login: ${USERN}, root rights: doas -s
+firewall is on: kryounix-firewall status
+packages: kpkg search name, kpkg install name
+https://wh1laye.github.io/Kryonux/
 
 EOM
 inroot passwd -S root | grep -q ' P ' || die "root password was not set"
 inroot passwd -S "$USERN" | grep -q ' P ' || die "password for $USERN was not set"
 grep -q "^$USERN:" "$T/etc/passwd" || die "user $USERN was not created"
-! grep -q '^cloudos:' "$T/etc/passwd" || die "live user was not removed"
+! grep -q '^kryounix:' "$T/etc/passwd" || die "live user was not removed"
 [ -s "$T/boot/limine/limine.conf" ] && [ -s "$T/boot/vmlinuz" ] || die "bootloader was not written"
 
-say "done: cloudos installed (root $ROOTPART, boot $BOOTDEV, $FW, $FS$([ "$LUKS" = 1 ] && echo ', luks2'))"
-say "kernel: $(ls "$T/lib/modules" | grep cloudk | head -n1)"
+say "done: kryounix installed (root $ROOTPART, boot $BOOTDEV, $FW, $FS$([ "$LUKS" = 1 ] && echo ', luks2'))"
+say "kernel: $(ls "$T/lib/modules" | grep kryonk | head -n1)"
 say "keyboard: $KEYMAP${SWITCH:+ (switch: $SWITCH)}, language: $LOC, time zone: $TZN"
 if [ "$MODE" = manual ] && [ "$FW" = uefi ] && [ "$FB" = 0 ]; then
   echo "the previous fallback loader was saved as EFI/BOOT/BOOTX64.EFI.bak on $BOOTDEV, add other systems to the limine menu if needed"
 fi
-if [ "${CLOUDOS_YES:-0}" != 1 ]; then
+if [ "${KRYOUNIX_YES:-0}" != 1 ]; then
   echo "run reboot and remove the install medium"
   if [ "$SB" = 1 ]; then
-    echo "secure boot: save a copy of /etc/cloudos/secureboot, enter uefi setup, clear the secure boot keys (setup mode),"
-    echo "boot cloudos, run doas cloudos-secureboot enroll, then enable secure boot in the firmware"
+    echo "secure boot: save a copy of /etc/kryounix/secureboot, enter uefi setup, clear the secure boot keys (setup mode),"
+    echo "boot kryounix, run doas kryounix-secureboot enroll, then enable secure boot in the firmware"
   fi
 fi

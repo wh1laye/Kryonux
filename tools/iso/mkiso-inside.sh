@@ -1,17 +1,17 @@
 #!/bin/bash
 set -eu
 
-VERSION=${1:-2.4}
+VERSION=${1:-0.0.0}
 KVER=${2:-6.18.10}
-NAME=${3:-cloudos-live-amd64-$VERSION.iso}
+NAME=${3:-kryounix-live-amd64-$VERSION.iso}
 MARCH=${4:-x86-64-v3}
-CLOUDK_VER=${5:-0.6}
+KRYONK_VER=${5:-0.0.0}
 
 ISOSRC=/var/tmp/isosrc
 ISOFILES=/var/tmp/isofiles
 ISOOUT=/var/tmp/isoout
-CK=cloudk-$CLOUDK_VER-$MARCH
-CMDLINE="root=live:CDLABEL=CLOUDOS_LIVE rd.live.image apparmor=1 security=apparmor quiet init=/init"
+CK=kryonk-$KRYONK_VER-$MARCH
+CMDLINE="root=live:CDLABEL=KRYOUNIX_LIVE rd.live.image apparmor=1 security=apparmor quiet init=/init"
 
 say() { printf '==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -63,7 +63,7 @@ modules_install() {
 squashfs_build() {
   mkdir -p /run/live
   mksquashfs / /run/live/filesystem.squashfs -comp zstd -Xcompression-level 19 -noappend -wildcards -e \
-    var/tmp/isosrc var/tmp/isofiles var/tmp/isoout var/cache/cloudpkg var/tmp/cloudpkg-build \
+    var/tmp/isosrc var/tmp/isofiles var/tmp/isoout var/cache/kpkg var/tmp/kpkg-build \
     var/log var/run var/lock run/live tmp
 }
 
@@ -76,7 +76,7 @@ iso_build() {
 timeout: 5
 default_entry: 1
 
-/CloudOS Live
+/Kryonux Live
     protocol: linux
     kernel_path: boot:///vmlinuz
     cmdline: $CMDLINE
@@ -92,7 +92,7 @@ CONF
     -isohybrid-mbr "$ISOFILES/limine/limine-bios.sys" \
     -c boot.cat -b limine-bios-cd.bin -no-emul-boot -boot-load-size 4 -boot-info-table \
     -eltorito-alt-boot -e efi/boot/limine-uefi-cd.bin -no-emul-boot \
-    -isohybrid-gpt-basdat -V CLOUDOS_LIVE "$ISOOUT"
+    -isohybrid-gpt-basdat -V KRYOUNIX_LIVE "$ISOOUT"
 }
 
 kernel_hardening

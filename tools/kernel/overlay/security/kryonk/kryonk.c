@@ -1,23 +1,23 @@
-#define pr_fmt(fmt) "cloudk: " fmt
+#define pr_fmt(fmt) "kryonk: " fmt
 
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
 #include <generated/utsrelease.h>
-#include "cloudk_version.h"
+#include "kryonk_version.h"
 
-static int cloudk_show(struct seq_file *m, void *v)
+static int kryonk_show(struct seq_file *m, void *v)
 {
-	seq_printf(m, "cloudk %s\nrelease %s\n", CLOUDK_VERSION, UTS_RELEASE);
+	seq_printf(m, "kryonk %s\nrelease %s\n", KRYONK_VERSION, UTS_RELEASE);
 	return 0;
 }
 
-static int __init cloudk_init(void)
+static int __init kryonk_init(void)
 {
-	if (!proc_create_single("cloudk", 0444, NULL, cloudk_show))
-		pr_warn("cannot create /proc/cloudk\n");
-	pr_info("fork %s (%s)\n", CLOUDK_VERSION, UTS_RELEASE);
+	if (!proc_create_single("kryonk", 0444, NULL, kryonk_show))
+		pr_warn("cannot create /proc/kryonk\n");
+	pr_info("fork %s (%s)\n", KRYONK_VERSION, UTS_RELEASE);
 	return 0;
 }
-device_initcall(cloudk_init);
+device_initcall(kryonk_init);

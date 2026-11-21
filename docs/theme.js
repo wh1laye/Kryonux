@@ -277,7 +277,7 @@
     x+='<div class="sps" data-t="text"><h4>'+T('чтение')+'</h4><p class="spm">'+T('размер текста')+'</p><div class="sgm"><button type="button" data-rfs="0">'+T('обычный')+'</button><button type="button" data-rfs="1">'+T('крупнее')+'</button><button type="button" data-rfs="2">'+T('ещё крупнее')+'</button></div>';
     x+='<label class="spc"><input type="checkbox" data-rk="hc"><span>'+T('высокий контраст')+'</span></label><label class="spc"><input type="checkbox" data-rk="cmd"><span>'+T('только команды в справочнике')+'</span></label></div>';
     x+='<div class="sps" data-t="glass"><h4>'+T('стекло')+'</h4><label class="spc"><input type="checkbox" data-k="gl"><span>'+T('жидкое стекло')+'</span></label>';
-    x+='<div class="gpv" aria-hidden="true"><i class="gp1"></i><i class="gp2"></i><i class="gp3"></i><div class="gpc"><b></b><span>cloudos</span></div></div>';
+    x+='<div class="gpv" aria-hidden="true"><i class="gp1"></i><i class="gp2"></i><i class="gp3"></i><div class="gpc"><b></b><span>kryounix</span></div></div>';
     x+='<p class="spm">'+T('стиль')+'</p><div class="sgm gst">';
     for(i=0;i<GLN.length;i++)x+='<button type="button" data-gp="'+GLN[i][0]+'">'+T(GLN[i][1])+'</button>';
     x+='</div><div class="gsl">';

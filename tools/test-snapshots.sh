@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
-SRC=$(dirname "$HERE")/cloudpkg
+SRC=$(dirname "$HERE")/kpkg
 T=$(mktemp -d)
 trap 'rm -rf "$T"' EXIT
 fail() { echo "ошибка: $*" >&2; exit 1; }
@@ -41,7 +41,7 @@ sleep 1
 sleep 1
 "$T/cp" snapshot third >/dev/null || fail "snapshot third"
 
-D="$T/top/cloudpkg-snapshots"
+D="$T/top/kpkg-snapshots"
 mkdir -p "$D"
 [ "$(find "$D" -mindepth 1 -maxdepth 1 | wc -l)" = 2 ] || fail "после обрезки должно остаться 2 снимка"
 grep -q "btrfs subvolume snapshot -r / $D/" "$LOG" || fail "нет команды снимка"
@@ -54,8 +54,8 @@ printf '%s\n' "$LIST" | grep -q -- '-third$' || fail "в списке нет п�
 
 "$T/cp" rollback -y >/dev/null || fail "rollback"
 grep -q "btrfs subvolume set-default 257 $T/top" "$LOG" || fail "не сменён корень по умолчанию"
-[ -d "$T/top/cloudpkg-roots" ] || fail "нет каталога корней"
-grep -q "btrfs subvolume snapshot $D/.*-third $T/top/cloudpkg-roots/" "$LOG" || fail "rollback не взял последний снимок"
+[ -d "$T/top/kpkg-roots" ] || fail "нет каталога корней"
+grep -q "btrfs subvolume snapshot $D/.*-third $T/top/kpkg-roots/" "$LOG" || fail "rollback не взял последний снимок"
 
 if "$T/cp" snapshot-rm ../etc 2>/dev/null; then fail "snapshot-rm принял путь"; fi
 if "$T/cp" snapshot "a b" 2>/dev/null; then fail "snapshot принял метку с пробелом"; fi

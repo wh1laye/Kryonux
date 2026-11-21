@@ -1,6 +1,6 @@
 window.REL={
-  repo:"wh1laye/cloudos-repo",
+  repo:"wh1laye/Kryonux",
   groups:[
-    {n:"live iso",d:"live iso CloudOs",match:"CloudOs"}
+    {n:"live iso",d:"live iso Kryonux",match:"kryounix"}
   ]
 };

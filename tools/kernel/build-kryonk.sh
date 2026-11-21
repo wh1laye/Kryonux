@@ -4,20 +4,20 @@ set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(dirname "$(dirname "$HERE")")
 KVER=${KVER:-}
-CLOUDK_VER=${CLOUDK_VER:-0.6}
+KRYONK_VER=${KRYONK_VER:-0.0.0}
 MARCH=${MARCH:-x86-64-v3}
-WORK=${WORK:-/var/tmp/cloudk-build}
+WORK=${WORK:-/var/tmp/kryonk-build}
 OUT=${OUT:-$PWD}
 JOBS=${JOBS:-$(nproc)}
 CACHY_REQUIRED=${CACHY_REQUIRED:-0}
 CACHY_REF=${CACHY_REF:-master}
 CACHY_SRC=${CACHY_SRC:-}
 KERNEL_SRC=${KERNEL_SRC:-}
-MINISIGN_KEY=${MINISIGN_KEY:-$REPO/docs/cloudos.pub}
-PUB=${PUB:-$REPO/docs/cloudos.pub}
+MINISIGN_KEY=${MINISIGN_KEY:-}
+PUB=${PUB:-$REPO/docs/kryounix.pub}
 PIN=${PIN:-$HERE/kernel-pin.txt}
 STRICT=${STRICT:-0}
-CK=cloudk-$CLOUDK_VER-$MARCH
+CK=kryonk-$KRYONK_VER-$MARCH
 
 say() { printf '==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -28,7 +28,7 @@ case $WORK in /|/usr*|/etc*|/home|/root|/var|/boot) die "unsafe work directory: 
 for c in gcc make curl tar xz zstd patch git perl awk sha256sum flex bison bc find; do
   command -v "$c" >/dev/null || die "missing command: $c"
 done
-[ -f "$HERE/cloudk.config" ] || die "no $HERE/cloudk.config"
+[ -f "$HERE/kryonk.config" ] || die "no $HERE/kryonk.config"
 
 mkdir -p "$WORK" "$OUT"
 fetch() { curl -fL --proto =https --retry 5 --retry-delay 10 --connect-timeout 20 -sS -o "$2" "$1"; }
@@ -60,7 +60,7 @@ else
     [ "$SUM" = "$WANT" ] || die "sha256 mismatch for linux-$KVER"
     if [ -f "$PIN.minisig" ] && command -v minisign >/dev/null 2>&1 && [ -f "$PUB" ]; then
       minisign -V -q -p "$PUB" -m "$PIN" -x "$PIN.minisig" || die "kernel pin signature mismatch"
-      say "kernel pin verified with the CloudOS key"
+      say "kernel pin verified with the Kryonux key"
     elif [ "$STRICT" = 1 ]; then
       die "STRICT=1 requires a signed kernel pin"
     else
@@ -88,8 +88,8 @@ fi
 cd "$SRCDIR"
 (
   HERE=$(dirname "$HERE")
-  . "$HERE/kernel/cloudk-source.sh"
-  cloudk_source
+  . "$HERE/kernel/kryonk-source.sh"
+  kryonk_source
 )
 
 if [ -z "$CACHY_SRC" ]; then
@@ -133,15 +133,15 @@ fi
 ours=0
 for p in "$HERE"/patches/*.patch; do
   [ -f "$p" ] || continue
-  patch -p1 --forward --batch -N < "$p" > "$WORK/ours.log" 2>&1 || { tail -20 "$WORK/ours.log" >&2; die "CloudOS patch failed: $(basename "$p")"; }
+  patch -p1 --forward --batch -N < "$p" > "$WORK/ours.log" 2>&1 || { tail -20 "$WORK/ours.log" >&2; die "Kryonux patch failed: $(basename "$p")"; }
   ours=$((ours+1))
 done
-say "CloudOS patches applied: $ours"
+say "Kryonux patches applied: $ours"
 
-say "config: x86_64_defconfig + cloudk.config ($MARCH)"
+say "config: x86_64_defconfig + kryonk.config ($MARCH)"
 make x86_64_defconfig
-FRAG=$WORK/cloudk-frag.config
-cat "$HERE/cloudk.config" > "$FRAG"
+FRAG=$WORK/kryonk-frag.config
+cat "$HERE/kryonk.config" > "$FRAG"
 printf 'CONFIG_MODULES=y\nCONFIG_MODULE_UNLOAD=y\n' >> "$FRAG"
 case $MARCH in
   x86-64-v2) printf 'CONFIG_GENERIC_CPU2=y\n' >> "$FRAG" ;;
@@ -150,7 +150,7 @@ case $MARCH in
 esac
 ./scripts/kconfig/merge_config.sh -m .config "$FRAG"
 make olddefconfig
-scripts/config --set-str CONFIG_LOCALVERSION "-cloudk-$CLOUDK_VER"
+scripts/config --set-str CONFIG_LOCALVERSION "-kryonk-$KRYONK_VER"
 make olddefconfig
 grep -q '^CONFIG_MODULES=y' .config || die "CONFIG_MODULES is not enabled after olddefconfig"
 grep -E '^(CONFIG_LOCALVERSION|CONFIG_MODULES)=' .config || true
@@ -180,9 +180,8 @@ printf '%s\n' "$MODREL" > "$OUT/$CK-krel.txt"
 ( cd "$OUT" && sha256sum "$CK-vmlinuz" "$CK-modules.tar.zst" "$CK-config" "$CK-krel.txt" > "$CK.sha256" )
 
 if [ -n "$MINISIGN_KEY" ]; then
-  command -v minisign >/dev/null 2>&1 || die "minisign is missing, cannot sign"
-  ( cd "$OUT" && minisign -Sm "$CK.sha256" -s "$MINISIGN_KEY" -x "$CK.sha256.minisig" )
-  say "signed with the CloudOS key: $CK.sha256.minisig"
+  MINISIGN_KEY="$MINISIGN_KEY" MINISIGN_PASSWORD="${MINISIGN_PASSWORD:-}" bash "$REPO/tools/sign.sh" "$OUT/$CK.sha256"
+  say "signed with the Kryonux key: $CK.sha256.minisig"
 else
   say "MINISIGN_KEY is not set, artifacts are unsigned"
 fi

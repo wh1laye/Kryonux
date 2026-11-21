@@ -1,4 +1,4 @@
-name: cloudk
+name: kryonk
 
 on:
   workflow_dispatch:
@@ -9,16 +9,16 @@ on:
         default: ""
         type: string
       ver:
-        description: cloudk release version
+        description: kryonk release version
         required: false
-        default: "0.6"
+        default: "0.0.0"
         type: string
 
 permissions:
   contents: write
 
 concurrency:
-  group: cloudk
+  group: kryonk
   cancel-in-progress: false
 
 jobs:
@@ -42,26 +42,43 @@ jobs:
           find tools -name '*.sh' -print0 | xargs -0 -r shellcheck -S error
       - name: signing key
         env:
-          CLOUDK_SIGNING_KEY: ${{ secrets.CLOUDK_SIGNING_KEY }}
+          MINISIGN_KEY: ${{ secrets.MINISIGN_KEY }}
+          KRYONK_SIGNING_KEY: ${{ secrets.KRYONK_SIGNING_KEY }}
         run: |
-          if [ -n "$CLOUDK_SIGNING_KEY" ]; then
-            printf '%s' "$CLOUDK_SIGNING_KEY" | base64 -d > "$RUNNER_TEMP/cloudk.key"
-            chmod 600 "$RUNNER_TEMP/cloudk.key"
-            echo "SIGN_KEY=$RUNNER_TEMP/cloudk.key" >> "$GITHUB_ENV"
+          if [ -n "$MINISIGN_KEY" ]; then
+            printf '%s\n' "$MINISIGN_KEY" > "$RUNNER_TEMP/kryonk.key"
+          elif [ -n "$KRYONK_SIGNING_KEY" ]; then
+            printf '%s' "$KRYONK_SIGNING_KEY" | base64 -d > "$RUNNER_TEMP/kryonk.key"
+          else
+            echo "::error::MINISIGN_KEY или KRYONK_SIGNING_KEY не задан, сборка без подписи запрещена"
+            exit 1
           fi
-      - name: build cloudk
+          chmod 600 "$RUNNER_TEMP/kryonk.key"
+          echo "SIGN_KEY=$RUNNER_TEMP/kryonk.key" >> "$GITHUB_ENV"
+      - name: build kryonk
+        env:
+          MINISIGN_PASSWORD: ${{ secrets.MINISIGN_PASSWORD }}
         run: |
           mkdir -p "$GITHUB_WORKSPACE/out"
           JOBS=$(nproc) MARCH=${{ matrix.march }} \
-          CLOUDK_VER=${{ inputs.ver }} KVER="${{ inputs.kver }}" \
+          KRYONK_VER=${{ inputs.ver }} KVER="${{ inputs.kver }}" \
           OUT="$GITHUB_WORKSPACE/out" CACHY_REQUIRED=0 \
-          MINISIGN_KEY="${SIGN_KEY:-}" bash tools/kernel/build-cloudk.sh
+          MINISIGN_KEY="${SIGN_KEY:-}" MINISIGN_PASSWORD="$MINISIGN_PASSWORD" \
+          bash tools/kernel/build-kryonk.sh
+      - name: проверка суммы и подписи
+        run: |
+          cd out
+          sha256sum -c kryonk-*.sha256
+          for x in kryonk-*.sha256; do
+            [ -s "$x.minisig" ] || { echo "::error::нет подписи $x.minisig"; exit 1; }
+            minisign -V -p "$GITHUB_WORKSPACE/docs/kryounix.pub" -m "$x" -x "$x.minisig"
+          done
       - uses: actions/upload-artifact@v4
         with:
-          name: cloudk-${{ inputs.ver }}-${{ matrix.march }}
+          name: kryonk-${{ inputs.ver }}-${{ matrix.march }}
           path: out/
       - name: release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: cloudk-${{ inputs.ver }}
+          tag_name: kryonk-${{ inputs.ver }}
           files: out/*

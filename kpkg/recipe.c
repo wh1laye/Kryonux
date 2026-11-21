@@ -1,4 +1,4 @@
-#include "cloudpkg.h"
+#include "kpkg.h"
 static const char *const phase_names[] = {
 	"src_prepare", "src_configure", "src_compile", "src_install",
 	"pkg_preinst", "pkg_postinst", "pkg_prerm", "pkg_postrm"
@@ -74,7 +74,7 @@ int recipe_load(const char *path, struct recipe *r)
 	size_t plen = 0;
 	int lineno = 0, ok = 1, i;
 	if (!f) {
-		fprintf(stderr, "cloudpkg: cannot read recipe: %s\n", path);
+		fprintf(stderr, "kpkg: cannot read recipe: %s\n", path);
 		return 0;
 	}
 	while (fgets(line, sizeof line, f)) {
@@ -85,7 +85,7 @@ int recipe_load(const char *path, struct recipe *r)
 				for (i = 0; i < r->nphases; i++)
 					if (!strcmp(r->phases[i].name, pname)) break;
 				if (i < r->nphases) {
-					fprintf(stderr, "cloudpkg: %s:%d: duplicate function %s\n", path, lineno, pname);
+					fprintf(stderr, "kpkg: %s:%d: duplicate function %s\n", path, lineno, pname);
 					ok = 0;
 					break;
 				}
@@ -98,7 +98,7 @@ int recipe_load(const char *path, struct recipe *r)
 				continue;
 			}
 			if (!body_append(&pbody, &plen, line)) {
-				fprintf(stderr, "cloudpkg: %s:%d: function %s is too large\n", path, lineno, pname);
+				fprintf(stderr, "kpkg: %s:%d: function %s is too large\n", path, lineno, pname);
 				ok = 0;
 				break;
 			}
@@ -108,7 +108,7 @@ int recipe_load(const char *path, struct recipe *r)
 			q = strchr(t, '"');
 			if (q) *q = 0;
 			if (!value_append(vbuf, sizeof vbuf, t)) {
-				fprintf(stderr, "cloudpkg: %s:%d: value of %s is too large\n", path, lineno, vkey);
+				fprintf(stderr, "kpkg: %s:%d: value of %s is too large\n", path, lineno, vkey);
 				ok = 0;
 				break;
 			}
@@ -125,12 +125,12 @@ int recipe_load(const char *path, struct recipe *r)
 			*paren = 0;
 			rest = trim(paren + 2);
 			if (!phase_known(t) || strcmp(rest, "{")) {
-				fprintf(stderr, "cloudpkg: %s:%d: unsupported function or missing opening brace: %s\n", path, lineno, t);
+				fprintf(stderr, "kpkg: %s:%d: unsupported function or missing opening brace: %s\n", path, lineno, t);
 				ok = 0;
 				break;
 			}
 			if (r->nphases >= 8) {
-				fprintf(stderr, "cloudpkg: %s:%d: too many functions\n", path, lineno);
+				fprintf(stderr, "kpkg: %s:%d: too many functions\n", path, lineno);
 				ok = 0;
 				break;
 			}
@@ -139,13 +139,13 @@ int recipe_load(const char *path, struct recipe *r)
 		}
 		eq = strchr(t, '=');
 		if (!eq) {
-			fprintf(stderr, "cloudpkg: %s:%d: expected key=value or function, got: %s\n", path, lineno, t);
+			fprintf(stderr, "kpkg: %s:%d: expected key=value or function, got: %s\n", path, lineno, t);
 			ok = 0;
 			break;
 		}
 		*eq = 0;
 		if (!key_valid(trim(t))) {
-			fprintf(stderr, "cloudpkg: %s:%d: invalid key: %s\n", path, lineno, t);
+			fprintf(stderr, "kpkg: %s:%d: invalid key: %s\n", path, lineno, t);
 			ok = 0;
 			break;
 		}
@@ -160,7 +160,7 @@ int recipe_load(const char *path, struct recipe *r)
 				snprintf(vkey, sizeof vkey, "%s", trim(t));
 				vbuf[0] = 0;
 				if (!value_append(vbuf, sizeof vbuf, q)) {
-					fprintf(stderr, "cloudpkg: %s:%d: value of %s is too large\n", path, lineno, vkey);
+					fprintf(stderr, "kpkg: %s:%d: value of %s is too large\n", path, lineno, vkey);
 					ok = 0;
 					break;
 				}
@@ -170,11 +170,11 @@ int recipe_load(const char *path, struct recipe *r)
 		}
 	}
 	if (ok && pname[0]) {
-		fprintf(stderr, "cloudpkg: %s: unterminated function %s, missing closing brace\n", path, pname);
+		fprintf(stderr, "kpkg: %s: unterminated function %s, missing closing brace\n", path, pname);
 		ok = 0;
 	}
 	if (ok && vkey[0]) {
-		fprintf(stderr, "cloudpkg: %s: unterminated quoted value of %s\n", path, vkey);
+		fprintf(stderr, "kpkg: %s: unterminated quoted value of %s\n", path, vkey);
 		ok = 0;
 	}
 	free(pbody);
@@ -231,7 +231,7 @@ void recipe_expand(struct recipe *r)
 }
 int recipe_path(const char *cat, const char *name, const char *ver, char *out, size_t n)
 {
-	snprintf(out, n, "%s/%s/%s/%s-%s/%s-%s.cpr", repo, cat, name, name, ver, name, ver);
+	snprintf(out, n, "%s/%s/%s/%s-%s/%s-%s.kpkg", repo, cat, name, name, ver, name, ver);
 	return exists(out);
 }
 int recipe_best(const char *cat, const char *name, char *ver, size_t n)
@@ -247,7 +247,7 @@ int recipe_best(const char *cat, const char *name, char *ver, size_t n)
 	pl = strlen(prefix);
 	for (i = 0; i < cnt; i++) {
 		if (nl[i]->d_name[0] != '.' && !strncmp(nl[i]->d_name, prefix, pl) && nl[i]->d_name[pl]) {
-			if (snprintf(probe, sizeof probe, "%s/%s/%s-%s.cpr", dir, nl[i]->d_name, name, nl[i]->d_name + pl) >= (int)sizeof probe) {
+			if (snprintf(probe, sizeof probe, "%s/%s/%s-%s.kpkg", dir, nl[i]->d_name, name, nl[i]->d_name + pl) >= (int)sizeof probe) {
 				free(nl[i]);
 				continue;
 			}
@@ -308,7 +308,7 @@ int resolve_name(const char *arg, char *cat, size_t cn, char *name, size_t nn, c
 		*at = 0;
 		snprintf(ver, vn, "%s", at + 1);
 		if (!name_chars_ok(ver)) {
-			fprintf(stderr, "cloudpkg: invalid version in %s\n", arg);
+			fprintf(stderr, "kpkg: invalid version in %s\n", arg);
 			return 0;
 		}
 	} else {
@@ -318,19 +318,19 @@ int resolve_name(const char *arg, char *cat, size_t cn, char *name, size_t nn, c
 	if (slash) {
 		*slash = 0;
 		if (!name_chars_ok(buf) || !name_chars_ok(slash + 1)) {
-			fprintf(stderr, "cloudpkg: invalid package reference: %s\n", arg);
+			fprintf(stderr, "kpkg: invalid package reference: %s\n", arg);
 			return 0;
 		}
 		snprintf(cat, cn, "%s", buf);
 		snprintf(name, nn, "%s", slash + 1);
 		snprintf(buf, sizeof buf, "%s/%s/%s", repo, cat, name);
 		if (!is_dir(buf)) {
-			fprintf(stderr, "cloudpkg: no package %s/%s in the recipe tree\n", cat, name);
+			fprintf(stderr, "kpkg: no package %s/%s in the recipe tree\n", cat, name);
 			return 0;
 		}
 	} else {
 		if (!name_chars_ok(buf)) {
-			fprintf(stderr, "cloudpkg: invalid package name: %s\n", arg);
+			fprintf(stderr, "kpkg: invalid package name: %s\n", arg);
 			return 0;
 		}
 		snprintf(name, nn, "%s", buf);
@@ -341,12 +341,12 @@ int resolve_name(const char *arg, char *cat, size_t cn, char *name, size_t nn, c
 		}
 		list_free(cats, nc);
 		if (!nh) {
-			fprintf(stderr, "cloudpkg: package not found in the recipe tree: %s\n", name);
+			fprintf(stderr, "kpkg: package not found in the recipe tree: %s\n", name);
 			list_free(hits, nh);
 			return 0;
 		}
 		if (nh > 1) {
-			fprintf(stderr, "cloudpkg: ambiguous name %s, use category/name:", name);
+			fprintf(stderr, "kpkg: ambiguous name %s, use category/name:", name);
 			for (i = 0; i < nh; i++) fprintf(stderr, " %s/%s", hits[i], name);
 			fputc('\n', stderr);
 			list_free(hits, nh);
@@ -357,10 +357,10 @@ int resolve_name(const char *arg, char *cat, size_t cn, char *name, size_t nn, c
 	}
 	if (ver[0]) {
 		ok = recipe_path(cat, name, ver, probe, sizeof probe);
-		if (!ok) fprintf(stderr, "cloudpkg: no version %s of %s/%s in the recipe tree\n", ver, cat, name);
+		if (!ok) fprintf(stderr, "kpkg: no version %s of %s/%s in the recipe tree\n", ver, cat, name);
 	} else {
 		ok = recipe_best(cat, name, ver, vn);
-		if (!ok) fprintf(stderr, "cloudpkg: no usable recipe versions for %s/%s\n", cat, name);
+		if (!ok) fprintf(stderr, "kpkg: no usable recipe versions for %s/%s\n", cat, name);
 	}
 	return ok;
 }
@@ -408,7 +408,7 @@ void dep_split(const char *deps, char ***out, int *n)
 	snprintf(buf, sizeof buf, "%s", deps);
 	for (tok = strtok_r(buf, " \t\n", &save); tok; tok = strtok_r(NULL, " \t\n", &save)) {
 		if (*tok == '!') {
-			fprintf(stderr, "cloudpkg: blocker dependencies are not supported, skipped: %s\n", tok);
+			fprintf(stderr, "kpkg: blocker dependencies are not supported, skipped: %s\n", tok);
 			continue;
 		}
 		if (!strcmp(tok, "||") || !strcmp(tok, "(") || !strcmp(tok, ")")) continue;
@@ -440,9 +440,9 @@ int ensure_tree(void)
 		if (n > 0) return 1;
 	}
 	if (geteuid() != 0) {
-		fputs("cloudpkg: recipe tree is missing, run as root: cloudpkg sync\n", stderr);
+		fputs("kpkg: recipe tree is missing, run as root: kpkg sync\n", stderr);
 		return 0;
 	}
-	puts("cloudpkg: recipe tree is missing, downloading it now");
+	puts("kpkg: recipe tree is missing, downloading it now");
 	return cmd_sync() == 0;
 }

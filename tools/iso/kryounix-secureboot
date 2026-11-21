@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-K=${CLOUDOS_SBDIR:-/etc/cloudos/secureboot}
-B=${CLOUDOS_BOOT:-/boot}
-SRC=${CLOUDOS_LIMINE_EFI:-/usr/share/limine/BOOTX64.EFI}
+K=${KRYOUNIX_SBDIR:-/etc/kryounix/secureboot}
+B=${KRYOUNIX_BOOT:-/boot}
+SRC=${KRYOUNIX_LIMINE_EFI:-/usr/share/limine/BOOTX64.EFI}
 CONF=$B/limine/limine.conf
 EFI=$B/EFI/BOOT/BOOTX64.EFI
 VARS=/sys/firmware/efi/efivars
@@ -16,15 +16,15 @@ efibyte() { [ -r "$VARS/$1-$2" ] && od -An -t u1 "$VARS/$1-$2" | awk '{ print $N
 
 usage() {
   cat <<'EOU'
-cloudos-secureboot: цепочка secure boot на своих ключах
+kryounix-secureboot: цепочка secure boot на своих ключах
 
-  init      создать ключи PK, KEK, db в /etc/cloudos/secureboot (только root)
+  init      создать ключи PK, KEK, db в /etc/kryounix/secureboot (только root)
   sign      хеши ядра и initramfs в limine.conf, хеш конфига внутри limine, подпись limine ключом db
   enroll    записать ключи в прошивку (нужен setup mode), иначе подсказка
   status    состояние secure boot, lockdown и подписи
 
-после каждого обновления ядра или initramfs запусти: cloudos-secureboot sign
-ключи из /etc/cloudos/secureboot сохрани в надёжное место, без db.key подписать новое не получится
+после каждого обновления ядра или initramfs запусти: kryounix-secureboot sign
+ключи из /etc/kryounix/secureboot сохрани в надёжное место, без db.key подписать новое не получится
 EOU
 }
 
@@ -37,7 +37,7 @@ init() {
   g=$(cat /proc/sys/kernel/random/uuid)
   printf '%s\n' "$g" > "$K/GUID"
   for n in PK KEK db; do
-    openssl req -new -x509 -newkey rsa:3072 -nodes -sha256 -days 3650 -subj "/CN=cloudos secure boot $n/" -keyout "$K/$n.key" -out "$K/$n.crt" 2>/dev/null
+    openssl req -new -x509 -newkey rsa:3072 -nodes -sha256 -days 3650 -subj "/CN=kryounix secure boot $n/" -keyout "$K/$n.key" -out "$K/$n.crt" 2>/dev/null
     cert-to-efi-sig-list -g "$g" "$K/$n.crt" "$K/$n.esl"
   done
   sign-efi-sig-list -g "$g" -k "$K/PK.key" -c "$K/PK.crt" PK "$K/PK.esl" "$K/PK.auth"
@@ -63,7 +63,7 @@ hashpaths() {
 
 sign() {
   need sbsign sbverify limine b2sum
-  [ -f "$K/db.key" ] || die "нет ключей, сначала: cloudos-secureboot init"
+  [ -f "$K/db.key" ] || die "нет ключей, сначала: kryounix-secureboot init"
   [ -f "$CONF" ] || die "нет $CONF"
   [ -f "$SRC" ] || die "нет $SRC"
   say "хеши ядра и initramfs в limine.conf"
@@ -77,9 +77,9 @@ sign() {
   mv "$EFI.signed" "$EFI"
   rm -f "$EFI.new" "$B/EFI/BOOT/BOOTIA32.EFI"
   sbverify --cert "$K/db.crt" "$EFI" >/dev/null || die "подпись не прошла проверку"
-  install -d -m755 "$B/cloudos-keys"
-  install -m644 "$K/PK.auth" "$K/KEK.auth" "$K/db.auth" "$K/db.cer" "$B/cloudos-keys/"
-  say "готово: BOOTX64.EFI подписан, публичные ключи в $B/cloudos-keys"
+  install -d -m755 "$B/kryounix-keys"
+  install -m644 "$K/PK.auth" "$K/KEK.auth" "$K/db.auth" "$K/db.cer" "$B/kryounix-keys/"
+  say "готово: BOOTX64.EFI подписан, публичные ключи в $B/kryounix-keys"
 }
 
 enroll() {
@@ -87,7 +87,7 @@ enroll() {
   [ -d "$VARS" ] || die "система загружена не в uefi"
   [ "$(efibyte SetupMode $GV)" = 1 ] || {
     echo "прошивка не в setup mode. зайди в настройки uefi, очисти ключи secure boot (clear keys или custom mode)"
-    echo "и выполни эту команду снова. запасной путь: $B/cloudos-keys (db.auth, KEK.auth, PK.auth через меню ключей прошивки)"
+    echo "и выполни эту команду снова. запасной путь: $B/kryounix-keys (db.auth, KEK.auth, PK.auth через меню ключей прошивки)"
     exit 1
   }
   efi-updatevar -f "$K/db.auth" db

@@ -2,16 +2,17 @@
 set -eu
 
 main() {
-	REPO=${CLOUDPKG_REPO:-wh1laye/cloudos-repo}
-	BRANCH=${CLOUDPKG_BRANCH:-main}
-	INSTALL_URL=${CLOUDPKG_INSTALL_URL:-https://raw.githubusercontent.com/$REPO/$BRANCH/cloudpkg/install.sh}
-	S3_VER=1.5
-	S3_NAME=cloudos-stage3-amd64-$S3_VER.tar.xz
-	S3=${CLOUDPKG_STAGE3:-https://github.com/$REPO/releases/download/$S3_VER/$S3_NAME}
-	BOX=${CLOUDPKG_BOX:-/var/lib/cloudpkg/box}
-	MODE=${CLOUDPKG_MODE:-auto}
-	SRC=${CLOUDPKG_SRC:-}
-	STRICT=${CLOUDPKG_STRICT:-1}
+	REPO=${KPKG_REPO:-wh1laye/Kryonux}
+	BRANCH=${KPKG_BRANCH:-main}
+	INSTALL_URL=${KPKG_INSTALL_URL:-https://raw.githubusercontent.com/$REPO/$BRANCH/kpkg/install.sh}
+	S3_TAG=${KPKG_STAGE3_TAG:-base-0.0.0}
+	S3_VER=${KPKG_STAGE3_VER:-0.0.0}
+	S3_NAME=kryounix-stage3-amd64-$S3_VER.tar.xz
+	S3=${KPKG_STAGE3:-https://github.com/$REPO/releases/download/$S3_TAG/$S3_NAME}
+	BOX=${KPKG_BOX:-/var/lib/kpkg/box}
+	MODE=${KPKG_MODE:-auto}
+	SRC=${KPKG_SRC:-}
+	STRICT=${KPKG_STRICT:-1}
 	UPDATE=0
 	TMP=
 	PM=
@@ -21,7 +22,7 @@ main() {
 	case $REPO in "" | *[!A-Za-z0-9._/-]* | *..*) die "плохое имя репозитория: $REPO" "bad repository name: $REPO" ;; esac
 	case $BRANCH in "" | *[!A-Za-z0-9._/-]* | *..*) die "плохое имя ветки: $BRANCH" "bad branch name: $BRANCH" ;; esac
 
-	case $STRICT in 0 | 1) ;; *) die "CLOUDPKG_STRICT: 1 или 0" "CLOUDPKG_STRICT: 1 or 0" ;; esac
+	case $STRICT in 0 | 1) ;; *) die "KPKG_STRICT: 1 или 0" "KPKG_STRICT: 1 or 0" ;; esac
 
 	need_root "$@"
 
@@ -40,7 +41,7 @@ main() {
 
 	case $(uname -m) in
 		x86_64 | amd64) ;;
-		*) die "cloudos работает только на x86_64, у тебя $(uname -m)" "cloudos runs on x86_64 only, this is $(uname -m)" ;;
+		*) die "kryounix работает только на x86_64, у тебя $(uname -m)" "kryounix runs on x86_64 only, this is $(uname -m)" ;;
 	esac
 	[ "$(uname -s)" = Linux ] || die "нужен linux" "linux is required"
 
@@ -53,15 +54,15 @@ main() {
 	done
 
 	if [ "$MODE" = auto ]; then
-		if [ "$OSID" = cloudos ]; then MODE=native; else MODE=box; fi
+		if [ "$OSID" = kryounix ]; then MODE=native; else MODE=box; fi
 	fi
 	case $MODE in
 		box | native) ;;
 		*) die "режим должен быть auto, box или native" "mode must be auto, box or native" ;;
 	esac
-	if [ "$MODE" = native ] && [ "$OSID" != cloudos ] && [ -z "${CLOUDPKG_FORCE:-}" ]; then
-		die "режим native пишет прямо в /, это ломает менеджер пакетов системы ($OSID). используй --box или задай CLOUDPKG_FORCE=1" \
-			"native mode writes straight into /, which breaks the package manager of $OSID. use --box or set CLOUDPKG_FORCE=1"
+	if [ "$MODE" = native ] && [ "$OSID" != kryounix ] && [ -z "${KPKG_FORCE:-}" ]; then
+		die "режим native пишет прямо в /, это ломает менеджер пакетов системы ($OSID). используй --box или задай KPKG_FORCE=1" \
+			"native mode writes straight into /, which breaks the package manager of $OSID. use --box or set KPKG_FORCE=1"
 	fi
 
 	say "система: $OSID, режим: $MODE" "system: $OSID, mode: $MODE"
@@ -69,26 +70,26 @@ main() {
 }
 
 usage() {
-	t "установка cloudpkg одной командой
-  curl -fsSL https://raw.githubusercontent.com/wh1laye/cloudos-repo/main/cloudpkg/install.sh | sh
+	t "установка kpkg одной командой
+  curl -fsSL https://raw.githubusercontent.com/wh1laye/Kryonux/main/kpkg/install.sh | sh
 
-  --box       изолированный режим (по умолчанию на любом дистрибутиве, кроме cloudos)
-  --native    поставить прямо в систему (по умолчанию в cloudos)
+  --box       изолированный режим (по умолчанию на любом дистрибутиве, кроме kryounix)
+  --native    поставить прямо в систему (по умолчанию в kryounix)
   --insecure  не требовать подпись minisign (по умолчанию она обязательна)
-  --update    обновить cloudpkg, бокс и пакеты не трогать
-  -h          эта справка" "install cloudpkg with one command
-  curl -fsSL https://raw.githubusercontent.com/wh1laye/cloudos-repo/main/cloudpkg/install.sh | sh
+  --update    обновить kpkg, бокс и пакеты не трогать
+  -h          эта справка" "install kpkg with one command
+  curl -fsSL https://raw.githubusercontent.com/wh1laye/Kryonux/main/kpkg/install.sh | sh
 
-  --box       isolated mode (default on every distro except cloudos)
-  --native    install straight into the system (default on cloudos)
+  --box       isolated mode (default on every distro except kryounix)
+  --native    install straight into the system (default on kryounix)
   --insecure  do not require the minisign signature (required by default)
-  --update    update cloudpkg, keep the box and packages
+  --update    update kpkg, keep the box and packages
   -h          this help"
 }
 
 t() { if [ "$RU" = 1 ]; then printf '%s\n' "$1"; else printf '%s\n' "$2"; fi; }
 say() { printf '==> '; t "$1" "$2"; }
-die() { printf 'cloudpkg: ' >&2; t "$1" "$2" >&2; exit 1; }
+die() { printf 'kpkg: ' >&2; t "$1" "$2" >&2; exit 1; }
 has() { command -v "$1" >/dev/null 2>&1; }
 
 cleanup() {
@@ -102,9 +103,9 @@ need_root() {
 		has "$s" || continue
 		say "нужен root, перезапускаю через $s" "root is needed, re-running with $s"
 		if [ -f "$0" ]; then
-			exec "$s" env "CLOUDPKG_REPO=$REPO" "CLOUDPKG_BRANCH=$BRANCH" "CLOUDPKG_BOX=$BOX" "CLOUDPKG_MODE=$MODE" "CLOUDPKG_SRC=$SRC" "CLOUDPKG_STAGE3=${CLOUDPKG_STAGE3:-}" "CLOUDPKG_STRICT=$STRICT" "CLOUDPKG_FORCE=${CLOUDPKG_FORCE:-}" "CLOUDPKG_KEEP=${CLOUDPKG_KEEP:-}" "CLOUDPKG_INSTALL_URL=$INSTALL_URL" sh "$0" "$@"
+			exec "$s" env "KPKG_REPO=$REPO" "KPKG_BRANCH=$BRANCH" "KPKG_BOX=$BOX" "KPKG_MODE=$MODE" "KPKG_SRC=$SRC" "KPKG_STAGE3=${KPKG_STAGE3:-}" "KPKG_STRICT=$STRICT" "KPKG_FORCE=${KPKG_FORCE:-}" "KPKG_KEEP=${KPKG_KEEP:-}" "KPKG_INSTALL_URL=$INSTALL_URL" sh "$0" "$@"
 		fi
-		fetch_out "$INSTALL_URL" | "$s" env "CLOUDPKG_REPO=$REPO" "CLOUDPKG_BRANCH=$BRANCH" "CLOUDPKG_BOX=$BOX" "CLOUDPKG_MODE=$MODE" "CLOUDPKG_SRC=$SRC" "CLOUDPKG_STAGE3=${CLOUDPKG_STAGE3:-}" "CLOUDPKG_STRICT=$STRICT" "CLOUDPKG_FORCE=${CLOUDPKG_FORCE:-}" "CLOUDPKG_KEEP=${CLOUDPKG_KEEP:-}" "CLOUDPKG_INSTALL_URL=$INSTALL_URL" sh -s -- "$@"
+		fetch_out "$INSTALL_URL" | "$s" env "KPKG_REPO=$REPO" "KPKG_BRANCH=$BRANCH" "KPKG_BOX=$BOX" "KPKG_MODE=$MODE" "KPKG_SRC=$SRC" "KPKG_STAGE3=${KPKG_STAGE3:-}" "KPKG_STRICT=$STRICT" "KPKG_FORCE=${KPKG_FORCE:-}" "KPKG_KEEP=${KPKG_KEEP:-}" "KPKG_INSTALL_URL=$INSTALL_URL" sh -s -- "$@"
 		exit $?
 	done
 	die "нужен root (sudo или doas). запусти от root: su -c 'curl -fsSL $INSTALL_URL | sh'" \
@@ -181,18 +182,18 @@ try_minisign() {
 
 get_src() {
 	if [ -n "$SRC" ]; then
-		[ -f "$SRC/cloudpkg.c" ] || die "нет $SRC/cloudpkg.c" "no $SRC/cloudpkg.c"
+		[ -f "$SRC/kpkg.c" ] || die "нет $SRC/kpkg.c" "no $SRC/kpkg.c"
 		return 0
 	fi
 	if [ -f "$0" ]; then
 		d=$(cd "$(dirname "$0")" 2>/dev/null && pwd) || d=
-		if [ -n "$d" ] && [ -f "$d/cloudpkg.c" ]; then SRC=$d; return 0; fi
+		if [ -n "$d" ] && [ -f "$d/kpkg.c" ]; then SRC=$d; return 0; fi
 	fi
-	TMP=$(mktemp -d /var/tmp/cloudpkg-install.XXXXXX)
-	say "загрузка исходников cloudpkg" "downloading cloudpkg sources"
-	REL=https://github.com/$REPO/releases/download/cloudpkg-latest
+	TMP=$(mktemp -d /var/tmp/kpkg-install.XXXXXX)
+	say "загрузка исходников kpkg" "downloading kpkg sources"
+	REL=https://github.com/$REPO/releases/download/kpkg-latest
 	try_minisign
-	if dl "$REL/cloudpkg-src.tar.gz" "$TMP/repo.tar.gz" && dl "$REL/cloudpkg-src.tar.gz.minisig" "$TMP/repo.tar.gz.minisig"; then
+	if dl "$REL/kpkg-src.tar.gz" "$TMP/repo.tar.gz" && dl "$REL/kpkg-src.tar.gz.minisig" "$TMP/repo.tar.gz.minisig"; then
 		if has minisign; then
 			minisign -Vq -P "$PUBKEY" -x "$TMP/repo.tar.gz.minisig" -m "$TMP/repo.tar.gz" || die "подпись исходников не подошла, установка отменена" "source signature mismatch, install aborted"
 			say "подпись minisign проверена" "minisign signature verified"
@@ -207,18 +208,18 @@ get_src() {
 		dl "https://codeload.github.com/$REPO/tar.gz/refs/heads/$BRANCH" "$TMP/repo.tar.gz" || die "не удалось скачать исходники" "could not download the sources"
 	fi
 	tar -xzf "$TMP/repo.tar.gz" -C "$TMP" --no-same-owner
-	SRC=$(echo "$TMP"/*/cloudpkg)
-	[ -f "$SRC/cloudpkg.c" ] || die "в архиве нет cloudpkg/cloudpkg.c" "no cloudpkg/cloudpkg.c in the archive"
+	SRC=$(echo "$TMP"/*/kpkg)
+	[ -f "$SRC/kpkg.c" ] || die "в архиве нет kpkg/kpkg.c" "no kpkg/kpkg.c in the archive"
 }
 
 install_native() {
 	for c in python3 curl tar xz gcc make bash; do
-		has "$c" || die "нет команды $c (в stage 3 cloudos она есть, проверь PATH)" "command $c is missing (stage 3 has it, check PATH)"
+		has "$c" || die "нет команды $c (в stage 3 kryounix она есть, проверь PATH)" "command $c is missing (stage 3 has it, check PATH)"
 	done
 	get_src
-	CLOUDPKG_SRC=$SRC bash "$SRC/cloudpkg-setup.sh" </dev/null && rc=0 || rc=$?
+	KPKG_SRC=$SRC bash "$SRC/kpkg-setup.sh" </dev/null && rc=0 || rc=$?
 	[ "$rc" = 0 ] || [ "$rc" = 3 ] || die "установка не удалась (код $rc)" "install failed (code $rc)"
-	say "готово. попробуй: cloudpkg install nano" "done. try: cloudpkg install nano"
+	say "готово. попробуй: kpkg install nano" "done. try: kpkg install nano"
 }
 
 get_stage3() {
@@ -230,10 +231,10 @@ get_stage3() {
 	S3SIG=
 	case $S3 in
 		http://* | https://*)
-			say "загрузка stage 3 cloudos, около 260 МБ" "downloading cloudos stage 3, about 260 MB"
+			say "загрузка stage 3 kryounix, около 260 МБ" "downloading kryounix stage 3, about 260 MB"
 			dl "$S3" "$DL/stage3.part" || { rm -f "$DL/stage3.part"; dl "$S3" "$DL/stage3.part"; } \
-				|| die "не удалось скачать $S3 (повтори или скачай файл сам и задай CLOUDPKG_STAGE3=/путь/к/файлу)" \
-				"could not download $S3 (retry, or download it yourself and set CLOUDPKG_STAGE3=/path/to/file)"
+				|| die "не удалось скачать $S3 (повтори или скачай файл сам и задай KPKG_STAGE3=/путь/к/файлу)" \
+				"could not download $S3 (retry, or download it yourself and set KPKG_STAGE3=/path/to/file)"
 			rm -f "$DL/stage3.sha256" "$DL/stage3.minisig"
 			dl "$S3.sha256" "$DL/stage3.sha256" || die "не удалось скачать $S3.sha256" "could not download $S3.sha256"
 			if dl "$S3.minisig" "$DL/stage3.minisig"; then S3SIG=$DL/stage3.minisig; else rm -f "$DL/stage3.minisig"; fi
@@ -276,14 +277,14 @@ get_stage3() {
 		rm -rf "$BOX.new"
 		die "не удалось распаковать stage 3" "could not unpack stage 3"
 	fi
-	if ! grep -q '^ID=.\?cloudos' "$BOX.new/etc/os-release" 2>/dev/null; then
+	if ! grep -q '^ID=.\?kryounix' "$BOX.new/etc/os-release" 2>/dev/null; then
 		rm -rf "$BOX.new"
-		die "это не stage 3 cloudos" "this is not a cloudos stage 3"
+		die "это не stage 3 kryounix" "this is not a kryounix stage 3"
 	fi
 	rmdir "$BOX" 2>/dev/null || true
 	mv "$BOX.new" "$BOX"
-	echo "cloudpkg box" > "$BOX/.cloudpkg-box"
-	case $S3 in http://* | https://*) [ -n "${CLOUDPKG_KEEP:-}" ] || rm -f "$F" "$DL/stage3.sha256" ;; esac
+	echo "kpkg box" > "$BOX/.kpkg-box"
+	case $S3 in http://* | https://*) [ -n "${KPKG_KEEP:-}" ] || rm -f "$F" "$DL/stage3.sha256" ;; esac
 }
 
 install_box() {
@@ -302,16 +303,16 @@ install_box() {
 		|| die "нет прав на mount и chroot. нужна обычная система с root, не урезанный контейнер" \
 		"no rights for mount and chroot. a normal system with root is needed, not a restricted container"
 
-	if [ -e "$BOX" ] && [ ! -f "$BOX/.cloudpkg-box" ]; then
+	if [ -e "$BOX" ] && [ ! -f "$BOX/.kpkg-box" ]; then
 		if [ -d "$BOX" ] && [ -z "$(ls -A "$BOX" 2>/dev/null)" ]; then
 			:
 		else
-			die "$BOX уже существует и это не бокс cloudpkg, укажи другой путь: CLOUDPKG_BOX=/путь" \
-				"$BOX exists and is not a cloudpkg box, pick another path: CLOUDPKG_BOX=/path"
+			die "$BOX уже существует и это не бокс kpkg, укажи другой путь: KPKG_BOX=/путь" \
+				"$BOX exists and is not a kpkg box, pick another path: KPKG_BOX=/path"
 		fi
 	fi
 
-	if [ ! -f "$BOX/.cloudpkg-box" ]; then
+	if [ ! -f "$BOX/.kpkg-box" ]; then
 		mkdir -p "$(dirname "$BOX")"
 		free_kb=$(df -Pk "$(dirname "$BOX")" | awk 'NR==2{print $4}')
 		if [ "${free_kb:-0}" -lt 4194304 ]; then
@@ -323,47 +324,47 @@ install_box() {
 	fi
 
 	get_src
-	rm -rf "$BOX/var/tmp/cloudpkg-src"
-	mkdir -p "$BOX/var/tmp/cloudpkg-src"
-	cp -R "$SRC/." "$BOX/var/tmp/cloudpkg-src/"
+	rm -rf "$BOX/var/tmp/kpkg-src"
+	mkdir -p "$BOX/var/tmp/kpkg-src"
+	cp -R "$SRC/." "$BOX/var/tmp/kpkg-src/"
 
-	if [ -e /usr/local/bin/cloudpkg ] && ! grep -q '^# cloudpkg-box-launcher' /usr/local/bin/cloudpkg 2>/dev/null; then
-		die "/usr/local/bin/cloudpkg уже есть и это не наш скрипт, убери его и повтори" "/usr/local/bin/cloudpkg exists and is not ours, remove it and retry"
+	if [ -e /usr/local/bin/kpkg ] && ! grep -q '^# kpkg-box-launcher' /usr/local/bin/kpkg 2>/dev/null; then
+		die "/usr/local/bin/kpkg уже есть и это не наш скрипт, убери его и повтори" "/usr/local/bin/kpkg exists and is not ours, remove it and retry"
 	fi
 	mkdir -p /usr/local/bin
-	sed 's|^BOX=${CLOUDPKG_BOX:-/var/lib/cloudpkg/box}$|BOX=${CLOUDPKG_BOX:-'"$BOX"'}|' "$SRC/cloudpkg-box.sh" > /usr/local/bin/cloudpkg.new
-	chmod 755 /usr/local/bin/cloudpkg.new
-	mv /usr/local/bin/cloudpkg.new /usr/local/bin/cloudpkg
+	sed 's|^BOX=${KPKG_BOX:-/var/lib/kpkg/box}$|BOX=${KPKG_BOX:-'"$BOX"'}|' "$SRC/kpkg-box.sh" > /usr/local/bin/kpkg.new
+	chmod 755 /usr/local/bin/kpkg.new
+	mv /usr/local/bin/kpkg.new /usr/local/bin/kpkg
 
-	say "настройка внутри бокса: cloudpkg, дерево рецептов" "setting up inside the box: cloudpkg, recipe tree"
+	say "настройка внутри бокса: kpkg, дерево рецептов" "setting up inside the box: kpkg, recipe tree"
 	extra=
-	if [ "$UPDATE" = 1 ] && [ -d "$BOX/var/db/repos/cloudpkg-recipes/metadata" ]; then extra=--no-sync; fi
-	/usr/local/bin/cloudpkg exec bash /var/tmp/cloudpkg-src/cloudpkg-setup.sh $extra </dev/null && rc=0 || rc=$?
-	rm -rf "$BOX/var/tmp/cloudpkg-src"
+	if [ "$UPDATE" = 1 ] && [ -d "$BOX/var/db/repos/kpkg-recipes/metadata" ]; then extra=--no-sync; fi
+	/usr/local/bin/kpkg exec bash /var/tmp/kpkg-src/kpkg-setup.sh $extra </dev/null && rc=0 || rc=$?
+	rm -rf "$BOX/var/tmp/kpkg-src"
 	[ "$rc" = 0 ] || [ "$rc" = 3 ] || die "настройка внутри бокса не удалась (код $rc)" "setup inside the box failed (code $rc)"
 
 	if [ "$rc" = 3 ]; then
-		say "почти готово: дерево рецептов не загрузилось, выполни позже: cloudpkg sync" "almost done: the recipe tree was not downloaded, run later: cloudpkg sync"
+		say "почти готово: дерево рецептов не загрузилось, выполни позже: kpkg sync" "almost done: the recipe tree was not downloaded, run later: kpkg sync"
 	else
 		say "готово" "done"
 	fi
 	case ":$PATH:" in
 		*:/usr/local/bin:*) ;;
-		*) say "/usr/local/bin нет в PATH, вызывай /usr/local/bin/cloudpkg или добавь каталог в PATH" "/usr/local/bin is not in PATH, call /usr/local/bin/cloudpkg or add the directory to PATH" ;;
+		*) say "/usr/local/bin нет в PATH, вызывай /usr/local/bin/kpkg или добавь каталог в PATH" "/usr/local/bin is not in PATH, call /usr/local/bin/kpkg or add the directory to PATH" ;;
 	esac
 	t "
-cloudpkg стоит в изолированном режиме, твоя система не тронута. бокс: $BOX
-  cloudpkg install nano       собрать и поставить пакет в бокс
-  cloudpkg run nano файл      запустить программу из бокса
-  cloudpkg export nano        сделать команду nano доступной везде
-  cloudpkg shell              оболочка внутри бокса
-  cloudpkg help               все команды" "
-cloudpkg is installed in isolated mode, your system is untouched. box: $BOX
-  cloudpkg install nano       build and install a package into the box
-  cloudpkg run nano file      run a program from the box
-  cloudpkg export nano        make the nano command available everywhere
-  cloudpkg shell              shell inside the box
-  cloudpkg help               all commands"
+kpkg стоит в изолированном режиме, твоя система не тронута. бокс: $BOX
+  kpkg install nano       собрать и поставить пакет в бокс
+  kpkg run nano файл      запустить программу из бокса
+  kpkg export nano        сделать команду nano доступной везде
+  kpkg shell              оболочка внутри бокса
+  kpkg help               все команды" "
+kpkg is installed in isolated mode, your system is untouched. box: $BOX
+  kpkg install nano       build and install a package into the box
+  kpkg run nano file      run a program from the box
+  kpkg export nano        make the nano command available everywhere
+  kpkg shell              shell inside the box
+  kpkg help               all commands"
 }
 
 main "$@"

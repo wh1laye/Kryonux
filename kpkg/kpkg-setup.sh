@@ -1,10 +1,10 @@
 #!/bin/bash
 set -eu
 
-REPO=${CLOUDPKG_REPO:-wh1laye/cloudos-repo}
-BRANCH=${CLOUDPKG_BRANCH:-main}
+REPO=${KPKG_REPO:-wh1laye/Kryonux}
+BRANCH=${KPKG_BRANCH:-main}
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd)" || HERE="$(pwd)"
-SRC="${CLOUDPKG_SRC:-}"
+SRC="${KPKG_SRC:-}"
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
 NOSYNC=""
@@ -23,32 +23,32 @@ die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
 [ "$(id -u)" = 0 ] || die "root is required"
 
-if [ -r /etc/os-release ] && ! grep -q '^ID=.\?cloudos' /etc/os-release && [ -z "${CLOUDPKG_FORCE:-}" ]; then
-  die "this is not CloudOS; on another distribution use install.sh (isolated box mode), it does not touch your system"
+if [ -r /etc/os-release ] && ! grep -q '^ID=.\?kryounix' /etc/os-release && [ -z "${KPKG_FORCE:-}" ]; then
+  die "this is not Kryonux; on another distribution use install.sh (isolated box mode), it does not touch your system"
 fi
 
 for c in bash curl tar gcc make; do
   command -v "$c" >/dev/null || die "missing command: $c"
 done
 
-TMP=$(mktemp -d /var/tmp/cloudpkg-setup.XXXXXX)
+TMP=$(mktemp -d /var/tmp/kpkg-setup.XXXXXX)
 
 if [ -z "$SRC" ]; then
-  if [ -f "$HERE/cloudpkg.c" ]; then
+  if [ -f "$HERE/kpkg.c" ]; then
     SRC="$HERE"
   else
-    say "downloading cloudpkg sources"
+    say "downloading kpkg sources"
     curl -fL --retry 3 --connect-timeout 20 -o "$TMP/repo.tar.gz" "https://codeload.github.com/$REPO/tar.gz/refs/heads/$BRANCH"
     tar xf "$TMP/repo.tar.gz" -C "$TMP"
-    SRC=$(echo "$TMP"/*/cloudpkg)
+    SRC=$(echo "$TMP"/*/kpkg)
   fi
 fi
-[ -f "$SRC/cloudpkg.c" ] || die "no $SRC/cloudpkg.c"
+[ -f "$SRC/kpkg.c" ] || die "no $SRC/kpkg.c"
 say "sources: $SRC"
 
-mkdir -p /var/db/repos /var/db/cloudpkg/installed /var/cache/cloudpkg/distfiles /var/tmp/cloudpkg-build
+mkdir -p /var/db/repos /var/db/kpkg/installed /var/cache/kpkg/distfiles /var/tmp/kpkg-build
 
-say "building cloudpkg"
+say "building kpkg"
 cd "$SRC"
 make clean
 make
@@ -57,15 +57,15 @@ make conf
 
 SYNC_FAIL=""
 if [ -z "$NOSYNC" ]; then
-  say "cloudpkg sync"
-  cloudpkg sync || SYNC_FAIL=1
+  say "kpkg sync"
+  kpkg sync || SYNC_FAIL=1
 fi
 
-cloudpkg doctor || true
+kpkg doctor || true
 if [ -z "$SYNC_FAIL" ]; then
   echo CP_OK
 else
-  echo "cloudpkg is installed, but the recipe tree was not downloaded"
-  echo "check the network and run: cloudpkg sync"
+  echo "kpkg is installed, but the recipe tree was not downloaded"
+  echo "check the network and run: kpkg sync"
   exit 3
 fi

@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: уязвимость
-    url: https://github.com/wh1laye/cloudos-repo/security/advisories/new
+    url: https://github.com/wh1laye/Kryonux/security/advisories/new
     about: не пиши об уязвимостях в публичный issue
   - name: вопросы
-    url: https://wh1laye.github.io/cloudos-repo/forum/
+    url: https://wh1laye.github.io/Kryonux/forum/
     about: вопросы и обсуждение на форуме

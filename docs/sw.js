@@ -1,5 +1,5 @@
-const V = '32'
-const CACHE = 'cloudos-' + V
+const V = '33'
+const CACHE = 'kryounix-' + V
 const SCOPE = self.registration.scope
 const CORE_FILES = ['offline.html', 'typo.js', 'manifest.webmanifest', 'icon.svg', 'apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png']
 const CORE_PAGES = ['./', 'handbook/', 'handbook/en/']
@@ -46,7 +46,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
     const ks = await caches.keys()
-    await Promise.all(ks.filter(k => k.startsWith('cloudos-') && k !== CACHE).map(k => caches.delete(k)))
+    await Promise.all(ks.filter(k => k.startsWith('kryounix-') && k !== CACHE).map(k => caches.delete(k)))
     await self.clients.claim()
   })())
 })

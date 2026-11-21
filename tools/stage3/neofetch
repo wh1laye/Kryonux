@@ -2,14 +2,14 @@
 export LC_ALL=C.UTF-8
 VER=$(sed -n 's/^VERSION_ID="\{0,1\}\([^"]*\)"\{0,1\}$/\1/p' /etc/os-release 2>/dev/null | head -n 1)
 VER=${VER:-1.6}
-SH=${CLOUDOS_SHARE:-/usr/share/cloudos}
+SH=${KRYOUNIX_SHARE:-/usr/share/kryounix}
 LOGO=$SH/logo.txt
 mode=auto
 case ${1:-} in --ff|--fastfetch) shift; exec fastfetch "$@" ;; esac
 for a in "$@"; do
   case $a in
     --plain|--no-logo) mode=plain ;;
-    --version|-v) echo "neofetch $VER (cloudos)"; exit 0 ;;
+    --version|-v) echo "neofetch $VER (kryounix)"; exit 0 ;;
     --help|-h) echo "neofetch [--plain] [--ff] [--version]"; exit 0 ;;
   esac
 done
@@ -38,7 +38,7 @@ user=${USER:-$(id -un)}; host=${HOSTNAME:-$(cat /proc/sys/kernel/hostname)}
 os="$(osr PRETTY_NAME)"; [ -n "$os" ] || os=$(osr NAME)
 arch=$(uname -m); kern=$(uname -r)
 read -r up _ < /proc/uptime; up=${up%.*}
-pk=0; for d in /var/db/cloudpkg/installed/*/*/*; do [ -d "$d" ] && pk=$((pk + 1)); done
+pk=0; for d in /var/db/kpkg/installed/*/*/*; do [ -d "$d" ] && pk=$((pk + 1)); done
 shn=${SHELL##*/}; shv=${BASH_VERSION%%(*}
 term=${TERM_PROGRAM:-${TERM:-tty}}
 cpu=""; cores=0
@@ -64,7 +64,7 @@ ip=""
 if command -v ip >/dev/null; then ip=$(ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p' | head -n 1); fi
 [ -n "$ip" ] || ip=offline
 init=$(readlink /proc/1/exe 2>/dev/null); init=${init##*/}; [ -n "$init" ] || init=unknown
-cpkg=""; command -v cloudpkg >/dev/null && cpkg=$(cloudpkg version 2>/dev/null)
+cpkg=""; command -v kpkg >/dev/null && cpkg=$(kpkg version 2>/dev/null)
 gpu=""
 for d in /sys/class/drm/card[0-9]/device; do
   [ -r "$d/vendor" ] || continue
@@ -80,7 +80,7 @@ add OS "$os $arch"
 add Kernel "$kern"
 add Init "$init"
 add Uptime "$(human "$up")"
-add Packages "${cpkg:-$pk} (cloudpkg)"
+add Packages "${cpkg:-$pk} (kpkg)"
 add Shell "$shn $shv"
 add Terminal "$term"
 add CPU "$cpu ($cores)"

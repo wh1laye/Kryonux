@@ -5,7 +5,7 @@ KREL=${2:-}
 CVER=${3:-}
 HERE=$(cd "$(dirname "$0")" && pwd)
 die() { printf '::error::%s\n' "$*" >&2; exit 1; }
-[ -s "$K" ] || die "использование: $0 vmlinuz [версия ядра] [версия cloudk]"
+[ -s "$K" ] || die "использование: $0 vmlinuz [версия ядра] [версия kryonk]"
 command -v qemu-system-x86_64 >/dev/null || die "нет qemu-system-x86_64"
 BB=$(command -v busybox) || die "нет busybox, поставь busybox-static"
 if ldd "$BB" >/dev/null 2>&1; then die "busybox динамический, нужен busybox-static"; fi

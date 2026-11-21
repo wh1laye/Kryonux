@@ -1,10 +1,10 @@
-name: cloudpkg-release
+name: kpkg-release
 
 on:
   push:
     branches: [main]
     paths:
-      - "cloudpkg/**"
+      - "kpkg/**"
       - "tools/sign.sh"
   workflow_dispatch:
 
@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: cloudpkg-release
+  group: kpkg-release
   cancel-in-progress: false
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p out
           tar --sort=name --owner=0 --group=0 --numeric-owner --mtime=@0 \
-            --transform 's,^,cloudpkg-src/,' -czf out/cloudpkg-src.tar.gz cloudpkg
+            --transform 's,^,kpkg-src/,' -czf out/kpkg-src.tar.gz kpkg
 
       - name: подпись minisign
         env:
@@ -37,13 +37,13 @@ jobs:
         run: |
           if [ -z "$MINISIGN_KEY" ]; then echo "::error::MINISIGN_KEY не задан"; exit 1; fi
           sudo apt-get install -y -qq minisign
-          bash tools/sign.sh out/cloudpkg-src.tar.gz
-          sha256sum out/cloudpkg-src.tar.gz > out/cloudpkg-src.tar.gz.sha256
+          bash tools/sign.sh out/kpkg-src.tar.gz
+          sha256sum out/kpkg-src.tar.gz > out/kpkg-src.tar.gz.sha256
 
-      - name: выпуск cloudpkg-latest
+      - name: выпуск kpkg-latest
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view cloudpkg-latest >/dev/null 2>&1 || gh release create cloudpkg-latest --title "cloudpkg latest" \
-            --notes "подписанные исходники cloudpkg для cloudpkg update и install.sh, обновляется автоматически" --prerelease
-          gh release upload cloudpkg-latest out/cloudpkg-src.tar.gz out/cloudpkg-src.tar.gz.minisig out/cloudpkg-src.tar.gz.sha256 --clobber
+          gh release view kpkg-latest >/dev/null 2>&1 || gh release create kpkg-latest --title "kpkg latest" \
+            --notes "подписанные исходники kpkg для kpkg update и install.sh, обновляется автоматически" --prerelease
+          gh release upload kpkg-latest out/kpkg-src.tar.gz out/kpkg-src.tar.gz.minisig out/kpkg-src.tar.gz.sha256 --clobber

@@ -213,7 +213,7 @@ document.addEventListener('click',async function(e){
     var blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
     var a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
-    a.download='cloudos-forum-export-'+new Date().toISOString().slice(0,10)+'.json';
+    a.download='kryounix-forum-export-'+new Date().toISOString().slice(0,10)+'.json';
     document.body.appendChild(a);
     a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);

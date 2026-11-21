@@ -6,7 +6,7 @@ REPO=$(dirname "$(dirname "$HERE")")
 KVER=${1:-}
 KEY=${MINISIGN_KEY:-}
 PIN=${PIN:-$HERE/kernel-pin.txt}
-WORK=${WORK:-/var/tmp/cloudk-pin}
+WORK=${WORK:-/var/tmp/kryonk-pin}
 
 say() { printf '==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -37,8 +37,8 @@ say "pinned: $KVER $SUM"
 if [ -n "$KEY" ]; then
   command -v minisign >/dev/null 2>&1 || die "minisign is missing"
   minisign -Sm "$PIN" -s "$KEY" -x "$PIN.minisig"
-  say "pin signed with the CloudOS key"
+  say "pin signed with the Kryonux key"
 else
   say "MINISIGN_KEY is not set, the pin is unsigned"
 fi
-say "commit $PIN and $PIN.minisig, public key: $REPO/docs/cloudos.pub"
+say "commit $PIN and $PIN.minisig, public key: $REPO/docs/kryounix.pub"

@@ -1,52 +1,52 @@
 (function(){
 var d=document,W=window;
 var T={
-i:[['p','doas cloudos-install'],['p','reboot'],['p','doas cloudos-audit']],
-p:[['p','doas cloudpkg sync'],['p','doas cloudpkg install nano'],['p','doas cloudpkg search htop'],['p','doas cloudpkg upgrade'],['p','doas cloudpkg rollback']],
-s:[['p','sha256sum -c cloudos-live-amd64-*.iso.sha256'],['p','doas cloudos-firewall status'],['p','doas cloudos-firewall allow ssh'],['p','doas rc-update add sshd default']]
+i:[['p','doas kryounix-install'],['p','reboot'],['p','doas kryounix-audit']],
+p:[['p','doas kpkg sync'],['p','doas kpkg install nano'],['p','doas kpkg search htop'],['p','doas kpkg upgrade'],['p','doas kpkg rollback']],
+s:[['p','sha256sum -c kryounix-live-amd64-*.iso.sha256'],['p','doas kryounix-firewall status'],['p','doas kryounix-firewall allow ssh'],['p','doas rc-update add sshd default']]
 };
 var D={
 "быстрый и усиленный":"fast and hardened",", который ставится одной командой":", that installs with a single command",
-"загружаешься с live iso, запускаешь установщик, через несколько минут в /mnt/cloudos уже готовая система. openrc, ядро без initramfs, фаервол включён с первой загрузки.":"boot the live iso, run the installer, and in a few minutes there is a ready system in /mnt/cloudos. openrc, a kernel without initramfs, firewall on from the first boot.",
+"загружаешься с live iso, запускаешь установщик, через несколько минут в /mnt/kryounix уже готовая система. openrc, ядро kryonk, фаервол включён с первой загрузки.":"boot the live iso, run the installer, and in a few minutes there is a ready system in /mnt/kryounix. openrc, the kryonk kernel, firewall on from the first boot.",
 "скачать live iso":"download live iso","читать справочник":"read the handbook","копировать":"copy","скопировано":"copied",
 "установка":"install","пакеты":"packages","защита":"protection","терминал":"terminal","примеры команд":"command examples",
-"версия live iso":"live iso version","размер iso":"ISO size","пакетов в stage 3":"packages in stage 3","uefi и bios":"UEFI and BIOS","лицензия":"license",
-"без initramfs":"no initramfs",
+"версия проекта":"project version","размер iso":"ISO size","uefi и bios":"UEFI and BIOS","лицензия":"license",
+"initramfs только для luks2":"initramfs only for luks2",
 "из чего состоит":"what it is made of","каждый компонент выбран за простоту и предсказуемость, а не за количество галочек.":"every component is picked for simplicity and predictability, not for a checklist count.",
 "быстрая установка":"fast install","система распаковывается прямо из iso, без скачивания и компиляции. режим auto сам размечает выбранный диск, режим manual трогает только разделы root и boot.":"the system is unpacked straight from the iso, with no download and no compiling. auto mode partitions the chosen disk itself, manual mode touches only the root and boot partitions.",
-"усиленная база":"hardened base","kspp-опции ядра, подпись модулей, nftables с drop, root только через doas.":"kspp kernel options, module signing, nftables with drop, root only through doas.",
-"ядро без initramfs":"kernel without initramfs","драйверы дисков и файловые системы встроены, загрузка короче.":"disk drivers and filesystems are built in, boot is shorter.",
+"усиленная база":"hardened base","kspp-опции ядра, подпись модулей, nftables с drop, обычный пользователь в wheel с doas.":"kspp kernel options, module signing, nftables with drop, a regular user in wheel with doas.",
+"ядро kryonk":"kryonk kernel","драйверы дисков и файловых систем встроены: без шифрования система загружается без initramfs.":"disk and filesystem drivers are built in: without encryption the system boots without an initramfs.",
 "openrc":"openrc","простая система служб без systemd, службы стартуют параллельно.":"a simple service system without systemd, services start in parallel.",
 "limine":"limine","быстрый загрузчик с одним файлом конфига, для uefi и bios.":"a fast bootloader with a single config file, for uefi and bios.",
-"cloudpkg":"cloudpkg","пакеты из исходников, свои рецепты, снимки btrfs перед обновлением.":"packages from source, own recipes, btrfs snapshots before upgrades.",
-"secure boot и tpm2":"secure boot and tpm2","свои ключи secure boot, подписанный uki, разблокировка luks через tpm2 с запасным паролем.":"your own secure boot keys, a signed uki, luks unlock through tpm2 with a fallback password.",
+"kpkg":"kpkg","пакеты из исходников, свои рецепты, снимки btrfs перед обновлением.":"packages from source, own recipes, btrfs snapshots before upgrades.",
+"secure boot и tpm2":"secure boot and tpm2","свои ключи secure boot, подписанный uki, разблокировка luks через tpm2 с запасным паролем. на реальном железе скрипты пока не проверены.":"your own secure boot keys, a signed uki, luks unlock through tpm2 with a fallback password. the scripts have not been tested on real hardware yet.",
 "проверка защиты":"protection audit","одна команда показывает, что включено в системе: фаервол, ssh, sysctl, ядро.":"one command shows what is enabled in the system: firewall, ssh, sysctl, kernel.",
 "установка в три шага":"installation in three steps","одной командой или вручную по справочнику.":"with one command or manually by the handbook.",
-"live iso":"live iso","скачай, проверь сумму, запиши на флешку и загрузись. вход в live: cloudos / cloudos.":"download, check the sum, write it to a usb stick and boot. live login: cloudos / cloudos.",
-"cloudos-install":"cloudos-install","диск, пароли, всё остальное само: форматирование, распаковка, limine, пользователи.":"disk, passwords, the rest is automatic: formatting, unpacking, limine, users.",
+"live iso":"live iso","скачай, проверь сумму, запиши на флешку и загрузись. вход в live: kryounix / kryounix.":"download, check the sum, write it to a usb stick and boot. live login: kryounix / kryounix.",
+"kryounix-install":"kryounix-install","диск, пароли, всё остальное само: форматирование, распаковка, limine, пользователи.":"disk, passwords, the rest is automatic: formatting, unpacking, limine, users.",
 "reboot":"reboot","вход, сеть, пакеты. чистая консоль и обычный пользователь с doas.":"login, network, packages. a clean console and a regular user with doas.",
 "безопасность по умолчанию":"secure by default","защита включена сразу после установки, а не спрятана в главе «потом настроишь».":"protection is on right after install, not hidden in a «configure it later» chapter.",
-"фаервол с первой загрузки":"firewall from the first boot","nftables: входящие закрыты, исходящие открыты. управление через cloudos-firewall.":"nftables: incoming closed, outgoing open. managed through cloudos-firewall.",
-"подписанные релизы":"signed releases","sha256 всех файлов и подпись minisign для stage 3 и iso, публичный ключ лежит на сайте.":"sha256 of all files and a minisign signature for stage 3 and the iso, the public key is on the site.",
+"фаервол с первой загрузки":"firewall from the first boot","nftables: входящие закрыты, исходящие открыты. управление через kryounix-firewall.":"nftables: incoming closed, outgoing open. managed through kryounix-firewall.",
+"подписанные релизы":"signed releases","sha256 всех файлов и подпись minisign для iso, публичный ключ лежит на сайте.":"sha256 of all files and a minisign signature for the iso, the public key is on the site.",
 "attestation в github actions":"attestation in github actions","происхождение сборки подтверждается в самом github, а не только словами.":"build provenance is confirmed by github itself, not just by words.",
 "sshd выключен":"sshd is off","openssh стоит, но не запущен. root по ssh закрыт, включается двумя командами.":"OpenSSH is installed but not running. root over ssh is closed, it is enabled with two commands.",
 "свой пакетный менеджер: пакеты собираются из исходников, на btrfs перед обновлением делается снимок.":"its own package manager: packages are built from source, on btrfs a snapshot is made before an upgrade.",
 "снимки btrfs":"btrfs snapshots","upgrade сначала делает снимок корня, rollback загружается из него.":"upgrade makes a root snapshot first, rollback boots from it.",
-"проверка при установке":"check on install","исходники cloudpkg проверяются подписью minisign, без неё установка отменяется.":"The cloudpkg sources are checked with a minisign signature, without it the install is aborted.",
-"доктор":"doctor","cloudpkg doctor проверяет настройку, cloudpkg fix чинит окружение сборки.":"cloudpkg doctor checks the setup, cloudpkg fix repairs the build environment.",
+"проверка при установке":"check on install","исходники kpkg проверяются подписью minisign, без неё установка отменяется.":"The kpkg sources are checked with a minisign signature, without it the install is aborted.",
+"доктор":"doctor","kpkg doctor проверяет настройку, kpkg fix чинит окружение сборки.":"kpkg doctor checks the setup, kpkg fix repairs the build environment.",
 "что внутри и чего нет":"what is inside and what is missing","честный список, без маркетинга.":"an honest list, without marketing.",
-"что внутри":"what is inside","чего пока нет":"what is missing for now","gcc, glibc, binutils, python":"gcc, glibc, binutils, python","openrc, udev, dhcpcd, iwd":"openrc, udev, dhcpcd, iwd","opendoas вместо sudo":"OpenDoas instead of sudo","curl, git, nano, wget, rsync":"curl, git, nano, wget, rsync","nftables, gnupg, man-db":"nftables, gnupg, man-db","cloudpkg для пакетов":"cloudpkg for packages","выбор рабочего стола и графики":"a choice of desktop and graphics","arm, только x86_64":"ARM, only x86_64","графического установщика":"a graphical installer",
+"что внутри":"what is inside","чего пока нет":"what is missing for now","gcc, glibc, binutils, python":"gcc, glibc, binutils, python","openrc, udev, dhcpcd, iwd":"openrc, udev, dhcpcd, iwd","opendoas вместо sudo":"OpenDoas instead of sudo","curl, git, nano, wget, rsync":"curl, git, nano, wget, rsync","nftables, gnupg, man-db":"nftables, gnupg, man-db","kpkg для пакетов":"kpkg for packages","выбор рабочего стола и графики":"a choice of desktop and graphics","arm, только x86_64":"ARM, only x86_64","графического установщика":"a graphical installer",
 "новое":"news","последние изменения проекта.":"latest project changes.",
 "частые вопросы":"faq",
-"это отдельный дистрибутив или сборка чужого?":"is this a separate distribution or a rebuild of someone else's?","собственная система: база собрана по lfs с glibc, свой установщик, свой загрузочный образ и свои сборочные скрипты. рецепты пакетов в cloudpkg написаны для проекта.":"its own system: the base is built by lfs with glibc, with its own installer, boot image and build scripts. package recipes in cloudpkg are written for the project.",
+"это отдельный дистрибутив или сборка чужого?":"is this a separate distribution or a rebuild of someone else's?","собственная система: база собрана по lfs с glibc, свой установщик, свой загрузочный образ и свои сборочные скрипты. рецепты пакетов в kpkg написаны для проекта.":"its own system: the base is built by lfs with glibc, with its own installer, boot image and build scripts. package recipes in kpkg are written for the project.",
 "на каком железе работает?":"what hardware does it run on?","только x86_64, uefi и старый bios. на странице «железо» собрано, на чём проверено.":"only x86_64, uefi and legacy bios. the «hardware» page lists what it was tested on.",
-"есть ли графика?":"is there graphics?","нет, после установки только консоль. всё остальное ты добавляешь сам через cloudpkg.":"no, only a console after install. everything else you add yourself through cloudpkg.",
-"как проверить, что iso не подменён?":"how do i check that the iso is genuine?","сверь sha256 и, если в релизе есть файл .minisig, подпись minisign ключом с сайта. подробности на странице «проверка файлов».":"compare the sha256 and, if the release has a .minisig file, the minisign signature with the key from the site. details are on the «file verification» page.",
-"безопасно ли в live пароль CloudOs?":"is the CloudOs password in live safe?","пароль CloudOs известен всем и нужен только для live, ssh в live закрыт. в установленной системе такого пароля нет.":"the CloudOs password is public and only for live, ssh is closed in live. the installed system has no such password.",
+"есть ли графика?":"is there graphics?","нет, после установки только консоль. всё остальное ты добавляешь сам через kpkg.":"no, only a console after install. everything else you add yourself through kpkg.",
+"как проверить, что iso не подменён?":"how do i check that the iso is genuine?","сверь sha256 и, если в релизе есть файл .minisig, подпись minisign ключом с сайта. файлы и суммы лежат на странице релизов.":"compare the sha256 and, if the release has a .minisig file, the minisign signature with the key from the site. the files and checksums are on the releases page.",
+"безопасно ли в live пароль Kryonux?":"is the Kryonux password in live safe?","пароль Kryonux известен всем и нужен только для live, ssh в live закрыт. в установленной системе такого пароля нет.":"the Kryonux password is public and only for live, ssh is closed in live. the installed system has no such password.",
 "дальше":"next","справочник":"handbook","релизы":"releases","форум":"forum","железо":"hardware",
-"установка, первые шаги и ошибки":"install, first steps and errors","live iso и контрольные суммы":"live iso and checksums","что в системе и что ставится через cloudpkg":"what is in the system and what installs through cloudpkg","вопросы и обсуждение":"questions and discussion","что в работе и что в планах":"what is in progress and what is planned","на чём проверено, добавь своё":"what it was tested on, add yours",
-"проверка файлов":"file verification","sha-256 и подпись прямо в браузере":"SHA-256 and signature right in the browser","статус сборок":"build status","состояние github actions":"GitHub Actions state","определение железа":"hardware detection","подскажет, что включить в ядре":"hints what to enable in the kernel","сравнение":"comparison","чем CloudOs отличается от других":"how CloudOs differs from others","песочница":"sandbox","попробуй команды в браузере":"try commands in the browser","карта размеров":"size map","из чего состоит stage 3":"what stage 3 consists of",
-"поставь CloudOs сегодня":"install CloudOs today","скачай live iso, проверь сумму и запусти установщик. хватит флешки и десяти минут.":"download the live iso, check the sum and run the installer. a usb stick and ten minutes are enough.",
+"установка, первые шаги и ошибки":"install, first steps and errors","live iso и контрольные суммы":"live iso and checksums","вопросы и обсуждение":"questions and discussion","что в работе и что в планах":"what is in progress and what is planned","на чём проверено, добавь своё":"what it was tested on, add yours",
+"статус сборок":"build status","состояние github actions":"GitHub Actions state","сравнение":"comparison","чем Kryonux отличается от других":"how Kryonux differs from others","песочница":"sandbox","попробуй команды в браузере":"try commands in the browser",
+"поставь Kryonux сегодня":"install Kryonux today","скачай live iso, проверь сумму и запусти установщик. хватит флешки и десяти минут.":"download the live iso, check the sum and run the installer. a usb stick and ten minutes are enough.",
 "нет новостей":"no news"
 };
 if(W.I18N&&W.I18N.add)W.I18N.add(D);
@@ -118,23 +118,19 @@ if('IntersectionObserver' in W){
 function mb(n){return (n/1048576).toFixed(0)+(lang()==='en'?' mb':' мб')}
 var a=$('#dl'),inf=$('#dlinfo');
 if(W.fetch){
-  fetch('https://api.github.com/repos/wh1laye/cloudos-repo/releases?per_page=10').then(function(r){return r.ok?r.json():[]}).then(function(rs){
+  fetch('https://api.github.com/repos/wh1laye/Kryonux/releases?per_page=10').then(function(r){return r.ok?r.json():[]}).then(function(rs){
     for(var k=0;k<rs.length;k++){
       var r=rs[k];
       if(r.draft)continue;
-      var f=(r.assets||[]).filter(function(x){return /\.iso$/.test(x.name)})[0];
+      var f=(r.assets||[]).filter(function(x){return /^kryounix-live-.*\.iso$/.test(x.name)})[0];
       if(!f)continue;
       var m=f.name.match(/(\d+(?:\.\d+)+)\.iso$/);
       if(a)a.href=f.browser_download_url;
       if(inf)inf.textContent=f.name.replace(/\.iso$/,'')+', '+mb(f.size);
-      if(m){$('#kv').textContent='live iso '+m[1];$('#sv').textContent=m[1]}
+      if(m){$('#kv').textContent='v'+m[1];$('#sv').textContent=m[1]}
       $('#ss').textContent=mb(f.size);
       return;
     }
-  }).catch(function(){});
-  fetch('packages/packages.json').then(function(r){return r.ok?r.json():[]}).then(function(p){
-    var n=p.filter(function(x){return x.s==='stage3'}).length;
-    if(n)$('#sp').textContent=String(n);
   }).catch(function(){});
   var nl=$('#nl');
   fetch('news/news.json').then(function(r){return r.ok?r.json():[]}).then(function(ns){

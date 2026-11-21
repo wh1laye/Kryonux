@@ -24,7 +24,7 @@ var CSS='.cst{position:fixed;inset:0;z-index:10000;background:rgba(2,6,3,.95);co
 +'.csc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.5}';
 var st=d.createElement('style');st.textContent=CSS;d.head.appendChild(st);
 var CMD={};
-var RUM={"reduced motion is on, rain skipped": "включено уменьшение движения, дождь пропущен", "theme engine not loaded": "движок тем не загружен", "nice try. this incident will be reported to nobody, it is a static site.": "хорошая попытка. об инциденте никому не сообщат, это статический сайт.", "rm: read-only file system": "rm: файловая система только для чтения", "removing /usr ...": "удаляю /usr ...", "removing /etc ...": "удаляю /etc ...", "removing /home ...": "удаляю /home ...", "removing /boot ...": "удаляю /boot ...", "just kidding. nothing was harmed.": "шучу. ничего не пострадало.", "just kidding. this is a static site, nothing was harmed.": "шучу. это статический сайт, ничего не пострадало.", "scanning ports ...": "сканирую порты ...", "port 22 open": "порт 22 открыт", "port 443 open": "порт 443 открыт", "bypassing firewall [##########]": "обхожу фаервол [##########]", "injecting payload ...": "внедряю нагрузку ...", "access granted": "доступ получен", "syncing CloudOs recipe tree ...": "синхронизирую дерево рецептов CloudOs ...", "sandbox: nothing was changed": "песочница: ничего не изменено", "calculating dependencies ...": "считаю зависимости ...", "nothing to upgrade, you run a browser tab": "обновлять нечего, у тебя вкладка браузера", "cloudpkg: nothing to clean": "cloudpkg: чистить нечего", "cloudpkg: could not load packages.json": "cloudpkg: не удалось загрузить packages.json", "cloudpkg: give a search string": "cloudpkg: укажи строку поиска", "cloudpkg: give a package": "cloudpkg: укажи пакет", "what manual page do you want?": "какую страницу руководства показать?", "ping: usage error: destination required": "ping: нужно указать адрес", "PING localhost (127.0.0.1) 56(84) bytes of data.": "PING localhost (127.0.0.1) 56(84) байт данных.", "3 packets transmitted, 3 received, 0% packet loss": "передано 3 пакета, получено 3, потерь 0%", "cloudsh 2.0. type help.": "cloudsh 2.0. введи help.", "hidden themes unlocked: matrix, amber. see settings.": "скрытые темы открыты: matrix, amber. смотри настройки.", "cloudsh 2.0, esc to close": "cloudsh 2.0, esc закрывает", "exit": "выход", "command": "команда", "CloudOs shell": "оболочка CloudOs", "there are 10 kinds of people: those who read man pages and those who guess.": "есть 10 типов людей: те, кто читает man, и те, кто угадывает.", "a clean build is a build you have not touched yet.": "чистая сборка — это сборка, которую ты ещё не трогал.", "rm -rf is forever, backups are for people who read this message in time.": "rm -rf навсегда, а бэкапы для тех, кто прочитал это вовремя.", "it works on my machine. ship the machine.": "у меня работает. отправляй мою машину.", "segfault is just the kernel saying no politely.": "segfault — это ядро вежливо говорит «нет».", "real admins sleep with root shells open.": "настоящие админы спят с открытым root-шеллом.", "if it compiles, ship it. if it boots, frame it.": "собралось — выпускай. загрузилось — в рамку.", "cloudpkg search|info|list|install -p works on the real package list. try: cloudpkg search nano": "cloudpkg search|info|list|install -p работает с настоящим списком пакетов. попробуй: cloudpkg search nano"},RUX=[[/^cd: (.*): no such directory$/,"cd: $1: нет такого каталога"],[/^opening (.*) \.\.\.$/,"открываю $1 ..."],[/^cat: (.*): no such file$/,"cat: $1: нет такого файла"],[/^current: (.*)$/,"сейчас: $1"],[/^available: (.*)$/,"доступно: $1"],[/^theme: (.*): unknown theme$/,"theme: $1: неизвестная тема"],[/^nothing found for (.*)$/,"по запросу «$1» ничего не найдено"],[/^cloudpkg: unknown command (.*)$/,"cloudpkg: неизвестная команда $1"],[/^cloudpkg: (.*): no such package in the sandbox list$/,"cloudpkg: $1: такого пакета нет в списке песочницы"],[/^ping: (.*): sandbox has no network$/,"ping: $1: в песочнице нет сети"],[/^no manual entry for (.*) here, see (.*)$/,"здесь нет страницы руководства для $1, смотри $2"],[/^cloudsh: (.*): command not found$/,"cloudsh: $1: команда не найдена"],[/^cd <section> opens a real page: (.*)$/,"cd <раздел> открывает настоящую страницу: $1"],[/^up (\d+) s, 1 user, load average: (.*)$/,"работает $1 с, 1 пользователь, нагрузка: $2"]];
+var RUM={"reduced motion is on, rain skipped": "включено уменьшение движения, дождь пропущен", "theme engine not loaded": "движок тем не загружен", "nice try. this incident will be reported to nobody, it is a static site.": "хорошая попытка. об инциденте никому не сообщат, это статический сайт.", "rm: read-only file system": "rm: файловая система только для чтения", "removing /usr ...": "удаляю /usr ...", "removing /etc ...": "удаляю /etc ...", "removing /home ...": "удаляю /home ...", "removing /boot ...": "удаляю /boot ...", "just kidding. nothing was harmed.": "шучу. ничего не пострадало.", "just kidding. this is a static site, nothing was harmed.": "шучу. это статический сайт, ничего не пострадало.", "scanning ports ...": "сканирую порты ...", "port 22 open": "порт 22 открыт", "port 443 open": "порт 443 открыт", "bypassing firewall [##########]": "обхожу фаервол [##########]", "injecting payload ...": "внедряю нагрузку ...", "access granted": "доступ получен", "syncing Kryonux recipe tree ...": "синхронизирую дерево рецептов Kryonux ...", "sandbox: nothing was changed": "песочница: ничего не изменено", "calculating dependencies ...": "считаю зависимости ...", "nothing to upgrade, you run a browser tab": "обновлять нечего, у тебя вкладка браузера", "kpkg: nothing to clean": "kpkg: чистить нечего", "kpkg: demo list is unavailable": "kpkg: демонстрационный список недоступен", "kpkg: give a search string": "kpkg: укажи строку поиска", "kpkg: give a package": "kpkg: укажи пакет", "what manual page do you want?": "какую страницу руководства показать?", "ping: usage error: destination required": "ping: нужно указать адрес", "PING localhost (127.0.0.1) 56(84) bytes of data.": "PING localhost (127.0.0.1) 56(84) байт данных.", "3 packets transmitted, 3 received, 0% packet loss": "передано 3 пакета, получено 3, потерь 0%", "krysh 2.0. type help.": "krysh 2.0. введи help.", "hidden themes unlocked: matrix, amber. see settings.": "скрытые темы открыты: matrix, amber. смотри настройки.", "krysh 2.0, esc to close": "krysh 2.0, esc закрывает", "exit": "выход", "command": "команда", "Kryonux shell": "оболочка Kryonux", "there are 10 kinds of people: those who read man pages and those who guess.": "есть 10 типов людей: те, кто читает man, и те, кто угадывает.", "a clean build is a build you have not touched yet.": "чистая сборка — это сборка, которую ты ещё не трогал.", "rm -rf is forever, backups are for people who read this message in time.": "rm -rf навсегда, а бэкапы для тех, кто прочитал это вовремя.", "it works on my machine. ship the machine.": "у меня работает. отправляй мою машину.", "segfault is just the kernel saying no politely.": "segfault — это ядро вежливо говорит «нет».", "real admins sleep with root shells open.": "настоящие админы спят с открытым root-шеллом.", "if it compiles, ship it. if it boots, frame it.": "собралось — выпускай. загрузилось — в рамку.", "kpkg search|info|list|install -p works on the built-in demo list. try: kpkg search nano": "kpkg search|info|list|install -p работает с встроенным демонстрационным списком. попробуй: kpkg search nano"},RUX=[[/^cd: (.*): no such directory$/,"cd: $1: нет такого каталога"],[/^opening (.*) \.\.\.$/,"открываю $1 ..."],[/^cat: (.*): no such file$/,"cat: $1: нет такого файла"],[/^current: (.*)$/,"сейчас: $1"],[/^available: (.*)$/,"доступно: $1"],[/^theme: (.*): unknown theme$/,"theme: $1: неизвестная тема"],[/^nothing found for (.*)$/,"по запросу «$1» ничего не найдено"],[/^kpkg: unknown command (.*)$/,"kpkg: неизвестная команда $1"],[/^kpkg: (.*): no such package in the sandbox list$/,"kpkg: $1: такого пакета нет в списке песочницы"],[/^ping: (.*): sandbox has no network$/,"ping: $1: в песочнице нет сети"],[/^no manual entry for (.*) here, see (.*)$/,"здесь нет страницы руководства для $1, смотри $2"],[/^krysh: (.*): command not found$/,"krysh: $1: команда не найдена"],[/^cd <section> opens a real page: (.*)$/,"cd <раздел> открывает настоящую страницу: $1"],[/^up (\d+) s, 1 user, load average: (.*)$/,"работает $1 с, 1 пользователь, нагрузка: $2"]];
 function isEn(){return !!(window.CloudTheme&&window.CloudTheme.getLang&&window.CloudTheme.getLang()==='en')}
 function tr(s){if(isEn())return s;if(RUM.hasOwnProperty(s))return RUM[s];for(var i=0;i<RUX.length;i++)if(RUX[i][0].test(s))return s.replace(RUX[i][0],RUX[i][1]);return s}
 function P(s,c){var e=d.createElement('div');e.textContent=tr(s);if(c)e.style.color=c;out.appendChild(e);out.scrollTop=out.scrollHeight}
@@ -47,11 +47,11 @@ function rain(){
     later(f,55);
   })();
 }
-CMD.help=function(){W(['help clear exit whoami uname uptime date echo ls cd cat theme matrix neofetch fortune cowsay hack history sudo rm','cloudpkg pwd id hostname which man free df lsblk ps dmesg ping sl cloudos-audit','cloudpkg search|info|list|install -p works on the real package list. try: cloudpkg search nano','cd <section> opens a real page: '+SEC.join(' ')])};
+CMD.help=function(){W(['help clear exit whoami uname uptime date echo ls cd cat theme matrix neofetch fortune cowsay hack history sudo rm','kpkg pwd id hostname which man free df lsblk ps dmesg ping sl kryounix-audit','kpkg search|info|list|install -p works on the real package list. try: kpkg search nano','cd <section> opens a real page: '+SEC.join(' ')])};
 CMD.clear=function(){out.textContent=''};
 CMD.exit=CMD.quit=function(){close()};
 CMD.whoami=function(){P('root')};
-CMD.uname=function(){P('CloudOs 2.1 x86_64 gnu/linux (browser edition)')};
+CMD.uname=function(){P('Kryonux 0.0.0 x86_64 gnu/linux (browser edition)')};
 CMD.uptime=function(){P('up '+Math.round((Date.now()-t0)/1000)+' s, 1 user, load average: 0.00, 0.00, 0.00')};
 CMD.date=function(){P(new Date().toString())};
 CMD.echo=function(a){P(a.join(' '))};
@@ -63,8 +63,8 @@ CMD.cd=function(a){
   P('opening '+s+' ...');later(function(){location.href=ROOT+s+'/'},400);
 };
 CMD.cat=function(a){
-  if(a[0]==='motd')W(['welcome to CloudOs.','you found the hidden shell. hidden themes are now unlocked: matrix, amber.','type theme to switch.']);
-  else if(a[0]==='os-release')W(['NAME="CloudOs"','ID=CloudOs','HOME_URL="https://wh1laye.github.io/cloudos-repo/"']);
+  if(a[0]==='motd')W(['welcome to Kryonux.','you found the hidden shell. hidden themes are now unlocked: matrix, amber.','type theme to switch.']);
+  else if(a[0]==='os-release')W(['NAME="Kryonux"','ID=kryounix','HOME_URL="/"']);
   else P('cat: '+(a[0]||'')+': no such file');
 };
 CMD.theme=function(a){
@@ -79,7 +79,7 @@ CMD.theme=function(a){
 CMD.matrix=function(){rain()};
 CMD.neofetch=function(){
   var T=th(),n=navigator,m=n.deviceMemory?n.deviceMemory+' gb+':'n/a';
-  W(['      .--.       root@CloudOs','   .-(    ).      -------------','  (___.__)__)      os: CloudOs 2.3','                   host: '+location.hostname,'                   shell: cloudsh','                   res: '+innerWidth+'x'+innerHeight,'                   theme: '+(T?T.get():'n/a'),'                   cpu: '+(n.hardwareConcurrency||'?')+' threads','                   mem: '+m,'                   lang: '+(n.language||'?')],'#00ff66');
+  W(['      .--.       root@Kryonux','   .-(    ).      -------------','  (___.__)__)      os: Kryonux 0.0.0','                   host: '+location.hostname,'                   shell: krysh','                   res: '+innerWidth+'x'+innerHeight,'                   theme: '+(T?T.get():'n/a'),'                   cpu: '+(n.hardwareConcurrency||'?')+' threads','                   mem: '+m,'                   lang: '+(n.language||'?')],'#00ff66');
 };
 CMD.fortune=function(){P(FORT[Math.floor(Math.random()*FORT.length)])};
 CMD.cowsay=function(a){
@@ -96,27 +96,32 @@ CMD.rm=function(a){
   var L=['removing /usr ...','removing /etc ...','removing /home ...','removing /boot ...','just kidding. nothing was harmed.'],i;
   for(i=0;i<L.length;i++)(function(k){later(function(){P(L[k],k===4?'#00ff66':'#ff5a5a')},k*400)})(i);
 };
-var PK=null,PKP=null,gameOff=null;
-function pkgs(cb){
-  if(PK){cb(PK);return}
-  if(!PKP)PKP=fetch(ROOT+'packages/packages.json').then(function(r){if(!r.ok)throw 0;return r.json()}).catch(function(){return null});
-  PKP.then(function(j){if(j)PK=j;cb(j)});
-}
+var PK=[
+  {n:'nano',v:'8.2',c:'editors',s:'source',d:{ru:'простой текстовый редактор',en:'simple text editor'}},
+  {n:'htop',v:'3.3.0',c:'sys-process',s:'source',d:{ru:'интерактивный просмотр процессов',en:'interactive process viewer'}},
+  {n:'curl',v:'8.11.1',c:'net-misc',s:'stage3',d:{ru:'передача данных по сети',en:'data transfer over the network'}},
+  {n:'git',v:'2.47.1',c:'dev-vcs',s:'stage3',d:{ru:'распределённая система контроля версий',en:'distributed version control'}},
+  {n:'nftables',v:'1.1.1',c:'net-firewall',s:'stage3',d:{ru:'фаервол и фильтрация пакетов',en:'firewall and packet filtering'}},
+  {n:'openssh',v:'9.9p1',c:'net-misc',s:'stage3',d:{ru:'ssh-клиент и сервер',en:'ssh client and server'}},
+  {n:'rsync',v:'3.4.1',c:'net-misc',s:'source',d:{ru:'синхронизация файлов',en:'file synchronization'}},
+  {n:'doas',v:'6.8.1',c:'sys-auth',s:'stage3',d:{ru:'замена sudo',en:'sudo replacement'}}
+],gameOff=null;
+function pkgs(cb){cb(PK)}
 function pd(p){return p.d&&(p.d.en||p.d.ru)||''}
 function pkrow(p){return p.n+(p.v?' '+p.v:'')+'  -  '+pd(p)+(p.s==='stage3'?'  [in system]':'  [source]')}
-var CPH=['cloudpkg 1.0 (own recipes), browser sandbox','usage: cloudpkg command [args]','','  search string     find a package','  info package      show what would be installed','  list              installed packages','  install [-p] pkg  simulated install','  remove pkg        simulated remove','  sync upgrade clean doctor  simulated','  version','','data comes from packages/packages.json. nothing is installed, this is a static site.'];
-CMD.cloudpkg=function(a){
+var CPH=['kpkg 2.2.0 (own recipes), browser sandbox','usage: kpkg command [args]','','  search string     find a package','  info package      show what would be installed','  list              installed packages','  install [-p] pkg  simulated install','  remove pkg        simulated remove','  sync upgrade clean doctor  simulated','  version','','data comes from the built-in demo list. nothing is installed, this is a static site.'];
+CMD.kpkg=function(a){
   var c=a[0],args=a.slice(1).filter(function(x){return x.charAt(0)!=='-'}),dry=a.indexOf('-p')>0||a.indexOf('--pretend')>0;
   if(!c||c==='help'){W(CPH);return}
-  if(c==='version'){P('cloudpkg 1.0');return}
-  if(c==='sync'){P('syncing CloudOs recipe tree ...');later(function(){P('sandbox: nothing was changed','#00ff66')},700);return}
+  if(c==='version'){P('kpkg 2.2.0');return}
+  if(c==='sync'){P('syncing Kryonux recipe tree ...');later(function(){P('sandbox: nothing was changed','#00ff66')},700);return}
   if(c==='upgrade'){P('calculating dependencies ...');later(function(){P('nothing to upgrade, you run a browser tab','#00ff66')},700);return}
-  if(c==='clean'){P('cloudpkg: nothing to clean');return}
-  if(c==='doctor'){W(['recipes: ok','overlay CloudOs: ok','signing key /etc/cloudpkg/cloudos.pub: ok','all fine (sandbox)'],'#00ff66');return}
-  if(['search','info','install','remove','list'].indexOf(c)<0){P('cloudpkg: unknown command '+c);return}
-  if((c==='search'||c==='info'||c==='install'||c==='remove')&&!args.length){P('cloudpkg: '+(c==='search'?'give a search string':'give a package'));return}
+  if(c==='clean'){P('kpkg: nothing to clean');return}
+  if(c==='doctor'){W(['recipes: ok','overlay Kryonux: ok','signing key /etc/kpkg/kryounix.pub: ok','all fine (sandbox)'],'#00ff66');return}
+  if(['search','info','install','remove','list'].indexOf(c)<0){P('kpkg: unknown command '+c);return}
+  if((c==='search'||c==='info'||c==='install'||c==='remove')&&!args.length){P('kpkg: '+(c==='search'?'give a search string':'give a package'));return}
   pkgs(function(j){
-    if(!j){P('cloudpkg: could not load packages.json');return}
+    if(!j){P('kpkg: demo list is unavailable');return}
     var q=(args[0]||'').toLowerCase(),r,i;
     if(c==='list'){
       r=j.filter(function(p){return p.s==='stage3'});
@@ -130,13 +135,13 @@ CMD.cloudpkg=function(a){
       P(r.length+' found');return;
     }
     r=j.filter(function(p){return p.n.toLowerCase()===q})[0];
-    if(!r){P('cloudpkg: '+args[0]+': no such package in the sandbox list');return}
+    if(!r){P('kpkg: '+args[0]+': no such package in the sandbox list');return}
     if(c==='info'){
-      W(['name:     '+r.n,'version:  '+(r.v||'-'),'category: '+r.c,'about:    '+pd(r),'state:    '+(r.s==='stage3'?'already in the system':'built from source via cloudpkg')]);
+      W(['name:     '+r.n,'version:  '+(r.v||'-'),'category: '+r.c,'about:    '+pd(r),'state:    '+(r.s==='stage3'?'already in the system':'built from source via kpkg')]);
       return;
     }
     if(c==='remove'){
-      P(r.s==='stage3'?'cloudpkg: '+r.n+' belongs to the base system, removal refused':(dry?'would remove ':'removing ')+r.n);
+      P(r.s==='stage3'?'kpkg: '+r.n+' belongs to the base system, removal refused':(dry?'would remove ':'removing ')+r.n);
       if(r.s!=='stage3')later(function(){P('sandbox: nothing was changed','#00ff66')},500);
       return;
     }
@@ -149,7 +154,7 @@ CMD.cloudpkg=function(a){
 };
 CMD.pwd=function(){P('/root')};
 CMD.id=function(){P('uid=0(root) gid=0(root) groups=0(root),10(wheel)')};
-CMD.hostname=function(){P('CloudOs')};
+CMD.hostname=function(){P('Kryonux')};
 CMD.which=function(a){P(a[0]&&CMD[a[0]]?'/usr/bin/'+a[0]:(a[0]||'which')+': not found')};
 CMD.man=function(a){P(a[0]?'no manual entry for '+a[0]+' here, see '+ROOT+'handbook/':'what manual page do you want?')};
 CMD.free=function(){
@@ -158,8 +163,8 @@ CMD.free=function(){
 };
 CMD.df=function(){W(['filesystem      size  used avail use% mounted on','/dev/sda2       120G   14G  100G  13% /','/dev/sda1       512M   86M  426M  17% /boot','tmpfs           2.0G     0  2.0G   0% /tmp'])};
 CMD.lsblk=function(){W(['NAME   SIZE TYPE MOUNTPOINT','sda    128G disk','|-sda1  512M part /boot','`-sda2  127G part /'])};
-CMD.ps=function(){W(['  pid tty      time cmd','    1 ?    00:00:00 openrc-init','  142 ?    00:00:00 syslog-ng','  188 ?    00:00:00 dhcpcd','  203 ?    00:00:00 nft-watch','  311 tty1 00:00:00 cloudsh'])};
-CMD.dmesg=function(){W(['[    0.000000] linux version (CloudOs) x86_64','[    0.000000] command line: root=/dev/sda2 apparmor=1 security=apparmor','[    0.412211] lsm: landlock yama apparmor','[    0.791530] nft: policy drop, loaded','[    1.204118] openrc: boot runlevel reached','[    2.009877] CloudOs: browser edition, no real kernel was harmed'])};
+CMD.ps=function(){W(['  pid tty      time cmd','    1 ?    00:00:00 openrc-init','  142 ?    00:00:00 syslog-ng','  188 ?    00:00:00 dhcpcd','  203 ?    00:00:00 nft-watch','  311 tty1 00:00:00 krysh'])};
+CMD.dmesg=function(){W(['[    0.000000] linux version (Kryonux) x86_64','[    0.000000] command line: root=/dev/sda2 apparmor=1 security=apparmor','[    0.412211] lsm: landlock yama apparmor','[    0.791530] nft: policy drop, loaded','[    1.204118] openrc: boot runlevel reached','[    2.009877] Kryonux: browser edition, no real kernel was harmed'])};
 CMD.ping=function(a){
   var h=a[0]||'';
   if(!h){P('ping: usage error: destination required');return}
@@ -168,8 +173,8 @@ CMD.ping=function(a){
   for(var i=1;i<=3;i++)(function(k){later(function(){P('64 bytes from localhost (127.0.0.1): icmp_seq='+k+' ttl=64 time=0.0'+(2+k)+' ms')},k*500)})(i);
   later(function(){P('3 packets transmitted, 3 received, 0% packet loss')},2000);
 };
-CMD['cloudos-audit']=function(){
-  W(['== firewall','[ ok ] nftables loaded, input drop','== kernel','[ ok ] kernel.kptr_restrict = 2','[ ok ] kernel.yama.ptrace_scope = 2','[ ok ] apparmor enabled','== ssh','[ ok ] PermitRootLogin no','sample output, run doas cloudos-audit on a real system'],'#00ff66');
+CMD['kryounix-audit']=function(){
+  W(['== firewall','[ ok ] nftables loaded, input drop','== kernel','[ ok ] kernel.kptr_restrict = 2','[ ok ] kernel.yama.ptrace_scope = 2','[ ok ] apparmor enabled','== ssh','[ ok ] PermitRootLogin no','sample output, run doas kryounix-audit on a real system'],'#00ff66');
 };
 CMD.sl=function(){
   var T=['      ====        ________','  _D _|  |_______/        \\__I_I_____===__|_________|','   |(_)---  |   H\\________/ |   |        =|___ ___|','   /     |  |   H  |  |     |   |         ||_| |_||','  |      |  |   H  |__--------------------| [___] |','  | ________|___H__/__|_____/[][]~\\_______|       |','  |/ |   |-----------I_____I [][] []  D   |=======|__'],e=d.createElement('div'),i=0,w=34;
@@ -256,11 +261,11 @@ function run(line){
   hi=hist.length;
   a=s.split(/\s+/);c=a.shift().toLowerCase();
   if(Object.prototype.hasOwnProperty.call(CMD,c)){try{CMD[c](a)}catch(e){P(c+': error')}}
-  else P('cloudsh: '+c+': command not found');
+  else P('krysh: '+c+': command not found');
 }
 function build(){
-  box=d.createElement('div');box.className='cst';box.hidden=true;box.setAttribute('role','dialog');box.setAttribute('aria-label',tr('CloudOs shell'));
-  box.innerHTML='<div class="csh"><span>'+tr('cloudsh 2.0, esc to close')+'</span><button type="button" class="csx">'+tr('exit')+'</button></div><div class="cso" aria-live="polite"></div><div class="csl"><span class="csp">root@CloudOs:~#</span><input class="csi" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="'+tr('command')+'"></div>';
+  box=d.createElement('div');box.className='cst';box.hidden=true;box.setAttribute('role','dialog');box.setAttribute('aria-label',tr('Kryonux shell'));
+  box.innerHTML='<div class="csh"><span>'+tr('krysh 2.0, esc to close')+'</span><button type="button" class="csx">'+tr('exit')+'</button></div><div class="cso" aria-live="polite"></div><div class="csl"><span class="csp">root@Kryonux:~#</span><input class="csi" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="'+tr('command')+'"></div>';
   d.body.appendChild(box);
   out=box.querySelector('.cso');inp=box.querySelector('.csi');pr=box.querySelector('.csp');
   box.querySelector('.csx').onclick=close;
@@ -280,7 +285,7 @@ function open(first){
   if(!box.hidden)return;
   box.hidden=false;h.style.overflow='hidden';
   out.textContent='';
-  P('cloudsh 2.0. type help.','#00ff66');
+  P('krysh 2.0. type help.','#00ff66');
   if(first)P('hidden themes unlocked: matrix, amber. see settings.','#00ff66');
   inp.focus();
 }

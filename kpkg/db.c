@@ -1,4 +1,4 @@
-#include "cloudpkg.h"
+#include "kpkg.h"
 static int meta_get(const char *dir, const char *key, char *out, size_t n)
 {
 	char path[BUF], line[BUF];
@@ -125,17 +125,17 @@ static void write_list(const char *path, char **v, int n)
 	FILE *f;
 	int i;
 	if (snprintf(tmp, sizeof tmp, "%s.tmp", path) >= (int)sizeof tmp) {
-		fprintf(stderr, "cloudpkg: path too long: %s\n", path);
+		fprintf(stderr, "kpkg: path too long: %s\n", path);
 		return;
 	}
 	f = fopen(tmp, "w");
 	if (!f) {
-		fprintf(stderr, "cloudpkg: cannot write %s: %s\n", tmp, strerror(errno));
+		fprintf(stderr, "kpkg: cannot write %s: %s\n", tmp, strerror(errno));
 		return;
 	}
 	for (i = 0; i < n; i++) fprintf(f, "%s\n", v[i]);
 	if (fclose(f) != 0 || rename(tmp, path) != 0) {
-		fprintf(stderr, "cloudpkg: cannot commit %s: %s\n", path, strerror(errno));
+		fprintf(stderr, "kpkg: cannot commit %s: %s\n", path, strerror(errno));
 		unlink(tmp);
 	}
 }
@@ -145,7 +145,7 @@ int db_record(const struct recipe *r, char **files, int nf, char **dirs, int nd,
 	FILE *f;
 	snprintf(dir, sizeof dir, "%s/%s/%s/%s", INSTALLED, r->category, r->name, r->version);
 	if (!mkdirs(dir)) {
-		fprintf(stderr, "cloudpkg: cannot create database entry %s\n", dir);
+		fprintf(stderr, "kpkg: cannot create database entry %s\n", dir);
 		return 0;
 	}
 	snprintf(path, sizeof path, "%s/files", dir);
@@ -155,7 +155,7 @@ int db_record(const struct recipe *r, char **files, int nf, char **dirs, int nd,
 	snprintf(meta, sizeof meta, "%s/meta.tmp", dir);
 	f = fopen(meta, "w");
 	if (!f) {
-		fprintf(stderr, "cloudpkg: cannot write %s: %s\n", meta, strerror(errno));
+		fprintf(stderr, "kpkg: cannot write %s: %s\n", meta, strerror(errno));
 		return 0;
 	}
 	fprintf(f, "category=%s\n", r->category);
@@ -170,13 +170,13 @@ int db_record(const struct recipe *r, char **files, int nf, char **dirs, int nd,
 	fprintf(f, "explicit=%d\n", explicit);
 	fprintf(f, "build_time=%ld\n", (long)time(NULL));
 	if (fclose(f) != 0) {
-		fprintf(stderr, "cloudpkg: cannot finish %s: %s\n", meta, strerror(errno));
+		fprintf(stderr, "kpkg: cannot finish %s: %s\n", meta, strerror(errno));
 		unlink(meta);
 		return 0;
 	}
 	snprintf(path, sizeof path, "%s/meta", dir);
 	if (rename(meta, path) != 0) {
-		fprintf(stderr, "cloudpkg: cannot commit %s: %s\n", path, strerror(errno));
+		fprintf(stderr, "kpkg: cannot commit %s: %s\n", path, strerror(errno));
 		unlink(meta);
 		return 0;
 	}
@@ -227,7 +227,7 @@ int db_remove(const char *cat, const char *name, const char *ver, char **keep, i
 	list_free(files, nf);
 	list_free(dirs, nd);
 	rm_tree(dir);
-	printf("cloudpkg: removed %s/%s-%s (%d files)\n", cat, name, ver, removed);
+	printf("kpkg: removed %s/%s-%s (%d files)\n", cat, name, ver, removed);
 	return 1;
 }
 int db_reverse_deps(const char *name, char ***out)

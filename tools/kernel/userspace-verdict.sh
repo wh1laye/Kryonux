@@ -10,14 +10,14 @@ tr -d '\r\033' < "$LOG" > "$T"
 f=0
 err() { printf '::error::%s\n' "$*" >&2; f=1; }
 grep -aq 'Kernel panic' "$T" && err "паника ядра"
-grep -aqx 'CLOUDK-START' "$T" || err "userspace не запустился"
-grep -aqx 'CLOUDK-DONE' "$T" || err "userspace не дошёл до конца проверок"
+grep -aqx 'KRYONK-START' "$T" || err "userspace не запустился"
+grep -aqx 'KRYONK-DONE' "$T" || err "userspace не дошёл до конца проверок"
 if [ -n "$KREL" ]; then
-  grep -aqxF "CLOUDK-UNAME: $KREL" "$T" || err "uname -r не $KREL"
+  grep -aqxF "KRYONK-UNAME: $KREL" "$T" || err "uname -r не $KREL"
 fi
 if [ -n "$CVER" ]; then
-  grep -aqF "CLOUDK-PROC: cloudk $CVER release" "$T" || err "/proc/cloudk не показывает cloudk $CVER"
+  grep -aqF "KRYONK-PROC: kryonk $CVER release" "$T" || err "/proc/kryonk не показывает kryonk $CVER"
 fi
-grep -aqx 'CLOUDK-LOCKDOWN: none' "$T" && err "lockdown недоступен в ядре"
-grep -a '^CLOUDK-' "$T" | grep -aE 'BORE|LSM|LOCKDOWN|PROC' | sed 's/^/    /'
+grep -aqx 'KRYONK-LOCKDOWN: none' "$T" && err "lockdown недоступен в ядре"
+grep -a '^KRYONK-' "$T" | grep -aE 'BORE|LSM|LOCKDOWN|PROC' | sed 's/^/    /'
 exit $f

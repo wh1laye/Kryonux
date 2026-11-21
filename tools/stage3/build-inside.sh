@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 
-VERSION=${1:-2.4}
+VERSION=${1:-0.0.0}
 STRICT=${2:-0}
 
 say() { printf '==> %s\n' "$*"; }
@@ -9,9 +9,9 @@ say() { printf '==> %s\n' "$*"; }
 F=/var/tmp/s3files
 ST=/var/tmp/s3stamp
 SRC=/var/tmp/s3src
-PKG=/var/tmp/cloudpkg-src
+PKG=/var/tmp/kpkg-src
 L=/var/tmp/s3log
-REPORT=/var/tmp/cloudos-report.txt
+REPORT=/var/tmp/kryounix-report.txt
 
 mkdir -p "$ST" "$L"
 rm -f "$REPORT"
@@ -32,14 +32,14 @@ step() {
   fi
 }
 
-setup_cloudpkg() {
-  install -d /etc/cloudpkg /var/db/cloudpkg/installed /var/db/repos \
-    /var/cache/cloudpkg/distfiles /var/tmp/cloudpkg-build
-  cat > /etc/cloudpkg/cloudpkg.conf <<CONF
-repo=/var/db/repos/cloudpkg-recipes
-recipes_url=https://codeload.github.com/wh1laye/cloudpkg-recipes/tar.gz/refs/heads/master
-distdir=/var/cache/cloudpkg/distfiles
-workdir=/var/tmp/cloudpkg-build
+setup_kpkg() {
+  install -d /etc/kpkg /var/db/kpkg/installed /var/db/repos \
+    /var/cache/kpkg/distfiles /var/tmp/kpkg-build
+  cat > /etc/kpkg/kpkg.conf <<CONF
+repo=/var/db/repos/kpkg-recipes
+recipes_url=https://codeload.github.com/wh1laye/kpkg-recipes/tar.gz/refs/heads/master
+distdir=/var/cache/kpkg/distfiles
+workdir=/var/tmp/kpkg-build
 jobs=$(nproc)
 snapshots=0
 keep_workdir=no
@@ -47,12 +47,12 @@ allow_host=yes
 CONF
   make -C "$PKG" clean >/dev/null
   make -C "$PKG" -j"$(nproc)"
-  install -m755 "$PKG/cloudpkg" /usr/bin/cloudpkg
-  "$PKG/cloudpkg" version
+  install -m755 "$PKG/kpkg" /usr/bin/kpkg
+  "$PKG/kpkg" version
 }
 
 fetch_recipes() {
-  cloudpkg sync
+  kpkg sync
 }
 
 install_set() {
@@ -60,40 +60,40 @@ install_set() {
   while read -r line; do
     case $line in ''|\#*) continue ;; esac
     say "install: $line"
-    if cloudpkg install --force "$line" > "$L/$(printf '%s' "$line" | tr / -).log" 2>&1; then
+    if kpkg install --force "$line" > "$L/$(printf '%s' "$line" | tr / -).log" 2>&1; then
       ok=$((ok+1))
     else
       fail=$((fail+1))
       echo "$line" >> "$REPORT"
       tail -20 "$L/$(printf '%s' "$line" | tr / -).log" >&2 || true
     fi
-  done < "$F/cloudos-packages.list"
+  done < "$F/kryounix-packages.list"
   say "packages: installed $ok, failed $fail"
   [ "$fail" = 0 ]
 }
 
 layout() {
-  install -d /usr/share/cloudos
-  [ -f "$F/logo.txt" ] && install -m644 "$F/logo.txt" /usr/share/cloudos/logo.txt
-  [ -f "$F/logo.ansi" ] && install -m644 "$F/logo.ansi" /usr/share/cloudos/logo.ansi
-  [ -f "$F/logo.png" ] && install -m644 "$F/logo.png" /usr/share/cloudos/logo.png
-  for f in cloudos-users cloudos-adduser cloudos-fix cloudos-firewall cloudos-audit; do
+  install -d /usr/share/kryounix
+  [ -f "$F/logo.txt" ] && install -m644 "$F/logo.txt" /usr/share/kryounix/logo.txt
+  [ -f "$F/logo.ansi" ] && install -m644 "$F/logo.ansi" /usr/share/kryounix/logo.ansi
+  [ -f "$F/logo.png" ] && install -m644 "$F/logo.png" /usr/share/kryounix/logo.png
+  for f in kryounix-users kryounix-adduser kryounix-fix kryounix-firewall kryounix-audit; do
     [ -f "$F/$f" ] && install -m755 "$F/$f" /usr/sbin/$f
   done
-  [ -f "$F/cloudos-audit" ] || true
-  printf 'cloudos\n' > /etc/hostname
-  grep -q '^ID=cloudos' /etc/os-release
+  [ -f "$F/kryounix-audit" ] || true
+  printf 'kryounix\n' > /etc/hostname
+  grep -q '^ID=kryounix' /etc/os-release
 }
 
 clean() {
-  rm -rf /var/cache/cloudpkg/distfiles/* /var/tmp/cloudpkg-build/* \
-    /var/tmp/s3src /var/tmp/cloudpkg-src /root/.cache /tmp/* /etc/resolv.conf
+  rm -rf /var/cache/kpkg/distfiles/* /var/tmp/kpkg-build/* \
+    /var/tmp/s3src /var/tmp/kpkg-src /root/.cache /tmp/* /etc/resolv.conf
 }
 
-step cloudpkg-setup setup_cloudpkg || exit 1
-step cloudpkg-recipes fetch_recipes || exit 1
-step cloudos-package-set install_set || exit 1
-step cloudos-layout layout || exit 1
+step kpkg-setup setup_kpkg || exit 1
+step kpkg-recipes fetch_recipes || exit 1
+step kryounix-package-set install_set || exit 1
+step kryounix-layout layout || exit 1
 clean
 
 if [ -s "$REPORT" ]; then

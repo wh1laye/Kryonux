@@ -1,1 +1,1 @@
-obj-$(CONFIG_SECURITY_CLOUDK) += cloudk.o
+obj-$(CONFIG_SECURITY_KRYONK) += kryonk.o

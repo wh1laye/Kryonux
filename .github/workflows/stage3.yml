@@ -5,9 +5,9 @@ on:
     inputs:
       version:
         description: версия
-        default: "1.6"
+        default: "0.0.0"
       refresh_list:
-        description: список пакетов берётся из tools/stage3/cloudos-packages.list
+        description: список пакетов берётся из tools/stage3/kryounix-packages.list
         type: boolean
         default: true
       strict:
@@ -20,7 +20,7 @@ on:
         default: true
       release_tag:
         description: тег внутреннего релиза базы для сборки iso
-        default: "1.6"
+        default: "base-0.0.0"
 
 concurrency:
   group: stage3-${{ inputs.version }}
@@ -58,12 +58,12 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq minisign gnupg
 
-      - name: проверка скриптов и cloudpkg
+      - name: проверка скриптов и kpkg
         run: |
-          for f in tools/build-stage3.sh tools/test-cloudpkg.sh tools/stage3/*.sh tools/stage3/cloudos-adduser tools/stage3/neofetch tools/stage3/cloudos-firewall tools/stage3/cloudos-audit tools/test-firewall.sh tools/test-forum.sh cloudpkg/*.sh; do bash -n "$f"; done
-          make -C cloudpkg clean all CC="gcc -Wextra -Werror"
-          ./cloudpkg/cloudpkg version
-          sudo bash tools/test-cloudpkg.sh
+          for f in tools/build-stage3.sh tools/test-kpkg.sh tools/stage3/*.sh tools/stage3/kryounix-adduser tools/stage3/neofetch tools/stage3/kryounix-firewall tools/stage3/kryounix-audit tools/test-firewall.sh tools/test-forum.sh kpkg/*.sh; do bash -n "$f"; done
+          make -C kpkg clean all CC="gcc -Wextra -Werror"
+          ./kpkg/kpkg version
+          sudo bash tools/test-kpkg.sh
 
       - name: проверка фаервола
         run: |
@@ -91,11 +91,6 @@ jobs:
           sudo -E env WORK=/mnt/stage3 OUT="$PWD/out" VERSION="$VERSION" REFRESH_LIST="$REFRESH_LIST" STRICT="$STRICT" \
             bash tools/build-stage3.sh 2>&1 | tee "$RUNNER_TEMP/build.log"
           ls -lh out
-
-      - name: карта размеров
-        env:
-          VERSION: ${{ inputs.version }}
-        run: python3 tools/stage3-map.py "out/cloudos-stage3-amd64-$VERSION.tar.xz" -o "out/cloudos-stage3-amd64-$VERSION.map.json"
 
       - name: итог в summary
         if: always()
@@ -133,9 +128,22 @@ jobs:
           sudo apt-get install -y -qq minisign
           bash tools/sign.sh out/*.tar.xz out/*.tar.xz.sha256
 
+      - name: проверка суммы и подписи
+        if: ${{ inputs.publish }}
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          cd out
+          f="kryounix-stage3-amd64-$VERSION.tar.xz"
+          sha256sum -c "$f.sha256"
+          for x in "$f" "$f.sha256"; do
+            [ -s "$x.minisig" ] || { echo "::error::нет подписи $x.minisig"; exit 1; }
+            minisign -V -p "$GITHUB_WORKSPACE/docs/kryounix.pub" -m "$x" -x "$x.minisig"
+          done
+
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: cloudos-stage3-${{ inputs.version }}
+          name: kryounix-stage3-${{ inputs.version }}
           path: out/*
           compression-level: 0
 
@@ -162,5 +170,5 @@ jobs:
           TAG: ${{ inputs.release_tag }}
         run: |
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --prerelease --title "base $TAG (внутренняя база для сборки iso)" \
-            --notes "внутренний артефакт сборки live iso, для установки не предназначен. ставь систему с live iso через cloudos-install."
+            --notes "внутренний артефакт сборки live iso, для установки не предназначен. ставь систему с live iso через kryounix-install."
           gh release upload "$TAG" out/* --clobber

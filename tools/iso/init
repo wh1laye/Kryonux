@@ -5,7 +5,7 @@ mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
 mount -t tmpfs tmpfs /run
 
-say() { echo "cloudos-init: $*"; }
+say() { echo "kryounix-init: $*"; }
 
 rescue() {
   say "$*"
@@ -14,7 +14,7 @@ rescue() {
 }
 
 CMDLINE=$(cat /proc/cmdline)
-case " $CMDLINE " in *" cloudos.shell "*) rescue "cloudos.shell в командной строке" ;; esac
+case " $CMDLINE " in *" kryounix.shell "*) rescue "kryounix.shell в командной строке" ;; esac
 
 find_iso() {
   local n=0 d t
@@ -24,7 +24,7 @@ find_iso() {
       t=$(blkid -o value -s TYPE "$d" 2>/dev/null)
       case $t in iso9660|vfat|ext4|ext3|ext2|exfat|ntfs|btrfs) ;; *) continue ;; esac
       mount -t "$t" -o ro "$d" /mnt/iso 2>/dev/null || continue
-      if [ -f /mnt/iso/cloudos/rootfs.squashfs ]; then
+      if [ -f /mnt/iso/kryounix/rootfs.squashfs ]; then
         say "образ найден на $d ($t)"
         return 0
       fi
@@ -39,19 +39,19 @@ find_iso() {
   return 1
 }
 
-until find_iso; do rescue "не найден носитель с cloudos/rootfs.squashfs"; done
+until find_iso; do rescue "не найден носитель с kryounix/rootfs.squashfs"; done
 
 case " $CMDLINE " in
-  *" cloudos.verify "*)
+  *" kryounix.verify "*)
     say "проверяю sha256 rootfs.squashfs"
-    if [ -f /mnt/iso/cloudos/rootfs.squashfs.sha256 ]; then
-      ( cd /mnt/iso/cloudos && sha256sum -c rootfs.squashfs.sha256 ) || rescue "sha256 rootfs.squashfs не совпал, образ повреждён или подменён"
+    if [ -f /mnt/iso/kryounix/rootfs.squashfs.sha256 ]; then
+      ( cd /mnt/iso/kryounix && sha256sum -c rootfs.squashfs.sha256 ) || rescue "sha256 rootfs.squashfs не совпал, образ повреждён или подменён"
     else
-      rescue "нет cloudos/rootfs.squashfs.sha256"
+      rescue "нет kryounix/rootfs.squashfs.sha256"
     fi ;;
 esac
 
-until mount -t squashfs -o ro,loop /mnt/iso/cloudos/rootfs.squashfs /mnt/sq; do rescue "squashfs не смонтировался"; done
+until mount -t squashfs -o ro,loop /mnt/iso/kryounix/rootfs.squashfs /mnt/sq; do rescue "squashfs не смонтировался"; done
 
 mount -t tmpfs -o mode=755 tmpfs /mnt/rw
 mkdir -p /mnt/rw/up /mnt/rw/work

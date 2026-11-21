@@ -43,31 +43,31 @@ EOP
 ok "initramfs: формат newc, init, busybox, узлы console и null"
 
 sh -n "$K/userspace-init.sh" || fail "userspace-init.sh с ошибкой синтаксиса"
-for m in CLOUDK-START CLOUDK-UNAME CLOUDK-PROC CLOUDK-BORE CLOUDK-LOCKDOWN CLOUDK-LSM CLOUDK-DONE; do
+for m in KRYONK-START KRYONK-UNAME KRYONK-PROC KRYONK-BORE KRYONK-LOCKDOWN KRYONK-LSM KRYONK-DONE; do
   grep -q "$m" "$K/userspace-init.sh" || fail "в init нет $m"
 done
 ok "init печатает все маркеры"
 
 good() {
-  printf 'boot noise\r\nCLOUDK-START\r\nCLOUDK-UNAME: 6.18.10-cloudk-0.4\r\nCLOUDK-PROC: cloudk 0.4 release 6.18.10-cloudk-0.4 \r\nCLOUDK-BORE: 1\r\nCLOUDK-LOCKDOWN: none [integrity] confidentiality\r\nCLOUDK-LSM: lockdown,capability,landlock,yama,apparmor,bpf\r\nCLOUDK-DONE\r\n'
+  printf 'boot noise\r\nKRYONK-START\r\nKRYONK-UNAME: 6.18.10-kryonk-0.4\r\nKRYONK-PROC: kryonk 0.4 release 6.18.10-kryonk-0.4 \r\nKRYONK-BORE: 1\r\nKRYONK-LOCKDOWN: none [integrity] confidentiality\r\nKRYONK-LSM: lockdown,capability,landlock,yama,apparmor,bpf\r\nKRYONK-DONE\r\n'
 }
 good > "$T/good.log"
-bash "$K/userspace-verdict.sh" "$T/good.log" 6.18.10-cloudk-0.4 0.4 >/dev/null 2>&1 || fail "хороший лог отвергнут"
+bash "$K/userspace-verdict.sh" "$T/good.log" 6.18.10-kryonk-0.4 0.4 >/dev/null 2>&1 || fail "хороший лог отвергнут"
 ok "хороший лог принят"
 
 try() {
-  local name=$1 filter=$2 krel=${3:-6.18.10-cloudk-0.4} cver=${4:-0.4}
+  local name=$1 filter=$2 krel=${3:-6.18.10-kryonk-0.4} cver=${4:-0.4}
   good | eval "$filter" > "$T/bad.log"
   if bash "$K/userspace-verdict.sh" "$T/bad.log" "$krel" "$cver" >/dev/null 2>&1; then fail "принят лог: $name"; fi
 }
-try "нет DONE" "grep -v CLOUDK-DONE"
-try "нет START" "grep -v CLOUDK-START"
-try "чужой uname" "cat" 6.18.9-cloudk-0.4
-try "чужая версия cloudk" "cat" 6.18.10-cloudk-0.4 0.3
-try "нет lockdown" "sed 's/^CLOUDK-LOCKDOWN: .*/CLOUDK-LOCKDOWN: none\r/'"
+try "нет DONE" "grep -v KRYONK-DONE"
+try "нет START" "grep -v KRYONK-START"
+try "чужой uname" "cat" 6.18.9-kryonk-0.4
+try "чужая версия kryonk" "cat" 6.18.10-kryonk-0.4 0.3
+try "нет lockdown" "sed 's/^KRYONK-LOCKDOWN: .*/KRYONK-LOCKDOWN: none\r/'"
 try "паника" "cat; printf 'Kernel panic - not syncing\r\n'"
-try "нет /proc/cloudk" "sed 's/^CLOUDK-PROC: .*/CLOUDK-PROC: \r/'"
+try "нет /proc/kryonk" "sed 's/^KRYONK-PROC: .*/KRYONK-PROC: \r/'"
 if bash "$K/userspace-verdict.sh" "$T/nonexistent.log" >/dev/null 2>&1; then fail "принят отсутствующий лог"; fi
-ok "плохие логи отвергаются: нет done, start, чужие версии, lockdown, паника, /proc/cloudk"
+ok "плохие логи отвергаются: нет done, start, чужие версии, lockdown, паника, /proc/kryonk"
 
 echo "все тесты пройдены"

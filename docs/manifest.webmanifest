@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "CloudOs",
-  "short_name": "CloudOs",
-  "description": "CloudOs: справочник, форум и инструменты",
+  "name": "Kryonux",
+  "short_name": "Kryonux",
+  "description": "Kryonux: справочник, форум и инструменты",
   "lang": "ru",
   "start_url": "./",
   "scope": "./",

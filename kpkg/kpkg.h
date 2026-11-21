@@ -1,5 +1,5 @@
-#ifndef CLOUDPKG_H
-#define CLOUDPKG_H
+#ifndef KPKG_H
+#define KPKG_H
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,24 +14,24 @@
 #include <sys/file.h>
 #include <sys/wait.h>
 #ifndef CONF
-#define CONF "/etc/cloudpkg/cloudpkg.conf"
+#define CONF "/etc/kpkg/kpkg.conf"
 #endif
 #ifndef LOCKFILE
-#define LOCKFILE "/run/cloudpkg.lock"
+#define LOCKFILE "/run/kpkg.lock"
 #endif
 #ifndef DBDIR
-#define DBDIR "/var/db/cloudpkg"
+#define DBDIR "/var/db/kpkg"
 #endif
 #ifndef PUBKEY
-#define PUBKEY "/etc/cloudpkg/cloudos.pub"
+#define PUBKEY "/etc/kpkg/kryounix.pub"
 #endif
 #define INSTALLED DBDIR "/installed"
 #define WORLD DBDIR "/world"
-#define UPD_REPO "wh1laye/cloudos-repo"
+#define UPD_REPO "wh1laye/Kryonux"
 #define UPD_BRANCH "main"
-#define UPD_TAG "cloudpkg-latest"
-#define UPD_ASSET "cloudpkg-src.tar.gz"
-#define RECIPES_URL "https://codeload.github.com/wh1laye/cloudpkg-recipes/tar.gz/refs/heads/master"
+#define UPD_TAG "kpkg-latest"
+#define UPD_ASSET "kpkg-src.tar.gz"
+#define RECIPES_URL "https://codeload.github.com/wh1laye/kpkg-recipes/tar.gz/refs/heads/master"
 #define MAXPLAN 512
 #define MAXPHASE 65536
 #define BUF 1024

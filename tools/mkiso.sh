@@ -2,22 +2,23 @@
 set -eu
 
 HERE=$(cd "$(dirname "$0")" && pwd)
-VERSION=${VERSION:-2.4}
+VERSION=${VERSION:-0.0.0}
 KVER=${KVER:-6.18.10}
 MARCH=${MARCH:-x86-64-v3}
-BASE_TAG=${BASE_TAG:-1.7}
-CLOUDK_VER=${CLOUDK_VER:-0.5}
-CLOUDK_TAG=${CLOUDK_TAG:-cloudk-$CLOUDK_VER}
-CLOUDK=${CLOUDK:-https://github.com/wh1laye/cloudos-repo/releases/download/$CLOUDK_TAG}
-CLOUDK_VERIFY=${CLOUDK_VERIFY:-1}
-PUB=${PUB:-$(dirname "$HERE")/docs/cloudos.pub}
-BASE_VERSION=${BASE_VERSION:-1.7}
+BASE_TAG=${BASE_TAG:-base-0.0.0}
+KRYONK_VER=${KRYONK_VER:-0.0.0}
+KRYONK_TAG=${KRYONK_TAG:-kryonk-$KRYONK_VER}
+KRYONK=${KRYONK:-https://github.com/wh1laye/Kryonux/releases/download/$KRYONK_TAG}
+KRYONK_VERIFY=${KRYONK_VERIFY:-1}
+PUB=${PUB:-$(dirname "$HERE")/docs/kryounix.pub}
+MINISIGN_KEY=${MINISIGN_KEY:-}
+BASE_VERSION=${BASE_VERSION:-0.0.0}
 BASE_VERIFY=${BASE_VERIFY:-1}
-BASE=${BASE:-https://github.com/wh1laye/cloudos-repo/releases/download/$BASE_TAG/cloudos-stage3-amd64-$BASE_VERSION.tar.xz}
-WORK=${WORK:-/var/tmp/cloudos-iso-build}
+BASE=${BASE:-https://github.com/wh1laye/Kryonux/releases/download/$BASE_TAG/kryounix-stage3-amd64-$BASE_VERSION.tar.xz}
+WORK=${WORK:-/var/tmp/kryounix-iso-build}
 OUT=${OUT:-$PWD}
 ROOT=$WORK/root
-NAME=cloudos-live-amd64-$VERSION.iso
+NAME=kryounix-live-amd64-$VERSION.iso
 
 say() { printf '==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -26,7 +27,7 @@ case $MARCH in x86-64|x86-64-v2|x86-64-v3|x86-64-v4) ;; *) die "MARCH: x86-64, x
 [ "$(uname -m)" = x86_64 ] || die "x86_64 is required"
 for c in curl tar xz sha256sum unshare mount chroot awk; do command -v "$c" >/dev/null || die "missing command: $c"; done
 case $WORK in /|/usr*|/etc*|/home|/root|/var|/boot) die "unsafe work directory: $WORK" ;; esac
-for f in iso/init iso/mkiso-inside.sh iso/cloudos-install iso/cloudos-secureboot iso/cloudos-uki iso/cloudos-tpm2 iso/dracut-tpm2/module-setup.sh iso/dracut-tpm2/cloudos-tpm2-unlock.sh iso/sysctl-perf.conf stage3/cloudos-audit; do
+for f in iso/init iso/mkiso-inside.sh iso/kryounix-install iso/kryounix-secureboot iso/kryounix-uki iso/kryounix-tpm2 iso/dracut-tpm2/module-setup.sh iso/dracut-tpm2/kryounix-tpm2-unlock.sh iso/sysctl-perf.conf stage3/kryounix-audit; do
   [ -f "$HERE/$f" ] || die "no $HERE/$f"
 done
 
@@ -67,41 +68,41 @@ case $BASE in
     BASEFILE=$BASE ;;
 esac
 
-CK=cloudk-$CLOUDK_VER-$MARCH
-say "cloudk $CLOUDK_VER ($MARCH) from $CLOUDK"
-mkdir -p "$WORK/cloudk"
-case $CLOUDK in
+CK=kryonk-$KRYONK_VER-$MARCH
+say "kryonk $KRYONK_VER ($MARCH) from $KRYONK"
+mkdir -p "$WORK/kryonk"
+case $KRYONK in
   http*://*)
-    rm -f "$WORK/cloudk"/*
+    rm -f "$WORK/kryonk"/*
     for f in "$CK-vmlinuz" "$CK-modules.tar.zst" "$CK-config" "$CK.sha256" "$CK.sha256.minisig"; do
-      fetch "$CLOUDK/$f" "$WORK/cloudk/$f" || die "download failed: $CLOUDK/$f"
+      fetch "$KRYONK/$f" "$WORK/kryonk/$f" || die "download failed: $KRYONK/$f"
     done ;;
   *)
     for f in "$CK-vmlinuz" "$CK-modules.tar.zst" "$CK-config" "$CK.sha256" "$CK.sha256.minisig"; do
-      [ -f "$CLOUDK/$f" ] || die "no such file: $CLOUDK/$f"
-      cp "$CLOUDK/$f" "$WORK/cloudk/$f"
+      [ -f "$KRYONK/$f" ] || die "no such file: $KRYONK/$f"
+      cp "$KRYONK/$f" "$WORK/kryonk/$f"
     done ;;
 esac
-case $CLOUDK_VERIFY in
+case $KRYONK_VERIFY in
   1)
-    command -v minisign >/dev/null || die "minisign is missing (CLOUDK_VERIFY=0 disables the check)"
+    command -v minisign >/dev/null || die "minisign is missing (KRYONK_VERIFY=0 disables the check)"
     [ -f "$PUB" ] || die "public key not found: $PUB"
-    minisign -V -p "$PUB" -m "$WORK/cloudk/$CK.sha256" -x "$WORK/cloudk/$CK.sha256.minisig" >/dev/null || die "cloudk signature does not match $PUB" ;;
-  0) printf 'warning: cloudk signature is not verified\n' >&2 ;;
-  *) die "CLOUDK_VERIFY: 1 or 0" ;;
+    minisign -V -p "$PUB" -m "$WORK/kryonk/$CK.sha256" -x "$WORK/kryonk/$CK.sha256.minisig" >/dev/null || die "kryonk signature does not match $PUB" ;;
+  0) printf 'warning: kryonk signature is not verified\n' >&2 ;;
+  *) die "KRYONK_VERIFY: 1 or 0" ;;
 esac
-( cd "$WORK/cloudk" && sha256sum -c "$CK.sha256" >/dev/null ) || die "cloudk sha256 mismatch"
+( cd "$WORK/kryonk" && sha256sum -c "$CK.sha256" >/dev/null ) || die "kryonk sha256 mismatch"
 
 say "unpacking the base into $ROOT"
 rm -rf "$ROOT"
 mkdir -p "$ROOT"
 xz -dc "$BASEFILE" | tar -xpf - -C "$ROOT" --numeric-owner --xattrs --xattrs-include='*'
-grep -q '^ID=.\?cloudos' "$ROOT/etc/os-release" || die "the base does not look like CloudOS"
+grep -qE '^ID="?(kryounix|kryonux)"?' "$ROOT/etc/os-release" || die "the base does not look like Kryonux"
 
 mkdir -p "$ROOT/var/tmp/isosrc" "$ROOT/var/tmp/isofiles"
-cp "$WORK/cloudk/$CK-vmlinuz" "$WORK/cloudk/$CK-modules.tar.zst" "$ROOT/var/tmp/isosrc/"
+cp "$WORK/kryonk/$CK-vmlinuz" "$WORK/kryonk/$CK-modules.tar.zst" "$ROOT/var/tmp/isosrc/"
 cp -R "$HERE"/iso/. "$ROOT/var/tmp/isofiles/"
-cp "$HERE/stage3/cloudos-audit" "$ROOT/var/tmp/isofiles/"
+cp "$HERE/stage3/kryounix-audit" "$ROOT/var/tmp/isofiles/"
 
 enter() {
   unshare -m sh -c '
@@ -114,11 +115,17 @@ exec chroot "$R" /usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/
 }
 
 say "building the iso inside chroot"
-enter bash /var/tmp/isofiles/mkiso-inside.sh "$VERSION" "$KVER" "$NAME" "$MARCH" "$CLOUDK_VER" || die "the chroot build stopped, see the reason above"
+enter bash /var/tmp/isofiles/mkiso-inside.sh "$VERSION" "$KVER" "$NAME" "$MARCH" "$KRYONK_VER" || die "the chroot build stopped, see the reason above"
 
 [ -s "$ROOT/var/tmp/isoout/$NAME" ] || die "the iso did not appear"
 mv "$ROOT/var/tmp/isoout/$NAME" "$OUT/$NAME"
 ( cd "$OUT" && sha256sum "$NAME" > "$NAME.sha256" )
+if [ -n "$MINISIGN_KEY" ]; then
+  say "signing $NAME"
+  MINISIGN_KEY="$MINISIGN_KEY" MINISIGN_PASSWORD="${MINISIGN_PASSWORD:-}" bash "$HERE/sign.sh" "$OUT/$NAME" "$OUT/$NAME.sha256"
+else
+  say "MINISIGN_KEY is not set, artifacts are unsigned"
+fi
 SIZE=$(stat -c %s "$OUT/$NAME")
 [ "$SIZE" -lt 2147483648 ] || printf 'warning: iso is %s bytes, the GitHub release limit is 2 GB\n' "$SIZE" >&2
 say "done: $OUT/$NAME ($(du -h "$OUT/$NAME" | cut -f1))"

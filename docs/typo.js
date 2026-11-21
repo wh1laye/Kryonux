@@ -10,11 +10,11 @@ var ABBR={
   'проч':1,'ред':1,'изд':1,'пер':1,'ст':1,'пп':1
 };
 var CANON={
-  'cloudos':'CloudOs','cloudpkg':'cloudpkg','cloudos-install':'cloudos-install',
-  'cloudos-firewall':'cloudos-firewall','cloudos-audit':'cloudos-audit',
-  'cloudos-uki':'cloudos-uki','cloudos-tpm2':'cloudos-tpm2',
-  'cloudos-secureboot':'cloudos-secureboot','cloudos-users':'cloudos-users',
-  'cloudos-adduser':'cloudos-adduser','cloudos-fix':'cloudos-fix',
+  'kryounix':'Kryonux','kpkg':'kpkg','kryounix-install':'kryounix-install',
+  'kryounix-firewall':'kryounix-firewall','kryounix-audit':'kryounix-audit',
+  'kryounix-uki':'kryounix-uki','kryounix-tpm2':'kryounix-tpm2',
+  'kryounix-secureboot':'kryounix-secureboot','kryounix-users':'kryounix-users',
+  'kryounix-adduser':'kryounix-adduser','kryounix-fix':'kryounix-fix',
   'gcc':'GCC','openrc':'OpenRC','uefi':'UEFI','bios':'BIOS','iso':'ISO',
   'ssh':'SSH','sshd':'sshd','tpm2':'TPM2','uki':'UKI','luks2':'LUKS2','cis':'CIS',
   'kspp':'KSPP','linux':'Linux','limine':'Limine','apparmor':'AppArmor',

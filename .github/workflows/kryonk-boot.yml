@@ -1,11 +1,11 @@
-name: cloudk-boot
+name: kryonk-boot
 
 on:
   workflow_dispatch:
     inputs:
-      cloudk_version:
-        description: версия ядра cloudk из релиза cloudk-<версия>
-        default: "0.6"
+      kryonk_version:
+        description: версия ядра kryonk из релиза kryonk-<версия>
+        default: "0.0.0"
       kernel:
         description: версия ванильного ядра
         default: "6.18.10"
@@ -32,22 +32,22 @@ jobs:
       - name: загрузка релиза
         env:
           GH_TOKEN: ${{ github.token }}
-          CVER: ${{ inputs.cloudk_version }}
+          CVER: ${{ inputs.kryonk_version }}
           MARCH: ${{ inputs.march }}
         run: |
-          case "$CVER" in ''|*[!0-9A-Za-z._]*) echo "::error::неверная версия cloudk"; exit 1 ;; esac
+          case "$CVER" in ''|*[!0-9A-Za-z._]*) echo "::error::неверная версия kryonk"; exit 1 ;; esac
           mkdir -p rel
-          gh release download "cloudk-$CVER" -p "cloudk-$CVER-$MARCH*" -D rel
-          ( cd rel && sha256sum -c "cloudk-$CVER-$MARCH.sha256" )
+          gh release download "kryonk-$CVER" -p "kryonk-$CVER-$MARCH*" -D rel
+          ( cd rel && sha256sum -c "kryonk-$CVER-$MARCH.sha256" )
           ls -lh rel
-          if [ -f "rel/cloudk-$CVER-$MARCH-missing.txt" ]; then echo "--- необязательные опции, которые не встали ---"; cat "rel/cloudk-$CVER-$MARCH-missing.txt"; fi
+          if [ -f "rel/kryonk-$CVER-$MARCH-missing.txt" ]; then echo "--- необязательные опции, которые не встали ---"; cat "rel/kryonk-$CVER-$MARCH-missing.txt"; fi
 
       - name: загрузка ядра в qemu
         env:
-          CVER: ${{ inputs.cloudk_version }}
+          CVER: ${{ inputs.kryonk_version }}
           KVER: ${{ inputs.kernel }}
           MARCH: ${{ inputs.march }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq qemu-system-x86
-          bash tools/kernel/boot-check.sh "rel/cloudk-$CVER-$MARCH-vmlinuz" "$KVER-cloudk-$CVER"
+          bash tools/kernel/boot-check.sh "rel/kryonk-$CVER-$MARCH-vmlinuz" "$KVER-kryonk-$CVER"

@@ -24,40 +24,40 @@ if [ -n "$ARCHIVE" ]; then
   tar -tf "$ARCHIVE" > "$LIST"
   need_entry() { if grep -qxE "(\./)?(usr/)?$1" "$LIST"; then ok "$1"; else bad "missing $1"; fi; }
   forbid_entry() { if grep -qxE "(\./)?$1" "$LIST"; then bad "forbidden $1"; else ok "absent $1"; fi; }
-  need_entry usr/bin/cloudpkg
-  need_entry etc/cloudpkg/cloudpkg.conf
+  need_entry usr/bin/kpkg
+  need_entry etc/kpkg/kpkg.conf
   need_entry etc/os-release
   need_entry sbin/openrc-init
   need_entry etc/doas.conf
-  need_entry usr/sbin/cloudos-install
+  need_entry usr/sbin/kryounix-install
   forbid_entry usr/bin/emerge
   forbid_entry usr/bin/emaint
   forbid_entry etc/portage/make.conf
   forbid_entry var/db/repos/gentoo
-  if grep -qE '^(\./)?var/db/cloudpkg/' "$LIST"; then
-    ok "cloudpkg database present"
+  if grep -qE '^(\./)?var/db/kpkg/' "$LIST"; then
+    ok "kpkg database present"
   else
-    ok "cloudpkg database empty, packages built manually"
+    ok "kpkg database empty, packages built manually"
   fi
 else
   printf '==> stage3 gate: repository\n'
   need_file tools/build-stage3.sh
   need_file tools/stage3/build-inside.sh
-  need_file tools/stage3/cloudos-packages.list
+  need_file tools/stage3/kryounix-packages.list
   need_file tools/stage3/SOURCES.txt
-  need_file cloudpkg/cloudpkg.c
-  need_file cloudpkg/Makefile
-  need_file tools/kernel/cloudk.config
-  need_file tools/overlay/security/cloudk/cloudk.c
+  need_file kpkg/kpkg.c
+  need_file kpkg/Makefile
+  need_file tools/kernel/kryonk.config
+  need_file tools/overlay/security/kryonk/kryonk.c
   forbid_file tools/stage3/gentoo-stage3.list
   forbid_file tools/stage3/gentoo-exclude.txt
   forbid_file tools/stage3/refresh-list.sh
-  need_text tools/stage3/build-inside.sh 'cloudpkg' "build-inside uses cloudpkg"
+  need_text tools/stage3/build-inside.sh 'kpkg' "build-inside uses kpkg"
   forbid_text tools/stage3/build-inside.sh 'portageq|/etc/portage|/var/db/repos/gentoo' "build-inside has no foreign package manager paths"
-  need_text tools/stage3/cloudos-packages.list '^(system|fs|network|toolchain|build|tools|libs|boot|init|admin)/' "package list uses our categories"
-  forbid_text tools/stage3/cloudos-packages.list '^(sys-apps|sys-libs|sys-devel|dev-libs|dev-build|dev-lang|app-|net-|virtual|acct-)' "package list has no foreign categories"
-  need_text cloudpkg/Makefile 'non-CloudOS' "make install refuses foreign systems"
-  need_text tools/kernel/cloudk.config 'CONFIG_SECURITY_CLOUDK=y' "kernel has the cloudk layer"
+  need_text tools/stage3/kryounix-packages.list '^(system|fs|network|toolchain|build|tools|libs|boot|init|admin)/' "package list uses our categories"
+  forbid_text tools/stage3/kryounix-packages.list '^(sys-apps|sys-libs|sys-devel|dev-libs|dev-build|dev-lang|app-|net-|virtual|acct-)' "package list has no foreign categories"
+  need_text kpkg/Makefile 'non-Kryonux' "make install refuses foreign systems"
+  need_text tools/kernel/kryonk.config 'CONFIG_SECURITY_KRYONK=y' "kernel has the kryonk layer"
 fi
 
 if [ "$fail" = 0 ]; then

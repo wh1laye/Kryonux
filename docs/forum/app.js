@@ -139,7 +139,7 @@ function presence(){
     if(ch)sb.removeChannel(ch);
     pk=key;
     online={};
-    const c=sb.channel('cloudos-online',{config:{presence:{key}}});
+    const c=sb.channel('kryounix-online',{config:{presence:{key}}});
     ch=c;
     c.on('presence',{event:'sync'},()=>{online=c.presenceState();renderOnline()});
     c.subscribe(st=>{if(st==='SUBSCRIBED')c.track(meta())});
@@ -215,7 +215,7 @@ async function home(){
   if(error)throw error;
   const fd=await feed();
   const pop=await popular();
-  app.innerHTML='<h1>форум</h1><p class="mu">предложения, вопросы и обсуждение CloudOs.</p><div class="grid">'+
+  app.innerHTML='<h1>форум</h1><p class="mu">предложения, вопросы и обсуждение Kryonux.</p><div class="grid">'+
     (data.map(b=>'<a class="card" href="#/b/'+b.id+'"><i class="ci"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg></i><strong>'+esc(b.title)+'</strong><span>'+esc(b.descr)+'</span><em>тем: '+b.threads[0].count+'</em></a>').join('')||'<p class="mu">разделов пока нет</p>')+'</div>'+pop+fd+'<div id="onl" class="onlw"></div>';
   renderOnline();
 }

@@ -5,34 +5,34 @@ LDFLAGS += -pie -Wl,-z,relro,-z,now
 PREFIX ?= /usr
 DESTDIR ?=
 
-all: cloudpkg
+all: kpkg
 
-SRCS := cloudpkg.c util.c lock.c recipe.c db.c build.c cmds.c snap.c update.c
+SRCS := kpkg.c util.c lock.c recipe.c db.c build.c cmds.c snap.c update.c
 
-cloudpkg: $(SRCS) cloudpkg.h
+kpkg: $(SRCS) kpkg.h
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(SRCS)
 
-install: cloudpkg
-	@if [ -z "$(DESTDIR)" ] && [ -z "$$CLOUDPKG_FORCE" ] && ! grep -q '^ID="\?cloudos' /etc/os-release 2>/dev/null; then \
-	  echo "cloudpkg: refusing to install into a non-CloudOS system; use DESTDIR for stage3/iso staging" >&2; \
+install: kpkg
+	@if [ -z "$(DESTDIR)" ] && [ -z "$$KPKG_FORCE" ] && ! grep -q '^ID="\?kryounix' /etc/os-release 2>/dev/null; then \
+	  echo "kpkg: refusing to install into a non-Kryonux system; use DESTDIR for stage3/iso staging" >&2; \
 	  exit 1; \
 	fi
-	install -Dm755 cloudpkg $(DESTDIR)$(PREFIX)/bin/cloudpkg
+	install -Dm755 kpkg $(DESTDIR)$(PREFIX)/bin/kpkg
 
 install-box:
-	install -Dm755 cloudpkg-box.sh $(DESTDIR)/usr/local/bin/cloudpkg
+	install -Dm755 kpkg-box.sh $(DESTDIR)/usr/local/bin/kpkg
 
 conf:
-	install -d $(DESTDIR)/etc/cloudpkg
-	@if [ -f etc/cloudpkg/cloudos.pub ]; then install -m644 etc/cloudpkg/cloudos.pub $(DESTDIR)/etc/cloudpkg/cloudos.pub; fi
-	@if [ ! -e $(DESTDIR)/etc/cloudpkg/cloudpkg.conf ]; then \
-	  install -m644 etc/cloudpkg/cloudpkg.conf $(DESTDIR)/etc/cloudpkg/cloudpkg.conf; \
-	elif ! cmp -s etc/cloudpkg/cloudpkg.conf $(DESTDIR)/etc/cloudpkg/cloudpkg.conf; then \
-	  install -m644 etc/cloudpkg/cloudpkg.conf $(DESTDIR)/etc/cloudpkg/cloudpkg.conf.dist; \
-	  echo "kept existing cloudpkg.conf, new version: cloudpkg.conf.dist"; \
+	install -d $(DESTDIR)/etc/kpkg
+	@if [ -f etc/kpkg/kryounix.pub ]; then install -m644 etc/kpkg/kryounix.pub $(DESTDIR)/etc/kpkg/kryounix.pub; fi
+	@if [ ! -e $(DESTDIR)/etc/kpkg/kpkg.conf ]; then \
+	  install -m644 etc/kpkg/kpkg.conf $(DESTDIR)/etc/kpkg/kpkg.conf; \
+	elif ! cmp -s etc/kpkg/kpkg.conf $(DESTDIR)/etc/kpkg/kpkg.conf; then \
+	  install -m644 etc/kpkg/kpkg.conf $(DESTDIR)/etc/kpkg/kpkg.conf.dist; \
+	  echo "kept existing kpkg.conf, new version: kpkg.conf.dist"; \
 	fi
 
 clean:
-	rm -f cloudpkg
+	rm -f kpkg
 
 .PHONY: all install install-box conf clean

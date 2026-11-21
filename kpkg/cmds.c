@@ -1,4 +1,4 @@
-#include "cloudpkg.h"
+#include "kpkg.h"
 struct opts { int pretend; int ask; int oneshot; int force; int no_snapshot; };
 struct plan_item { char cat[128]; char name[128]; char ver[64]; char oldver[64]; int explicit; int upgrade; };
 static struct plan_item plan[MAXPLAN];
@@ -40,7 +40,7 @@ static int parse_opts(int argc, char **argv, struct opts *o, char ***pkgs, int *
 			if (jobs > 256) jobs = 256;
 		}
 		else if (argv[i][0] == '-') {
-			fprintf(stderr, "cloudpkg: unknown option: %s\n", argv[i]);
+			fprintf(stderr, "kpkg: unknown option: %s\n", argv[i]);
 			return 0;
 		} else {
 			list_add(pkgs, npk, argv[i]);
@@ -52,10 +52,10 @@ static int confirm(void)
 {
 	char ans[16];
 	if (!isatty(0)) {
-		fputs("cloudpkg: cannot ask without a terminal, drop -a\n", stderr);
+		fputs("kpkg: cannot ask without a terminal, drop -a\n", stderr);
 		return 0;
 	}
-	fputs("cloudpkg: proceed? [y/N] ", stderr);
+	fputs("kpkg: proceed? [y/N] ", stderr);
 	if (!fgets(ans, sizeof ans, stdin) || (ans[0] != 'y' && ans[0] != 'Y')) return 0;
 	return 1;
 }
@@ -84,11 +84,11 @@ static int visit(const char *cat, const char *name, const char *ver, int explici
 	snprintf(key, sizeof key, "%s/%s", cat, name);
 	if (list_has(visited, nvisited, key)) return 1;
 	if (list_has(visiting, nvisiting, key)) {
-		fprintf(stderr, "cloudpkg: dependency cycle at %s\n", key);
+		fprintf(stderr, "kpkg: dependency cycle at %s\n", key);
 		return 0;
 	}
 	if (nplan >= MAXPLAN) {
-		fputs("cloudpkg: too many packages in one transaction\n", stderr);
+		fputs("kpkg: too many packages in one transaction\n", stderr);
 		return 0;
 	}
 	list_add(&visiting, &nvisiting, key);
@@ -98,7 +98,7 @@ static int visit(const char *cat, const char *name, const char *ver, int explici
 		return 1;
 	}
 	if (!recipe_path(cat, name, ver, path, sizeof path)) {
-		fprintf(stderr, "cloudpkg: recipe not found: %s-%s\n", key, ver);
+		fprintf(stderr, "kpkg: recipe not found: %s-%s\n", key, ver);
 		ok = 0;
 		goto done;
 	}
@@ -118,13 +118,13 @@ static int visit(const char *cat, const char *name, const char *ver, int explici
 			if (slash && find_category(slash + 1, dcat, sizeof dcat) && recipe_best(dcat, slash + 1, dver, sizeof dver)) {
 				if (!visit(dcat, slash + 1, dver, 0)) ok = 0;
 			} else {
-				fprintf(stderr, "cloudpkg: virtual dependency %s has no recipe, skipped\n", deps[i]);
+				fprintf(stderr, "kpkg: virtual dependency %s has no recipe, skipped\n", deps[i]);
 			}
 			continue;
 		}
 		if (db_find_installed(slash ? slash + 1 : deps[i], dcat, sizeof dcat, dver, sizeof dver)) continue;
 		if (!resolve_dep(deps[i], dcat, sizeof dcat, dname, sizeof dname, dver, sizeof dver)) {
-			fprintf(stderr, "cloudpkg: missing dependency %s required by %s\n", deps[i], key);
+			fprintf(stderr, "kpkg: missing dependency %s required by %s\n", deps[i], key);
 			ok = 0;
 			break;
 		}
@@ -166,7 +166,7 @@ static int execute_plan(int force)
 		}
 	}
 	ownership_free();
-	if (!r) printf("cloudpkg: transaction finished: %d package(s)\n", nplan);
+	if (!r) printf("kpkg: transaction finished: %d package(s)\n", nplan);
 	return r;
 }
 int cmd_install(int argc, char **argv)
@@ -176,7 +176,7 @@ int cmd_install(int argc, char **argv)
 	int npk = 0, i, r = 1;
 	if (!parse_opts(argc, argv, &o, &pkgs, &npk)) return 1;
 	if (!npk) {
-		fputs("cloudpkg: specify at least one package\n", stderr);
+		fputs("kpkg: specify at least one package\n", stderr);
 		goto out;
 	}
 	if (!o.pretend && !need_root()) goto out;
@@ -187,7 +187,7 @@ int cmd_install(int argc, char **argv)
 		if (!visit(cat, name, ver, !o.oneshot)) goto out;
 	}
 	if (!nplan) {
-		puts("cloudpkg: nothing to do, requested packages are already installed");
+		puts("kpkg: nothing to do, requested packages are already installed");
 		r = 0;
 		goto out;
 	}
@@ -210,7 +210,7 @@ int cmd_remove(int argc, char **argv)
 	int npk = 0, i, j, nrd, r = 1;
 	if (!parse_opts(argc, argv, &o, &pkgs, &npk)) return 1;
 	if (!npk) {
-		fputs("cloudpkg: specify at least one package\n", stderr);
+		fputs("kpkg: specify at least one package\n", stderr);
 		goto out;
 	}
 	if (!o.pretend && !need_root()) goto out;
@@ -225,32 +225,32 @@ int cmd_remove(int argc, char **argv)
 			snprintf(cat, sizeof cat, "%.127s", buf);
 			snprintf(name, sizeof name, "%.127s", slash + 1);
 			if (!db_installed_version(cat, name, ver, sizeof ver)) {
-				fprintf(stderr, "cloudpkg: %s/%s is not installed\n", cat, name);
+				fprintf(stderr, "kpkg: %s/%s is not installed\n", cat, name);
 				goto out;
 			}
 		} else {
 			snprintf(name, sizeof name, "%.127s", buf);
 			if (!db_find_installed(name, cat, sizeof cat, ver, sizeof ver)) {
-				fprintf(stderr, "cloudpkg: %s is not installed\n", name);
+				fprintf(stderr, "kpkg: %s is not installed\n", name);
 				goto out;
 			}
 		}
 		if (at && strcmp(at + 1, ver)) {
-			fprintf(stderr, "cloudpkg: version %s of %s/%s is not installed\n", at + 1, cat, name);
+			fprintf(stderr, "kpkg: version %s of %s/%s is not installed\n", at + 1, cat, name);
 			goto out;
 		}
 		nrd = db_reverse_deps(name, &rd);
 		if (nrd && !o.force) {
-			fprintf(stderr, "cloudpkg: cannot remove %s/%s, required by:", cat, name);
+			fprintf(stderr, "kpkg: cannot remove %s/%s, required by:", cat, name);
 			for (j = 0; j < nrd; j++) fprintf(stderr, " %s", rd[j]);
 			fputc('\n', stderr);
 			list_free(rd, nrd);
 			goto out;
 		}
-		if (nrd) fprintf(stderr, "cloudpkg: removing %s/%s despite %d reverse dependencies (--force)\n", cat, name, nrd);
+		if (nrd) fprintf(stderr, "kpkg: removing %s/%s despite %d reverse dependencies (--force)\n", cat, name, nrd);
 		list_free(rd, nrd);
 		if (nplan >= MAXPLAN) {
-			fputs("cloudpkg: too many packages in one transaction\n", stderr);
+			fputs("kpkg: too many packages in one transaction\n", stderr);
 			goto out;
 		}
 		snprintf(plan[nplan].cat, sizeof plan[nplan].cat, "%s", cat);
@@ -282,7 +282,7 @@ int cmd_upgrade(int argc, char **argv)
 	struct db_pkg *all = NULL;
 	if (!parse_opts(argc, argv, &o, &pkgs, &npk)) return 1;
 	if (npk) {
-		fputs("cloudpkg: upgrade takes no package arguments\n", stderr);
+		fputs("kpkg: upgrade takes no package arguments\n", stderr);
 		list_free(pkgs, npk);
 		return 1;
 	}
@@ -297,11 +297,11 @@ int cmd_upgrade(int argc, char **argv)
 		} else if (find_category(all[i].name, cat2, sizeof cat2) && recipe_best(cat2, all[i].name, best, sizeof best)) {
 			if (vercmp(best, all[i].version) > 0 && !visit(cat2, all[i].name, best, all[i].explicit)) goto out;
 		} else {
-			fprintf(stderr, "cloudpkg: no recipe for %s/%s, skipped\n", all[i].category, all[i].name);
+			fprintf(stderr, "kpkg: no recipe for %s/%s, skipped\n", all[i].category, all[i].name);
 		}
 	}
 	if (!nplan) {
-		puts("cloudpkg: all packages are up to date");
+		puts("kpkg: all packages are up to date");
 		r = 0;
 		goto out;
 	}
@@ -336,7 +336,7 @@ int cmd_clean(int argc, char **argv)
 			if (!nrd) printf("remove   %s/%s-%s (orphan dependency)\n", all[i].category, all[i].name, all[i].version);
 		}
 		free(all);
-		puts("cloudpkg: would clear distfiles and build directories");
+		puts("kpkg: would clear distfiles and build directories");
 		return 0;
 	}
 	if (o.ask && !confirm()) return 1;
@@ -365,7 +365,7 @@ int cmd_clean(int argc, char **argv)
 		a[0] = "find"; a[1] = workdir; a[2] = "-mindepth"; a[3] = "1"; a[4] = "-delete"; a[5] = NULL;
 		run(a);
 	}
-	printf("cloudpkg: cleaned %d orphan package(s), distfiles and build directories cleared\n", total);
+	printf("kpkg: cleaned %d orphan package(s), distfiles and build directories cleared\n", total);
 	return 0;
 }
 int cmd_search(int argc, char **argv)
@@ -374,7 +374,7 @@ int cmd_search(int argc, char **argv)
 	int nc, i, j, np, matches = 0, shown = 0;
 	struct dirent **nl = NULL;
 	if (argc != 1) {
-		fputs("cloudpkg: usage: cloudpkg search term\n", stderr);
+		fputs("kpkg: usage: kpkg search term\n", stderr);
 		return 1;
 	}
 	if (!ensure_tree()) return 1;
@@ -396,10 +396,10 @@ int cmd_search(int argc, char **argv)
 	}
 	list_free(cats, nc);
 	if (!matches) {
-		puts("cloudpkg: no packages matched");
+		puts("kpkg: no packages matched");
 		return 1;
 	}
-	if (matches > shown) printf("cloudpkg: %d matches total, showing %d, refine the term\n", matches, shown);
+	if (matches > shown) printf("kpkg: %d matches total, showing %d, refine the term\n", matches, shown);
 	return 0;
 }
 int cmd_info(int argc, char **argv)
@@ -408,7 +408,7 @@ int cmd_info(int argc, char **argv)
 	struct recipe r;
 	int i;
 	if (argc != 1) {
-		fputs("cloudpkg: usage: cloudpkg info package\n", stderr);
+		fputs("kpkg: usage: kpkg info package\n", stderr);
 		return 1;
 	}
 	if (!ensure_tree()) return 1;
@@ -444,7 +444,7 @@ int cmd_list(void)
 	int n, i;
 	n = db_all(&all);
 	if (!n) {
-		puts("cloudpkg: no packages installed");
+		puts("kpkg: no packages installed");
 		free(all);
 		return 0;
 	}
@@ -457,7 +457,7 @@ int cmd_files(int argc, char **argv)
 	char cat[128], name[128], ver[64], path[BUF], buf[512], **files, *sl;
 	int n, i;
 	if (argc != 1) {
-		fputs("cloudpkg: usage: cloudpkg files package\n", stderr);
+		fputs("kpkg: usage: kpkg files package\n", stderr);
 		return 1;
 	}
 	snprintf(buf, sizeof buf, "%s", argv[0]);
@@ -467,13 +467,13 @@ int cmd_files(int argc, char **argv)
 		snprintf(cat, sizeof cat, "%.127s", buf);
 		snprintf(name, sizeof name, "%.127s", sl + 1);
 		if (!db_installed_version(cat, name, ver, sizeof ver)) {
-			fprintf(stderr, "cloudpkg: %s/%s is not installed\n", cat, name);
+			fprintf(stderr, "kpkg: %s/%s is not installed\n", cat, name);
 			return 1;
 		}
 	} else {
 		snprintf(name, sizeof name, "%.127s", buf);
 		if (!db_find_installed(name, cat, sizeof cat, ver, sizeof ver)) {
-			fprintf(stderr, "cloudpkg: %s is not installed\n", name);
+			fprintf(stderr, "kpkg: %s is not installed\n", name);
 			return 1;
 		}
 	}
@@ -488,7 +488,7 @@ int cmd_owns(int argc, char **argv)
 	char rel[BUF];
 	const char *owner;
 	if (argc != 1) {
-		fputs("cloudpkg: usage: cloudpkg owns path\n", stderr);
+		fputs("kpkg: usage: kpkg owns path\n", stderr);
 		return 1;
 	}
 	snprintf(rel, sizeof rel, "%s", argv[0]);
@@ -535,9 +535,9 @@ int cmd_doctor(void)
 int cmd_fix(void)
 {
 	if (!need_root()) return 1;
-	puts("cloudpkg: repairing the environment");
+	puts("kpkg: repairing the environment");
 	if (!mkdirs(distdir) || !mkdirs(workdir) || !mkdirs(INSTALLED)) {
-		fputs("cloudpkg: cannot create required directories\n", stderr);
+		fputs("kpkg: cannot create required directories\n", stderr);
 		return 1;
 	}
 	if (!ensure_tree()) return 1;
@@ -582,20 +582,20 @@ int cmd_sync(void)
 	int ncats = 0, npkgs = 0;
 	if (!need_root()) return 1;
 	if (!have("curl") || !have("tar")) {
-		fputs("cloudpkg: sync needs curl and tar\n", stderr);
+		fputs("kpkg: sync needs curl and tar\n", stderr);
 		return 1;
 	}
 	if (!mkdirs(distdir)) {
-		fprintf(stderr, "cloudpkg: cannot create %s\n", distdir);
+		fprintf(stderr, "kpkg: cannot create %s\n", distdir);
 		return 1;
 	}
 	snprintf(part, sizeof part, "%s/recipes.tar.gz.part", distdir);
 	snprintf(fin, sizeof fin, "%s/recipes.tar.gz", distdir);
-	printf("cloudpkg: downloading recipe tree: %s\n", recipes_url);
+	printf("kpkg: downloading recipe tree: %s\n", recipes_url);
 	fflush(stdout);
 	unlink(part);
 	if (fetch(recipes_url, part) != 0) {
-		fputs("cloudpkg: recipe tree download failed, check the network and recipes_url\n", stderr);
+		fputs("kpkg: recipe tree download failed, check the network and recipes_url\n", stderr);
 		unlink(part);
 		return 1;
 	}
@@ -604,54 +604,54 @@ int cmd_sync(void)
 	if (fetch(sigurl, sig) == 0) {
 		if (have("minisign") && exists(PUBKEY)) {
 			if (!verify_sig(part, sig)) {
-				fputs("cloudpkg: recipe tree signature mismatch, sync aborted\n", stderr);
+				fputs("kpkg: recipe tree signature mismatch, sync aborted\n", stderr);
 				unlink(part);
 				unlink(sig);
 				return 1;
 			}
-			puts("cloudpkg: minisign signature verified");
+			puts("kpkg: minisign signature verified");
 		} else {
-			fputs("cloudpkg: signature downloaded but minisign or the public key is missing, not verified\n", stderr);
+			fputs("kpkg: signature downloaded but minisign or the public key is missing, not verified\n", stderr);
 		}
 		unlink(sig);
 	} else {
-		fputs("cloudpkg: no detached signature published for the recipe tree, trusting HTTPS\n", stderr);
+		fputs("kpkg: no detached signature published for the recipe tree, trusting HTTPS\n", stderr);
 	}
 	unlink(fin);
 	if (rename(part, fin) != 0) {
-		perror("cloudpkg: rename");
+		perror("kpkg: rename");
 		return 1;
 	}
 	snprintf(nw, sizeof nw, "%s.new", repo);
 	snprintf(old, sizeof old, "%s.old", repo);
 	rm_tree(nw);
 	if (!mkdirs(nw)) {
-		fprintf(stderr, "cloudpkg: cannot create %s\n", nw);
+		fprintf(stderr, "kpkg: cannot create %s\n", nw);
 		return 1;
 	}
-	puts("cloudpkg: extracting the recipe tree");
+	puts("kpkg: extracting the recipe tree");
 	fflush(stdout);
 	a[0] = "tar"; a[1] = "xzf"; a[2] = fin; a[3] = "--strip-components=1"; a[4] = "--no-same-owner"; a[5] = "-C"; a[6] = nw; a[7] = NULL;
 	if (run(a) != 0) {
-		fputs("cloudpkg: cannot extract the recipe archive\n", stderr);
+		fputs("kpkg: cannot extract the recipe archive\n", stderr);
 		return 1;
 	}
 	if (!count_tree(nw, &ncats, &npkgs)) {
-		fputs("cloudpkg: the archive does not look like a recipe tree, the current tree was kept\n", stderr);
+		fputs("kpkg: the archive does not look like a recipe tree, the current tree was kept\n", stderr);
 		rm_tree(nw);
 		return 1;
 	}
 	rm_tree(old);
 	if (exists(repo) && rename(repo, old) != 0) {
-		perror("cloudpkg: rename");
+		perror("kpkg: rename");
 		return 1;
 	}
 	if (rename(nw, repo) != 0) {
-		perror("cloudpkg: rename");
-		if (exists(old) && rename(old, repo) != 0) perror("cloudpkg: cannot restore the previous tree");
+		perror("kpkg: rename");
+		if (exists(old) && rename(old, repo) != 0) perror("kpkg: cannot restore the previous tree");
 		return 1;
 	}
 	rm_tree(old);
-	printf("cloudpkg: recipe tree updated: %d packages in %d categories\n", npkgs, ncats);
+	printf("kpkg: recipe tree updated: %d packages in %d categories\n", npkgs, ncats);
 	return 0;
 }

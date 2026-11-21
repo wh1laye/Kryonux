@@ -14,13 +14,13 @@ echo data2 > "$T/b.tgz"
 minisign -S -s "$T/k.key" -m "$T/a.tgz" -x "$T/a.tgz.minisig" </dev/null >/dev/null
 
 cat > "$T/t.c" <<'EOT'
-#include "cloudpkg.h"
+#include "kpkg.h"
 #undef main
 int main(int c, char **v) { (void)c; return verify_sig(v[1], v[2]) ? 0 : 1; }
 EOT
 
 build() {
-  gcc -std=gnu17 -Wall -Wextra -Werror -Dmain=cloudpkg_main -DPUBKEY="\"$1\"" -I"$R/cloudpkg" -o "$2" "$T/t.c" "$R"/cloudpkg/*.c
+  gcc -std=gnu17 -Wall -Wextra -Werror -Dmain=kpkg_main -DPUBKEY="\"$1\"" -I"$R/kpkg" -o "$2" "$T/t.c" "$R"/kpkg/*.c
 }
 
 build "$T/k.pub" "$T/ok" || die "не собралось"
