@@ -105,7 +105,11 @@ say "kernel release: $KREL"
 
 say "building with $JOBS jobs"
 KCF=""; [ "$MARCH" = x86-64 ] || KCF="-march=$MARCH"
-make -j"$JOBS" KCFLAGS="$KCF" bzImage modules
+if ! make -j"$JOBS" KCFLAGS="$KCF" bzImage modules; then
+  say "the parallel build failed, repeating it with one job to show the real error"
+  make -j1 KCFLAGS="$KCF" bzImage modules 2>&1 | tail -n 80 >&2 || true
+  die "the kernel build failed, see the error above"
+fi
 
 say "staging modules"
 rm -rf "$WORK/modules"

@@ -9,7 +9,7 @@ The series lives in `patches/` and is listed in `patches/series`. Patches are ap
 | Patch | What it does |
 | :--- | :--- |
 | `0001-security-add-kryonk-guard.patch` | Adds `security/kryonk`. At boot it sets `kptr_restrict=2`, `dmesg_restrict=1` and `panic_on_oops=1`, and creates `/proc/kryonk`. Boot with `kryonk.guard=0` to disable it |
-| `0002-security-kryonk-add-lock-sysctl.patch` | Adds the one-way sysctl `kernel.kryonk.lock`. Writing `1` re-asserts the guard values and disables module loading until reboot. It cannot be changed back |
+| `0002-security-kryonk-add-lock-sysctl.patch` | Adds the one-way sysctl `kernel.kryonk.lock`. Writing `1` re-asserts the guard values. It cannot be changed back |
 | `0003-security-kryonk-report-lock-state.patch` | Shows the lock state and the module loading state in `/proc/kryonk` |
 
 Use it after boot, for example at the end of your init sequence:

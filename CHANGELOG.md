@@ -12,7 +12,13 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - `kpkg install ./name-version.kpkg` installs straight from a local recipe file; dependencies still come from the recipe tree and the package is recorded in the category `local`
 - Short build function names in recipes: `prepare`, `configure`, `build`, `install`, `pre_install`, `post_install`, `pre_remove`, `post_remove`. The old `src_*` and `pkg_*` names still work
 - `kpkg/RECIPES.md` documents the recipe format
+- `kpkg checksum file.kpkg` downloads every source and writes the `SHA256` field
+- Recipe versions may contain lowercase letters, such as `9.9p1`
 - `SHA256` recipe field: every downloaded source is verified and `kpkg lint` requires it
+
+#### Fixed
+- Installing from a local `.kpkg` file crashed with a buffer overflow detected by the new tests; the path buffer is now `PATH_MAX`
+- `kpkg lint` rejected valid recipes that rely on the default build steps
 
 #### Changed
 - The Gentoo style `Manifest` checks (BLAKE2B and SHA512) were replaced by the `SHA256` field
@@ -22,7 +28,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 
 ### 🗜️ Stage 3
 #### Changed
-- Stage 3 is now minimal: the toolchain, core utilities, filesystem tools, `dhcpcd`, `curl`, `openssh`, `nftables`, `nano`, `fastfetch` and `kpkg`, plus the base tools every system needs: `openrc`, `limine`, `kmod`, `eudev`, `ncurses`, `readline`, `less`, `file`, `iproute2`, `iputils` and `minisign`
+- Stage 3 is now minimal: the toolchain, core utilities, filesystem tools, `dhcpcd`, `curl`, `openssh`, `nftables`, `nano`, `fastfetch` and `kpkg`, plus the build tools `m4`, `autoconf`, `automake`, `libtool`, `bison`, `flex`, `pkgconf`, `gmp`, `mpfr` and `mpc`, and the base tools every system needs: `openrc`, `limine`, `kmod`, `eudev`, `ncurses`, `readline`, `less`, `file`, `iproute2`, `iputils` and `minisign`
 - Version is `0.0.1`; the builder base is `base-0.0.0` and the ISO consumes the new `base-0.0.1`
 
 #### Removed
@@ -47,6 +53,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - `tools/kernel/README.md` documents the patch series, build variables and signing
 
 #### Fixed
+- The CI run `kryonk #2` failed late in the build. Patch 0002 referenced `modules_disabled`, which the 6.18 kernel no longer exports, so the final link failed. The patch no longer touches it, and `ZERO_CALL_USED_REGS` was removed from `kryonk.config`. A failed parallel build is now repeated with one job so the real compiler error is printed
 - The CI run `kryonk #1` built the kernel but failed with "Error while loading the secret key file". The workflow passes the key as a file path while `tools/sign.sh` treated the variable as the key text. `sign.sh` now accepts a file path or the key text, rejects anything that is not a minisign key, and signs keys without a password with `-W`
 
 #### Removed
@@ -60,13 +67,16 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 #### Changed
 - Every cloud was replaced with the Kryonux logo: the header brand mark on all pages, the pre-login check screen, the summer theme, the space theme background and the forum sticker
 - The PWA icons (`icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`) were still the old cloud and are now the Kryonux K
+- The summer theme flies real clouds again and the space theme flies meteorites; the Kryonux logo no longer drifts across the themes. Logo icons stay in the header, the pre-login screen and the forum sticker
 - The forum sticker `:s_cloud:` is now `:s_kryonux:`, the cloud emoji was removed from the emoji picker, and the "cloud" color preset is now "cryo"
 - The header logo is a tight crop of the K and sits next to `ryonux` like a letter; `canonical` links were added to every page and `theme-color` to the 404 and offline pages
 - Settings have five tabs: Theme, Colors, Glass, Reading and More. The More tab with all extra options (view and comfort, text, appearance, extras) is kept. Each core section has a short hint, and there is a "Reset all settings" button
+- Brand text: `typo.js` capitalized the first letter of the header text, so `ryonux` rendered as `Ryonux`; the header brand is now excluded
+- Stronger ice and diamond look: frosted gradient cards with a light sweep on hover, ice chips, a second diamond facet in the hero and a deep blue dark theme
 - New ice and diamond look: icy blue light and dark palettes, a faint crystal lattice background, a diamond facet behind the home hero and gradient accent buttons
 - In the header the Kryonux logo now replaces the letter K, so the brand reads as the logo followed by `ryonux`
 - Theme stylesheet selectors use `.kryonux`, and the seasonal theme layer class is `zs-logo`
-- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `38`
+- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `40`
 
 #### Added
 - News and RSS entry for `v0.0.1`

@@ -1,7 +1,17 @@
+toolchain/autoconf
+toolchain/automake
 toolchain/binutils
+toolchain/bison
+toolchain/flex
 toolchain/gcc
+toolchain/libtool
+toolchain/m4
 toolchain/make
 toolchain/patch
+toolchain/pkgconf
+libs/gmp
+libs/mpc
+libs/mpfr
 system/bash
 system/bzip2
 system/coreutils

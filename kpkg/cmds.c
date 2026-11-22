@@ -1,3 +1,4 @@
+#include <limits.h>
 #include "kpkg.h"
 struct opts { int pretend; int ask; int oneshot; int force; int no_snapshot; };
 struct plan_item { char cat[128]; char name[128]; char ver[64]; char oldver[64]; int explicit; int upgrade; };
@@ -176,8 +177,10 @@ static int local_recipe(const char *arg, char *cat, size_t cn, char *name, size_
 	int ok = 0;
 	if (l < 6 || strcmp(arg + l - 5, ".kpkg") || !exists(arg)) return 0;
 	recipe_init(&r);
-	if (recipe_load(arg, &r) && safe_id(r.name) && ver_ok(r.version)) {
-		if (!realpath(arg, recipe_local)) snprintf(recipe_local, sizeof recipe_local, "%s", arg);
+	if (recipe_load(arg, &r) && safe_id(r.name) && recipe_ver_ok(r.version)) {
+		char rp[PATH_MAX];
+		if (realpath(arg, rp)) snprintf(recipe_local, sizeof recipe_local, "%s", rp);
+		else snprintf(recipe_local, sizeof recipe_local, "%s", arg);
 		snprintf(recipe_local_name, sizeof recipe_local_name, "%s", r.name);
 		snprintf(recipe_local_ver, sizeof recipe_local_ver, "%s", r.version);
 		snprintf(cat, cn, "local");
@@ -189,6 +192,103 @@ static int local_recipe(const char *arg, char *cat, size_t cn, char *name, size_
 	}
 	recipe_free(&r);
 	return ok;
+}
+static int sum_source(const char *url, char *hash)
+{
+	char tmp[BUF], got[BUF];
+	char *a[4];
+	int ok = 0;
+	snprintf(tmp, sizeof tmp, "/var/tmp/kpkg-checksum.%ld", (long)getpid());
+	unlink(tmp);
+	if (url[0] == '/') {
+		a[0] = "cp"; a[1] = (char *)url; a[2] = tmp; a[3] = NULL;
+		if (run(a) != 0) return 0;
+	} else if (fetch(url, tmp) != 0) {
+		fprintf(stderr, "kpkg: download failed: %s\n", url);
+		unlink(tmp);
+		return 0;
+	}
+	a[0] = "sha256sum"; a[1] = tmp; a[2] = NULL;
+	if (capture(a, got, sizeof got) == 0 && strspn(got, "0123456789abcdef") >= 64) {
+		memcpy(hash, got, 64);
+		hash[64] = 0;
+		ok = 1;
+	}
+	unlink(tmp);
+	return ok;
+}
+static int checksum_file(const char *path)
+{
+	struct recipe r;
+	char buf[2048], *tok, *save = NULL, line[1200], hash[65], sums[1024] = "";
+	char *text, *p, *eol, *out;
+	FILE *f;
+	long len;
+	int ok = 1, replaced = 0, has;
+	size_t pos = 0;
+	recipe_init(&r);
+	if (!recipe_load(path, &r) || !r.src_uri[0]) {
+		fprintf(stderr, "kpkg: %s: cannot read a recipe with SRC_URI\n", path);
+		recipe_free(&r);
+		return 0;
+	}
+	snprintf(buf, sizeof buf, "%s", r.src_uri);
+	recipe_free(&r);
+	for (tok = strtok_r(buf, " \t\n", &save); tok && ok; tok = strtok_r(NULL, " \t\n", &save)) {
+		if (!strcmp(tok, "->")) {
+			tok = strtok_r(NULL, " \t\n", &save);
+			continue;
+		}
+		printf("kpkg: hashing %s\n", tok);
+		if (!sum_source(tok, hash)) { ok = 0; break; }
+		if (strlen(sums) + 66 >= sizeof sums) { ok = 0; break; }
+		if (sums[0]) strcat(sums, " ");
+		strcat(sums, hash);
+	}
+	if (!ok || !sums[0]) return 0;
+	f = fopen(path, "r");
+	if (!f) return 0;
+	fseek(f, 0, SEEK_END);
+	len = ftell(f);
+	rewind(f);
+	text = malloc((size_t)len + 1);
+	out = malloc((size_t)len + 2048);
+	if (!text || !out || fread(text, 1, (size_t)len, f) != (size_t)len) { fclose(f); free(text); free(out); return 0; }
+	fclose(f);
+	text[len] = 0;
+	snprintf(line, sizeof line, "SHA256=\"%s\"\n", sums);
+	has = !strncmp(text, "SHA256=", 7) || strstr(text, "\nSHA256=") != NULL;
+	for (p = text; *p; p = eol) {
+		eol = strchr(p, '\n');
+		eol = eol ? eol + 1 : p + strlen(p);
+		if (!strncmp(p, "SHA256=", 7)) {
+			memcpy(out + pos, line, strlen(line)); pos += strlen(line); replaced = 1;
+			continue;
+		}
+		memcpy(out + pos, p, (size_t)(eol - p)); pos += (size_t)(eol - p);
+		if (!has && !replaced && !strncmp(p, "SRC_URI=", 8)) {
+			memcpy(out + pos, line, strlen(line)); pos += strlen(line); replaced = 1;
+		}
+	}
+	out[pos] = 0;
+	f = fopen(path, "w");
+	if (!f || fwrite(out, 1, pos, f) != pos) { if (f) fclose(f); free(text); free(out); return 0; }
+	fclose(f);
+	free(text);
+	free(out);
+	printf("kpkg: %s: SHA256 written\n", path);
+	return 1;
+}
+int cmd_checksum(int argc, char **argv)
+{
+	int i, bad = 0;
+	if (argc < 1) {
+		fputs("kpkg: specify at least one .kpkg file\n", stderr);
+		return 1;
+	}
+	for (i = 0; i < argc; i++)
+		if (!checksum_file(argv[i])) bad++;
+	return bad ? 1 : 0;
 }
 int cmd_lint(int argc, char **argv)
 {

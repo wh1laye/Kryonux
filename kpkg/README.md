@@ -28,6 +28,7 @@ make
 | `remove` | Remove packages |
 | `upgrade` | Upgrade installed packages |
 | `lint` | Check `.kpkg` files for errors |
+| `checksum` | Download sources and write the `SHA256` field |
 | `search`, `info`, `list` | Query recipes and installed packages |
 | `files`, `owns` | Show package files or the package that owns a path |
 | `snapshot`, `snapshots`, `rollback` | Manage `btrfs` snapshots |

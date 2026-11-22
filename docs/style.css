@@ -116,3 +116,13 @@ pre,.code{border:1px solid color-mix(in srgb,var(--ac) 18%,var(--line));box-shad
 a.card,.card{transition:transform .18s,box-shadow .18s,border-color .18s}
 a.card:hover,.card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--ac) 45%,var(--line));box-shadow:0 10px 28px color-mix(in srgb,var(--ac) 16%,transparent)}
 ::selection{background:color-mix(in srgb,var(--ac) 28%,transparent)}
+
+.bento>*,.card,.stat{background:linear-gradient(145deg,color-mix(in srgb,var(--surf) 90%,#d4eeff),color-mix(in srgb,var(--surf) 95%,#b9defa));border:1px solid color-mix(in srgb,var(--ac) 24%,var(--line));box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 8px 24px color-mix(in srgb,var(--ac) 9%,transparent);position:relative;overflow:hidden}
+.bento>*::after,.card::after,.stat::after{content:"";position:absolute;top:-60%;left:-30%;width:55%;height:220%;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:rotate(18deg) translateX(-180%);transition:transform .9s ease}
+.bento>*:hover::after,.card:hover::after,.stat:hover::after{transform:rotate(18deg) translateX(460%)}
+.chip,.kick{background:linear-gradient(135deg,#e2f5ff,#bfe1ff);color:#0a3a78;border:1px solid #9ed0ff}
+.hero-w::after{content:"";position:absolute;left:-40px;bottom:-30px;width:220px;height:220px;z-index:-1;pointer-events:none;background:linear-gradient(135deg,rgba(150,215,255,.7),rgba(255,255,255,0));clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);opacity:.55}
+html[data-theme=gray] .bento>*,html[data-theme=gray] .card,html[data-theme=gray] .stat{background:linear-gradient(145deg,#17304a,#0f2033);border-color:#2a4a6c;box-shadow:inset 0 1px 0 rgba(160,220,255,.12),0 8px 28px rgba(60,160,255,.08)}
+html[data-theme=gray] .chip,html[data-theme=gray] .kick{background:linear-gradient(135deg,#17406a,#10304f);color:#bfe6ff;border-color:#2d6a9f}
+html[data-theme=gray] .hero-w::before,html[data-theme=gray] .hero-w::after{opacity:.28}
+@media(prefers-reduced-motion:reduce){.bento>*::after,.card::after,.stat::after{transition:none}}

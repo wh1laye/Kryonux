@@ -469,6 +469,11 @@ int ensure_tree(void)
 	puts("kpkg: recipe tree is missing, downloading it now");
 	return cmd_sync() == 0;
 }
+int recipe_ver_ok(const char *s)
+{
+	if (!*s || !((*s >= '0' && *s <= '9') || (*s >= 'a' && *s <= 'z'))) return 0;
+	return strspn(s, "0123456789abcdefghijklmnopqrstuvwxyz.+_~-") == strlen(s) && s[strlen(s) - 1] != '.';
+}
 int recipe_lint(const char *path)
 {
 	struct recipe r;
@@ -481,12 +486,12 @@ int recipe_lint(const char *path)
 	if (!r.name[0]) { fprintf(stderr, "kpkg: %s: PACKAGE is missing\n", path); bad++; }
 	else if (!safe_id(r.name)) { fprintf(stderr, "kpkg: %s: PACKAGE has invalid characters\n", path); bad++; }
 	if (!r.version[0]) { fprintf(stderr, "kpkg: %s: VERSION is missing\n", path); bad++; }
-	else if (!ver_ok(r.version)) { fprintf(stderr, "kpkg: %s: VERSION has invalid characters\n", path); bad++; }
+	else if (!recipe_ver_ok(r.version)) { fprintf(stderr, "kpkg: %s: VERSION has invalid characters\n", path); bad++; }
 	if (!r.description[0]) { fprintf(stderr, "kpkg: %s: DESCRIPTION is missing\n", path); bad++; }
 	if (!r.license[0]) { fprintf(stderr, "kpkg: %s: LICENSE is missing\n", path); bad++; }
 	if (r.src_uri[0] && !r.sha256[0]) { fprintf(stderr, "kpkg: %s: SHA256 is missing\n", path); bad++; }
 	if (!r.src_uri[0] && recipe_phase(&r, "src_install")) { fprintf(stderr, "kpkg: %s: SRC_URI is missing\n", path); bad++; }
-	if (!recipe_phase(&r, "src_install") && !r.depend[0] && !r.rdepend[0]) {
+	if (!r.src_uri[0] && !recipe_phase(&r, "src_install") && !r.depend[0] && !r.rdepend[0]) {
 		fprintf(stderr, "kpkg: %s: the recipe installs nothing and has no dependencies\n", path);
 		bad++;
 	}

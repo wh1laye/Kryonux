@@ -76,5 +76,53 @@ check clean-pretend 0 "$(run clean -p)" "would clear distfiles"
 check upgrade-pretend 0 "$(run upgrade -p)" "up to date"
 check doctor 1 "$(run doctor)" "system id"
 
+mkdir -p "$T/rec"
+SUM=$(sha256sum "$T/src/hello-1.0.tar.gz" | awk '{print $1}')
+cat > "$T/rec/good-1.0.kpkg" <<REC
+PACKAGE=good
+VERSION=1.0
+DESCRIPTION="Good recipe"
+LICENSE="MIT"
+SRC_URI="$T/src/hello-1.0.tar.gz -> good-1.0.tar.gz"
+SHA256="$SUM"
+build() {
+  make
+}
+install() {
+  make DESTDIR="\$DESTDIR" install
+}
+REC
+printf 'PACKAGE=nodesc\nVERSION=1.0\nLICENSE="MIT"\nSRC_URI="%s"\nSHA256="%s"\n' "$T/src/hello-1.0.tar.gz" "$SUM" > "$T/rec/nodesc-1.0.kpkg"
+printf 'PACKAGE=nosum\nVERSION=1.0\nDESCRIPTION="No checksum"\nLICENSE="MIT"\nSRC_URI="%s"\n' "$T/src/hello-1.0.tar.gz" > "$T/rec/nosum-1.0.kpkg"
+printf 'PACKAGE=oldnames\nVERSION=1.0\nDESCRIPTION="Old names"\nLICENSE="MIT"\nSRC_URI="%s"\nSHA256="%s"\nsrc_compile() {\n  make\n}\nsrc_install() {\n  make DESTDIR="$DESTDIR" install\n}\n' "$T/src/hello-1.0.tar.gz" "$SUM" > "$T/rec/oldnames-1.0.kpkg"
+printf 'PACKAGE=dupfunc\nVERSION=1.0\nDESCRIPTION="Duplicate"\nLICENSE="MIT"\nSRC_URI="%s"\nSHA256="%s"\nbuild() {\n  make\n}\nbuild() {\n  make\n}\n' "$T/src/hello-1.0.tar.gz" "$SUM" > "$T/rec/dupfunc-1.0.kpkg"
+mkdir -p "$T/tree/tools/badsum/badsum-1.0"
+printf 'PACKAGE=badsum\nVERSION=1.0\nDESCRIPTION="Wrong checksum"\nLICENSE="MIT"\nSRC_URI="%s"\nSHA256="%s"\n' "$T/src/hello-1.0.tar.gz" "0000000000000000000000000000000000000000000000000000000000000000" > "$T/tree/tools/badsum/badsum-1.0/badsum-1.0.kpkg"
+
+check lint-good 0 "$(run lint "$T/rec/good-1.0.kpkg")" "ok:"
+check lint-no-description 1 "$(run lint "$T/rec/nodesc-1.0.kpkg")" "DESCRIPTION is missing"
+check lint-no-sha256 1 "$(run lint "$T/rec/nosum-1.0.kpkg")" "SHA256 is missing"
+check lint-legacy-names 0 "$(run lint "$T/rec/oldnames-1.0.kpkg")" "ok:"
+check lint-duplicate-function 1 "$(run lint "$T/rec/dupfunc-1.0.kpkg")" "dupfunc"
+printf 'PACKAGE=patchlevel\nVERSION=9.9p1\nDESCRIPTION="Letter in the version"\nLICENSE="MIT"\nSRC_URI="%s"\nSHA256="%s"\n' "$T/src/hello-1.0.tar.gz" "$SUM" > "$T/rec/patchlevel-9.9p1.kpkg"
+check lint-version-with-letters 0 "$(run lint "$T/rec/patchlevel-9.9p1.kpkg")" "ok:"
+printf 'PACKAGE=badver\nVERSION=1.0 beta\nDESCRIPTION="Bad"\nLICENSE="MIT"\nSRC_URI="x"\nSHA256="y"\n' > "$T/rec/badver-1.kpkg"
+check lint-bad-version 1 "$(run lint "$T/rec/badver-1.kpkg")" "invalid characters"
+check lint-no-args 1 "$(run lint)" "specify at least one"
+check lint-missing-file 1 "$(run lint "$T/rec/absent.kpkg")" "absent"
+check local-plan 0 "$(run install -p "$T/rec/good-1.0.kpkg")" "local/good-1.0"
+check local-bad-file 1 "$(run install -p "$T/rec/dupfunc-1.0.kpkg")" "not a valid recipe"
+
+cp "$T/rec/nosum-1.0.kpkg" "$T/rec/fill-1.0.kpkg"
+sed -i 's/PACKAGE=nosum/PACKAGE=fill/' "$T/rec/fill-1.0.kpkg"
+check checksum-writes 0 "$(run checksum "$T/rec/fill-1.0.kpkg")" "SHA256 written"
+if grep -qF "SHA256=\"$SUM\"" "$T/rec/fill-1.0.kpkg"; then printf 'PASS  checksum-value\n'; pass=$((pass+1)); else printf 'FAIL  checksum-value\n'; fail=$((fail+1)); fi
+check checksum-then-lint 0 "$(run lint "$T/rec/fill-1.0.kpkg")" "ok:"
+run checksum "$T/rec/fill-1.0.kpkg" >/dev/null
+if [ "$(grep -c '^SHA256=' "$T/rec/fill-1.0.kpkg")" = 1 ]; then printf 'PASS  checksum-idempotent\n'; pass=$((pass+1)); else printf 'FAIL  checksum-idempotent\n'; fail=$((fail+1)); fi
+check checksum-missing-source 1 "$(run checksum "$T/rec/dupfunc-1.0.kpkg")" "dupfunc"
+check checksum-mismatch-blocks-install 1 "$(KPKG_FORCE=1 run install badsum)" "SHA256 mismatch"
+check unknown-command 1 "$(run frobnicate)" "usage"
+
 printf '\nkpkg tests: %d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" = 0 ] || exit 1

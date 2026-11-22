@@ -1,7 +1,7 @@
 From: The Kryonux Project
 Subject: [PATCH] security: kryonk: add the kernel.kryonk.lock sysctl
 
-Adds a one-way sysctl. Writing 1 re-asserts the guard defaults and disables module loading until reboot. The value cannot be changed afterwards.
+Adds a one-way sysctl. Writing 1 re-asserts the guard defaults. The value cannot be changed afterwards.
 ---
 diff --git a/security/kryonk/Makefile b/security/kryonk/Makefile
 --- a/security/kryonk/Makefile
@@ -12,7 +12,7 @@ diff --git a/security/kryonk/Makefile b/security/kryonk/Makefile
 diff --git a/security/kryonk/kryonk_lock.c b/security/kryonk/kryonk_lock.c
 --- a/security/kryonk/kryonk_lock.c
 +++ b/security/kryonk/kryonk_lock.c
-@@ -0,0 +1,54 @@
+@@ -0,0 +1,48 @@
 +#include <linux/errno.h>
 +#include <linux/init.h>
 +#include <linux/kernel.h>
@@ -22,9 +22,6 @@ diff --git a/security/kryonk/kryonk_lock.c b/security/kryonk/kryonk_lock.c
 +extern int kptr_restrict;
 +extern int dmesg_restrict;
 +extern int panic_on_oops;
-+#ifdef CONFIG_MODULES
-+extern int modules_disabled;
-+#endif
 +
 +int kryonk_locked;
 +
@@ -40,10 +37,7 @@ diff --git a/security/kryonk/kryonk_lock.c b/security/kryonk/kryonk_lock.c
 +		kptr_restrict = 2;
 +		dmesg_restrict = 1;
 +		panic_on_oops = 1;
-+#ifdef CONFIG_MODULES
-+		modules_disabled = 1;
-+#endif
-+		pr_info("kryonk: locked, module loading is disabled\n");
++		pr_info("kryonk: locked\n");
 +	}
 +	return ret;
 +}

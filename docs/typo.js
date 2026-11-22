@@ -1,6 +1,6 @@
 (function(){
 var d=document,W=window;
-var SKIP='svg,code,pre,kbd,samp,script,style,textarea,[contenteditable="true"],.cmd,.tb,.code,.txt,.bio,.dmm,.un,.relbody,.trow strong,.trow .mu,.sxr,[data-noi]';
+var SKIP='.brand,svg,code,pre,kbd,samp,script,style,textarea,[contenteditable="true"],.cmd,.tb,.code,.txt,.bio,.dmm,.un,.relbody,.trow strong,.trow .mu,.sxr,[data-noi]';
 var LETTER=/[A-Za-zА-Яа-яЁё]/;
 var WORD=/^[A-Za-zА-Яа-яЁё0-9_](?:[A-Za-zА-Яа-яЁё0-9_.-]*[A-Za-zА-Яа-яЁё0-9_])?/;
 var ABBR={
