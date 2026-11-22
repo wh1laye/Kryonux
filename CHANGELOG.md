@@ -76,10 +76,14 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - New ice and diamond look: icy blue light and dark palettes, a faint crystal lattice background, a diamond facet behind the home hero and gradient accent buttons
 - In the header the Kryonux logo now replaces the letter K, so the brand reads as the logo followed by `ryonux`
 - Theme stylesheet selectors use `.kryonux`, and the seasonal theme layer class is `zs-logo`
-- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `40`
+- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `41`
 
 #### Added
 - News and RSS entry for `v0.0.1`
+
+#### Fixed
+- The space theme no longer draws the purple K over the header logo or the moon over the page text
+- The space theme comets and meteors fly down and to the right on separate tracks instead of crossing each other
 
 ### 📚 Repository
 #### Added
