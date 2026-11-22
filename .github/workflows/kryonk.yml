@@ -73,7 +73,7 @@ jobs:
             [ -s "$x.minisig" ] || { echo "::error::нет подписи $x.minisig"; exit 1; }
             minisign -V -p "$GITHUB_WORKSPACE/docs/kryonux.pub" -m "$x" -x "$x.minisig"
           done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: kryonk-${{ inputs.ver }}-${{ matrix.march }}
           path: out/
