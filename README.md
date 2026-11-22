@@ -6,7 +6,7 @@
 
 **A fast, security-hardened Linux distribution built on an LFS-style base.**
 
-![version](https://img.shields.io/badge/version-v0.0.0-5fb4ff?style=flat-square)
+![version](https://img.shields.io/badge/version-v0.0.1-5fb4ff?style=flat-square)
 ![license](https://img.shields.io/badge/license-GPLv3-blue?style=flat-square)
 ![arch](https://img.shields.io/badge/arch-x86__64-informational?style=flat-square)
 ![init](https://img.shields.io/badge/init-OpenRC-success?style=flat-square)
@@ -23,12 +23,12 @@ Kryonux is an independent Linux distribution built from scratch on an LFS-style 
 
 | Component | What it is | Version |
 | :--- | :--- | :--- |
-| 🐧 **Kryonux** | The distribution | `v0.0.0` |
-| 🧠 **kryonk** | Hardened kernel built from kernel.org sources | `kryonk-0.0.0` |
+| 🐧 **Kryonux** | The distribution | `v0.0.1` |
+| 🧠 **kryonk** | Hardened kernel built from kernel.org sources | `kryonk-0.0.1` |
 | 📦 **kpkg** | Source-based package manager written in C | `2.2.0` |
 | 🍳 **kpkg-recipes** | Package recipes in `.kpkg` format | [separate repository](https://github.com/wh1laye/kpkg-recipes) |
 | 🗜️ **Stage 3** | Base root filesystem archive | `kryonux-stage3-amd64-0.0.0.tar.xz` |
-| 💿 **Live ISO** | Bootable installer image | `kryonux-live-amd64-0.0.0.iso` |
+| 💿 **Live ISO** | Bootable installer image | `kryonux-live-amd64-0.0.1.iso` |
 
 ## 🛡️ Highlights
 
@@ -42,12 +42,12 @@ Kryonux is an independent Linux distribution built from scratch on an LFS-style 
 
 ## 🚀 Quick start
 
-1. Download `kryonux-live-amd64-0.0.0.iso` and its `.sha256` and `.minisig` files from [Releases](https://github.com/wh1laye/Kryonux/releases).
+1. Download `kryonux-live-amd64-0.0.1.iso` and its `.sha256` and `.minisig` files from [Releases](https://github.com/wh1laye/Kryonux/releases).
 2. Verify the image:
 
 ```sh
-sha256sum -c kryonux-live-amd64-0.0.0.iso.sha256
-minisign -V -p docs/kryonux.pub -m kryonux-live-amd64-0.0.0.iso
+sha256sum -c kryonux-live-amd64-0.0.1.iso.sha256
+minisign -V -p docs/kryonux.pub -m kryonux-live-amd64-0.0.1.iso
 ```
 
 3. Boot the ISO and run the installer:

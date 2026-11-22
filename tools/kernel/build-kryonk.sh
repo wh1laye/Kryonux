@@ -4,7 +4,7 @@ set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(dirname "$(dirname "$HERE")")
 KVER=${KVER:-}
-KRYONK_VER=${KRYONK_VER:-0.0.0}
+KRYONK_VER=${KRYONK_VER:-0.0.1}
 MARCH=${MARCH:-x86-64-v3}
 WORK=${WORK:-/var/tmp/kryonk-build}
 OUT=${OUT:-$PWD}

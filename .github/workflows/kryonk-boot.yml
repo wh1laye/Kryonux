@@ -5,7 +5,7 @@ on:
     inputs:
       kryonk_version:
         description: версия ядра kryonk из релиза kryonk-<версия>
-        default: "0.0.0"
+        default: "0.0.1"
       kernel:
         description: версия ванильного ядра
         default: "6.18.10"

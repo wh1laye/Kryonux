@@ -5,7 +5,7 @@ on:
     inputs:
       version:
         description: версия live iso
-        default: "0.0.0"
+        default: "0.0.1"
       base_tag:
         description: тег релиза с внутренней базой
         default: "base-0.0.0"
@@ -17,7 +17,7 @@ on:
         default: "6.18.10"
       kryonk_version:
         description: версия ядра kryonk из релиза kryonk-<версия>
-        default: "0.0.0"
+        default: "0.0.1"
       march:
         description: микроархитектура (v3 только для процессоров с avx2, 2013 и новее)
         type: choice

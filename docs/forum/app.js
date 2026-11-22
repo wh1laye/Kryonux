@@ -416,7 +416,7 @@ async function notifs(){
 }
 
 const GP={
-  light:[['облако','#dbeafe','#f4f8fd',160],['рассвет','#fde7d9','#e8e4fb',135],['мята','#d6f1e6','#e3f0fb',120],['лаванда','#e9e1fb','#fdf0f6',200]],
+  light:[['крио','#dbeafe','#f4f8fd',160],['рассвет','#fde7d9','#e8e4fb',135],['мята','#d6f1e6','#e3f0fb',120],['лаванда','#e9e1fb','#fdf0f6',200]],
   gray:[['сумрак','#2b3350','#1b1e26',160],['лес','#1f3a33','#202226',150],['ночь','#2a2540','#16181d',210],['уголь','#34373d','#1a1c20',135]]
 };
 GP.night=GP.nord=GP.dracula=GP.matrix=GP.amber=GP.gray;GP.sepia=GP.light;

@@ -4,6 +4,7 @@
 <link>https://wh1laye.github.io/Kryonux/news/</link>
 <description>Что нового в Kryonux: готовое, в работе и планы.</description>
 <language>ru</language>
+<item><title>Kryonux v0.0.1</title><link>https://wh1laye.github.io/Kryonux/news/</link><guid isPermaLink="false">kryonux-v0.0.1</guid><pubDate>Sun, 22 Nov 2026 12:00:00 +0000</pubDate><description>Облака на сайте заменены логотипом Kryonux</description></item>
 <item><title>Kryonux v0.0.0</title><link>https://wh1laye.github.io/Kryonux/news/</link><guid isPermaLink="false">kryonux-v0.0.0</guid><pubDate>Sat, 21 Nov 2026 12:00:00 +0000</pubDate><description>Перезапуск проекта: новое имя Kryonux, ядро kryonk, пакетный менеджер kpkg и формат пакетов .kpkg</description></item>
 
 </channel></rss>

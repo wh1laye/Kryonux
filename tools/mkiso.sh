@@ -2,11 +2,11 @@
 set -eu
 
 HERE=$(cd "$(dirname "$0")" && pwd)
-VERSION=${VERSION:-0.0.0}
+VERSION=${VERSION:-0.0.1}
 KVER=${KVER:-6.18.10}
 MARCH=${MARCH:-x86-64-v3}
 BASE_TAG=${BASE_TAG:-base-0.0.0}
-KRYONK_VER=${KRYONK_VER:-0.0.0}
+KRYONK_VER=${KRYONK_VER:-0.0.1}
 KRYONK_TAG=${KRYONK_TAG:-kryonk-$KRYONK_VER}
 KRYONK=${KRYONK:-https://github.com/wh1laye/Kryonux/releases/download/$KRYONK_TAG}
 KRYONK_VERIFY=${KRYONK_VERIFY:-1}

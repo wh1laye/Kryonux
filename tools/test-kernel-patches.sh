@@ -8,7 +8,7 @@ T=$(mktemp -d)
 GNUPGHOME=$(mktemp -d)
 WORK="$T/w"
 OUT="$T/o"
-KRYONK_VER=${KRYONK_VER:-0.0.0}
+KRYONK_VER=${KRYONK_VER:-0.0.1}
 export T SRC_HOME REPO GNUPGHOME WORK OUT KRYONK_VER
 mkdir -p "$WORK" "$OUT"
 trap 'rm -rf "$T" "$GNUPGHOME"' EXIT

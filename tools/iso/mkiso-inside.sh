@@ -1,11 +1,11 @@
 #!/bin/bash
 set -eu
 
-VERSION=${1:-0.0.0}
+VERSION=${1:-0.0.1}
 KVER=${2:-6.18.10}
 NAME=${3:-kryonux-live-amd64-$VERSION.iso}
 MARCH=${4:-x86-64-v3}
-KRYONK_VER=${5:-0.0.0}
+KRYONK_VER=${5:-0.0.1}
 
 ISOSRC=/var/tmp/isosrc
 ISOFILES=/var/tmp/isofiles

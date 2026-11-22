@@ -2,7 +2,31 @@
 
 All notable changes to The Kryonux Project are recorded here.
 
-Component versions at this release: Kryonux `v0.0.0`, website `v0.0.0`, live ISO `v0.0.0`, stage 3 `v0.0.0`, kernel `kryonk-0.0.0`, kpkg `2.2.0`.
+Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO `v0.0.1`, kernel `kryonk-0.0.1`, stage 3 base `0.0.0`, kpkg `2.2.0`.
+
+## [v0.0.1] - 2026-11-22
+
+### 🌐 Website
+#### Changed
+- Every cloud was replaced with the Kryonux logo: the header brand mark on all pages, the pre-login check screen, the summer theme, the space theme background and the forum sticker
+- The forum sticker `:s_cloud:` is now `:s_kryonux:`, the cloud emoji was removed from the emoji picker, and the "cloud" color preset is now "cryo"
+- Theme stylesheet selectors use `.kryonux`, and the seasonal theme layer class is `zs-logo`
+- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `35`
+
+#### Added
+- News and RSS entry for `v0.0.1`
+
+### 💿 ISO and 🧠 kryonk
+#### Changed
+- Default release version is `0.0.1` in the ISO and kernel workflows and build scripts. The stage 3 base archive stays at `0.0.0` (`base-0.0.0`), so the ISO build keeps using the existing base
+
+### 📚 Repository
+#### Added
+- `AGENTS.md` with project context for OpenCode and other agents
+
+#### Changed
+- `CLAUDE.md` rewritten: it imports `AGENTS.md` and keeps the Claude Code specific rules
+- `README.md` shows version `v0.0.1`
 
 ## [v0.0.0] - 2026-11-21
 
