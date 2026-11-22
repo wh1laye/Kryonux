@@ -74,6 +74,8 @@ html[data-theme="light"] .zs-star{display:none}
 .zs-moon{border-radius:50%;box-shadow:0 0 28px 8px rgba(255,236,150,.45)}
 .zs-rays{animation:zsspin 40s linear infinite;will-change:transform}
 .zs-logo{animation:zsdrift 100s linear infinite;will-change:transform}
+@keyframes zsrock{from{transform:translate(-40vw,0)}to{transform:translate(120vw,var(--dy,30vh))}}
+.zs-rock{animation:zsrock 100s linear infinite;will-change:transform}
 .zs-wv{overflow:hidden}
 .zs-wv svg{display:block;width:200%;animation:zswave 16s linear infinite;will-change:transform}
 .zs-wv.b2 svg{animation-duration:10s;animation-direction:reverse}

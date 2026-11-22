@@ -11,7 +11,7 @@
   window.KryonuxSeason.reg('cs',{
     init:function(k){
       var m=k.mobile(),gh=m?30:40,i;
-      for(i=0;i<(m?3:6);i++)k.el('zs-logo',k.svg('0 0 136 86',NEB),'left:'+k.rnd(-30,60).toFixed(1)+'%;top:'+Math.round(k.rnd(gh*.1,gh*.85))+'px;width:'+Math.round(k.rnd(m?34:46,m?64:96))+'px;animation-duration:'+Math.round(k.rnd(70,150))+'s;animation-delay:'+(-i*21).toFixed(1)+'s;opacity:.92');
+      for(i=0;i<(m?3:6);i++)k.el('zs-logo zs-rock',k.svg('0 0 136 86',NEB),'left:'+k.rnd(-30,60).toFixed(1)+'%;top:'+(m?12+i*24:8+i*9)+'%;--dy:'+(m?24+i*18:20+i*12)+'vh;width:'+Math.round(k.rnd(m?34:46,m?64:96))+'px;animation-duration:'+Math.round(k.rnd(70,150))+'s;animation-delay:'+(-i*21).toFixed(1)+'s;opacity:.92');
       k.el('',k.strip(gh,[{d:k.hill(1000,gh*.7,gh*.55,9,15),fill:'#05050a',line:'#2a2a4e',w:2},{d:k.hill(1000,gh*.92,gh*.4,11,21),fill:'#0a0a12',line:'#3a3a66',w:2}]),'left:0;right:0;bottom:0;height:'+gh+'px',true);
       var sat=k.el('zs-fly zs-orbit',k.svg('0 0 62 42',SATELLITE),'right:6%;top:'+Math.round(gh*.3)+'px;width:'+(m?38:60)+'px;animation-duration:'+(m?100:140)+'s;animation-delay:-60s');
       sat.innerHTML='<div>'+sat.innerHTML+'</div>';

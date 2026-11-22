@@ -83,7 +83,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 
 #### Fixed
 - The space theme no longer draws the purple K over the header logo or the moon over the page text
-- The space theme comets and meteors fly down and to the right on separate tracks instead of crossing each other
+- The space theme comets, meteors and drifting rocks fly down and to the right on separate trajectories instead of one horizontal line
 
 ### 📚 Repository
 #### Added
