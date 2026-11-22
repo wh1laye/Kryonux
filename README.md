@@ -117,6 +117,12 @@ Copyright © 2026 The Kryonux Project. Released under the [GNU General Public Li
 
 The names "Kryonux", "kryonk" and "kpkg" and the official Kryonux crystal logo are identifiers of The Kryonux Project. Modified forks and unofficial builds distributed publicly must use a different name and logo. See [NOTICE](NOTICE) for details.
 
+## ❤️ Support the project
+
+<a href="https://nowpayments.io/donation?api_key=1fb8d9d7-88e2-48db-b923-17868a27790e" target="_blank" rel="noreferrer noopener">
+  <img src="https://nowpayments.io/images/embeds/donation-button-black.svg" alt="Crypto donation button by NOWPayments" width="220">
+</a>
+
 ---
 
 <div align="center">
