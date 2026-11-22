@@ -74,8 +74,6 @@ html[data-theme="light"] .zs-star{display:none}
 .zs-moon{border-radius:50%;box-shadow:0 0 28px 8px rgba(255,236,150,.45)}
 .zs-rays{animation:zsspin 40s linear infinite;will-change:transform}
 .zs-logo{animation:zsdrift 100s linear infinite;will-change:transform}
-@keyframes zsrock{from{transform:translate(-40vw,0)}to{transform:translate(120vw,var(--dy,30vh))}}
-.zs-rock{animation:zsrock 100s linear infinite;will-change:transform}
 .zs-wv{overflow:hidden}
 .zs-wv svg{display:block;width:200%;animation:zswave 16s linear infinite;will-change:transform}
 .zs-wv.b2 svg{animation-duration:10s;animation-direction:reverse}
@@ -91,7 +89,7 @@ html[data-theme="light"] .zs-snow path[fill="#d3e8fb"]{fill:#c5def5}
 .zss .zsn{margin:8px 2px 0;font-size:12px;line-height:1.4;color:var(--mute)}
 @keyframes zsraysw{0%,100%{opacity:.55;transform:rotate(-2deg)}50%{opacity:1;transform:rotate(2deg)}}
 @keyframes zsaur{from{transform:translateX(-8%) scaleY(.85)}to{transform:translateX(8%) scaleY(1.15)}}
-@keyframes zsshoot{0%{opacity:0;transform:translate(0,0) rotate(35deg)}2%{opacity:1}9%{opacity:0;transform:translate(320px,220px) rotate(35deg)}100%{opacity:0;transform:translate(320px,220px) rotate(35deg)}}
+@keyframes zsshoot{0%{opacity:0;transform:translate(0,0) rotate(28deg)}2%{opacity:1}9%{opacity:0;transform:translate(260px,140px) rotate(28deg)}100%{opacity:0;transform:translate(260px,140px) rotate(28deg)}}
 @keyframes zsbolt{0%{opacity:0}6%{opacity:.9}12%{opacity:.15}20%{opacity:.7}40%,100%{opacity:0}}
 .zs-fog2{height:170px;bottom:16px;background:linear-gradient(to top,rgba(130,100,200,.3),rgba(130,100,200,0));animation:zsfog 22s ease-in-out infinite alternate-reverse}
 .zs-bolt{opacity:0;pointer-events:none;background:radial-gradient(ellipse at 50% 0,rgba(200,180,255,.22),rgba(200,180,255,0) 70%)}
@@ -121,7 +119,7 @@ html[data-season="oc"] .zs-wv{filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
 .zs-orbit{animation:zsorbit 24s linear infinite;will-change:transform}
 @keyframes zsorbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .zs-comet{animation:zscomet 10s linear infinite;will-change:transform}
-@keyframes zscomet{from{transform:translateX(-15vw) translateY(-12vh)}to{transform:translateX(115vw) translateY(58vh)}}
+@keyframes zscomet{from{transform:translateX(-15vw) translateY(-10vh)}to{transform:translateX(110vw) translateY(20vh)}}
 .zs-leaf{filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
 
 :root[data-mbl="1"] .top{background:color-mix(in srgb,var(--surf) 70%,transparent);-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5)}

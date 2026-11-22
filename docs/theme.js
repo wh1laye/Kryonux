@@ -548,6 +548,6 @@ d.addEventListener('keydown',function(e){if(e.key==='Escape')sh(false)});
 var s=document.currentScript;
 if(!s||!s.src)return;
 var e=document.createElement('script');
-e.src=s.src.replace(/theme\.js.*$/,'')+'themes/themes.js?v=12';
+e.src=s.src.replace(/theme\.js.*$/,'')+'themes/themes.js?v=10';
 document.head.appendChild(e);
 })();
