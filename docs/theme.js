@@ -239,8 +239,8 @@
   });
   function dot(t){return '<i class="dt" style="background:'+(t==='auto'?'linear-gradient(90deg,#f6f8fc 50%,#1a1c20 50%)':BG[t])+'"></i>'}
   function extra(){var o='',k,L=['night','nord','dracula','sepia'];if(secOn())L=L.concat(['matrix','amber']);for(k=0;k<L.length;k++)o+='<button type="button" data-th="'+L[k]+'">'+dot(L[k])+T(NM[L[k]])+'</button>';return o}
-  var TABS=[['look','тема'],['color','цвета'],['glass','стекло'],['text','чтение']];
-  function tabGet(){try{var v=localStorage.getItem('sptab');if(/^(look|color|glass|text)$/.test(v))return v}catch(e){}return 'look'}
+  var TABS=[['look','тема'],['color','цвета'],['glass','стекло'],['text','чтение'],['more','ещё']];
+  function tabGet(){try{var v=localStorage.getItem('sptab');if(/^(look|color|glass|text|more)$/.test(v))return v}catch(e){}return 'look'}
   function setTab(v){
     if(!sp)return;
     var b=sp.querySelector('.spb');
@@ -256,7 +256,7 @@
     if(!b)return;
     [].forEach.call(b.children,function(n){
       if(!n.classList||!n.classList.contains('sps')||n.hasAttribute('data-t'))return;
-      n.setAttribute('data-t','look');
+      n.setAttribute('data-t',n.classList.contains('zss')?'look':'more');
     });
   }
   function fill(){

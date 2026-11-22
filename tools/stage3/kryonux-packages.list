@@ -29,3 +29,4 @@ network/curl
 network/openssh
 network/nftables
 tools/nano
+tools/fastfetch

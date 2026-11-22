@@ -23,7 +23,7 @@ html.sp-open{overflow:hidden}
 .spt button{flex:1 0 auto;padding:8px 14px;border:0;border-radius:calc(11px*var(--rs,1));background:none;color:var(--mute);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s,color .2s,box-shadow .2s}
 .spt button:hover{color:var(--ink)}
 .spt button.on{background:var(--surf);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.1)}
-.spb[data-tab="look"]>.sps:not([data-t="look"]),.spb[data-tab="color"]>.sps:not([data-t="color"]),.spb[data-tab="glass"]>.sps:not([data-t="glass"]),.spb[data-tab="text"]>.sps:not([data-t="text"]){display:none}
+.spb[data-tab="look"]>.sps:not([data-t="look"]),.spb[data-tab="color"]>.sps:not([data-t="color"]),.spb[data-tab="glass"]>.sps:not([data-t="glass"]),.spb[data-tab="text"]>.sps:not([data-t="text"]),.spb[data-tab="more"]>.sps:not([data-t="more"]){display:none}
 .spx{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%!important;padding:0;border:1px solid var(--line);border-radius:calc(12px*var(--rs,1));background:var(--surf);color:var(--mute);cursor:pointer}
 .spx:hover{border-color:var(--ac);color:var(--ac)}
 .spx svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round}

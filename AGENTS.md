@@ -46,7 +46,7 @@ Instructions for AI coding agents (OpenCode, Claude Code and others) working in 
   - CLI output and repository docs (`README.md`, `CHANGELOG.md`, `AGENTS.md`, `CLAUDE.md`): English
   - Website pages: Russian, with every visible string translated in `docs/i18n.js` (or the page's `I18N_EXTRA`); the handbook also has `docs/handbook/en/`
 - **Website visuals:** no emojis and no cloud imagery; use SVG or PNG icons and the logo (`docs/logo.svg`, `docs/logo.png`). Emojis are allowed in `README.md` and other repository docs
-- **`docs/config.jsonc`:** keep it in the repository, do not edit it unless asked
+- **Fastfetch logo:** the Kryonux K ASCII logo lives in `tools/stage3/fastfetch.jsonc` and is installed as `/etc/xdg/fastfetch/config.jsonc` in stage 3. It is not part of the website
 - **Sandbox:** the browser sandbox page was removed; do not reintroduce it
 - **Sitemap:** keep `docs/sitemap.xml` and `docs/robots.txt` in sync with both website domains when pages are added or removed
 - **Service worker:** bump `V` in `docs/sw.js` when cached website assets change
@@ -54,7 +54,7 @@ Instructions for AI coding agents (OpenCode, Claude Code and others) working in 
 - **kpkg:** read the actual files in `kpkg/` before changing internal logic, flags or filesystem paths. It is source-based and does not use Portage, ebuilds or global `USE` flags
 - **Kernel:** `kryonk` is a fork of the Linux 6.18 LTS series. Sources come from kernel.org and must be verified with the kernel.org PGP signature. The fork is the patch series in `tools/kernel/patches/` (listed in `series`) plus the scripted edits in `tools/kernel/kryonk-source.sh`. Do not add third-party kernel patch sets
 - **Stage 3:** keep it minimal: toolchain, core utilities, networking basics and `kpkg`. Add a package to `tools/stage3/kryonux-packages.list` only when the system cannot work without it
-- **Recipes:** `.kpkg` format is documented in `kpkg/RECIPES.md`; `kpkg` is independent of Gentoo and other package managers
+- **Recipes:** the recipe tree is the separate repository `wh1laye/kpkg-recipes`, reset to a clean layout with two reference recipes. `.kpkg` format is documented in `kpkg/RECIPES.md`; every recipe needs a `SHA256`; `kpkg` is independent of Gentoo and other package managers
 - **Git:** commit and push only when asked
 
 ## Release artifacts

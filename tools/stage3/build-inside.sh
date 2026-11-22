@@ -76,6 +76,8 @@ layout() {
   [ -f "$F/logo.ansi" ] && install -m644 "$F/logo.ansi" /usr/share/kryonux/logo.ansi
   [ -f "$F/logo.png" ] && install -m644 "$F/logo.png" /usr/share/kryonux/logo.png
   local f src
+  install -d /etc/xdg/fastfetch
+  install -m644 "$F/fastfetch.jsonc" /etc/xdg/fastfetch/config.jsonc
   for f in kryonux-users kryonux-adduser kryonux-fix kryonux-firewall kryonux-audit; do
     src=$F/$f
     [ -f "$src" ] || src=$F/$f.sh

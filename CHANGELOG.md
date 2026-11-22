@@ -12,8 +12,11 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - `kpkg install ./name-version.kpkg` installs straight from a local recipe file; dependencies still come from the recipe tree and the package is recorded in the category `local`
 - Short build function names in recipes: `prepare`, `configure`, `build`, `install`, `pre_install`, `post_install`, `pre_remove`, `post_remove`. The old `src_*` and `pkg_*` names still work
 - `kpkg/RECIPES.md` documents the recipe format
+- `SHA256` recipe field: every downloaded source is verified and `kpkg lint` requires it
 
 #### Changed
+- The Gentoo style `Manifest` checks (BLAKE2B and SHA512) were replaced by the `SHA256` field
+- Recipe header keys may contain digits, so `SHA256` is a valid key
 - Version is `0.0.1`; live ISO 0.0.1 is built from stage 3 0.0.1, which is built by kpkg 0.0.1
 - `kpkg/README.md` rewritten; kpkg is documented as independent of Gentoo and other package managers
 
@@ -23,7 +26,10 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - Version is `0.0.1`; the builder base is `base-0.0.0` and the ISO consumes the new `base-0.0.1`
 
 #### Removed
-- The Gentoo style extra package list, `SOURCES.txt` and its download loop, `fastfetch`, `neofetch`, the logo assets, `make-logo.py`, `tools/pack-fetch.sh` and the `fetch-pack` workflow, and `man-db`, `man-pages`, `psmisc`, `wget`, `rsync`, `git`, `screen`, `autoconf`, `automake` and `libtool` from the package set
+- The Gentoo style extra package list, `SOURCES.txt` and its download loop, `neofetch`, the old logo assets, `make-logo.py`, `tools/pack-fetch.sh` and the `fetch-pack` workflow, and `man-db`, `man-pages`, `psmisc`, `wget`, `rsync`, `git`, `screen`, `autoconf`, `automake` and `libtool` from the package set
+
+#### Added
+- `fastfetch` with the Kryonux K logo: the configuration moved from `docs/config.jsonc` to `tools/stage3/fastfetch.jsonc` and is installed as `/etc/xdg/fastfetch/config.jsonc`
 
 #### Fixed
 - `build-inside.sh` looked for `kryonux-users` and `kryonux-fix` without the `.sh` suffix, so they were never installed and the archive check failed
@@ -47,9 +53,11 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - Every cloud was replaced with the Kryonux logo: the header brand mark on all pages, the pre-login check screen, the summer theme, the space theme background and the forum sticker
 - The PWA icons (`icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`) were still the old cloud and are now the Kryonux K
 - The forum sticker `:s_cloud:` is now `:s_kryonux:`, the cloud emoji was removed from the emoji picker, and the "cloud" color preset is now "cryo"
-- Settings were reorganized into four tabs: Theme, Colors, Glass and Reading. Each section has a short hint, the empty "More" tab is gone, and there is a "Reset all settings" button
+- Settings have five tabs: Theme, Colors, Glass, Reading and More. The More tab with all extra options (view and comfort, text, appearance, extras) is kept. Each core section has a short hint, and there is a "Reset all settings" button
+- New ice and diamond look: icy blue light and dark palettes, a faint crystal lattice background, a diamond facet behind the home hero and gradient accent buttons
+- In the header the Kryonux logo now replaces the letter K, so the brand reads as the logo followed by `ryonux`
 - Theme stylesheet selectors use `.kryonux`, and the seasonal theme layer class is `zs-logo`
-- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `36`
+- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `37`
 
 #### Added
 - News and RSS entry for `v0.0.1`

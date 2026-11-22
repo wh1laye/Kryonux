@@ -39,7 +39,7 @@ struct phase { char name[32]; char *body; };
 struct recipe {
 	char category[128]; char name[128]; char version[64];
 	char description[512]; char homepage[256]; char license[128]; char slot[32];
-	char src_uri[2048]; char depend[1024]; char rdepend[1024]; char build_flags[512];
+	char src_uri[2048]; char sha256[1024]; char depend[1024]; char rdepend[1024]; char build_flags[512];
 	char dir[BUF]; struct phase phases[8]; int nphases;
 };
 struct db_pkg { char category[128]; char name[128]; char version[64]; int explicit; };

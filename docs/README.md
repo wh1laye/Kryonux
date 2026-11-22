@@ -22,7 +22,7 @@ Pages are written in Russian. English is provided by `i18n.js` dictionaries, and
 
 ## 🎨 Assets
 
-`logo.svg`, `logo.png`, `icon.svg`, `favicon.ico`, `apple-touch-icon.png`, `og.png` and the icons in `icons/`. `config.jsonc` is the fastfetch configuration with the ASCII logo.
+`logo.svg`, `logo.png`, `icon.svg`, `favicon.ico`, `apple-touch-icon.png`, `og.png` and the icons in `icons/`.
 
 ## ✅ Checks
 

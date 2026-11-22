@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 150
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: dependencies
         run: |
           sudo apt-get update
@@ -73,12 +73,12 @@ jobs:
             [ -s "$x.minisig" ] || { echo "::error::нет подписи $x.minisig"; exit 1; }
             minisign -V -p "$GITHUB_WORKSPACE/docs/kryonux.pub" -m "$x" -x "$x.minisig"
           done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: kryonk-${{ inputs.ver }}-${{ matrix.march }}
           path: out/
       - name: release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: kryonk-${{ inputs.ver }}
           files: out/*

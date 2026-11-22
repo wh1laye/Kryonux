@@ -88,50 +88,26 @@ static int distfile_name_ok(const char *s)
 		if (!(isalnum((unsigned char)*s) || *s == '.' || *s == '_' || *s == '+' || *s == '-')) return 0;
 	return 1;
 }
-static int manifest_check(const struct build_ctx *c, const char *filename, const char *full)
+static int checksum_check(const struct build_ctx *c, const char *filename, const char *full)
 {
-	char path[BUF + 32], line[BUF], dname[256], want[129], got[BUF], *h;
-	long long dsize;
-	struct stat st;
-	FILE *f;
-	int matched = 0, ok = 1;
-	size_t hl;
-	char *a[3];
-	snprintf(path, sizeof path, "%s/Manifest", c->r.dir);
-	f = fopen(path, "r");
-	if (!f) {
-		fprintf(stderr, "kpkg: no Manifest for %s/%s-%s, checksum verification skipped\n", c->r.category, c->r.name, c->r.version);
-		return 1;
+	char list[1024], got[BUF], *tok, *save = NULL, *a[3];
+	int i = 0;
+	snprintf(list, sizeof list, "%s", c->r.sha256);
+	for (tok = strtok_r(list, " 	\n", &save); tok && i < c->ndist; tok = strtok_r(NULL, " 	\n", &save)) i++;
+	if (!tok) {
+	fprintf(stderr, "kpkg: no SHA256 for %s, the source is not verified\n", filename);
+	return 1;
 	}
-	while (fgets(line, sizeof line, f)) {
-		if (strncmp(line, "DIST ", 5)) continue;
-		if (sscanf(line + 5, "%255s %lld", dname, &dsize) != 2) continue;
-		if (strcmp(dname, filename)) continue;
-		matched = 1;
-		if (stat(full, &st) == 0 && (long long)st.st_size != dsize) {
-			fprintf(stderr, "kpkg: size mismatch for %s: Manifest says %lld, got %lld\n", filename, dsize, (long long)st.st_size);
-			ok = 0;
-			break;
-		}
-		h = strstr(line, "SHA512 ");
-		if (h) {
-			h += 7;
-			hl = strspn(h, "0123456789abcdefABCDEF");
-			if (hl == 128) {
-				memcpy(want, h, 128);
-				want[128] = 0;
-				a[0] = "sha512sum"; a[1] = (char *)full; a[2] = NULL;
-				if (capture(a, got, sizeof got) == 0 && strncasecmp(got, want, 128)) {
-					fprintf(stderr, "kpkg: SHA512 mismatch for %s\n", filename);
-					ok = 0;
-				}
-			}
-		}
-		break;
+	if (strspn(tok, "0123456789abcdefABCDEF") != 64 || strlen(tok) != 64) {
+	fprintf(stderr, "kpkg: malformed SHA256 for %s\n", filename);
+	return 0;
 	}
-	fclose(f);
-	if (!matched) fprintf(stderr, "kpkg: no Manifest entry for %s, checksum verification skipped\n", filename);
-	return ok;
+	a[0] = "sha256sum"; a[1] = (char *)full; a[2] = NULL;
+	if (capture(a, got, sizeof got) != 0 || strncasecmp(got, tok, 64)) {
+	fprintf(stderr, "kpkg: SHA256 mismatch for %s\n", filename);
+	return 0;
+	}
+	return 1;
 }
 static int fetch_one(struct build_ctx *c, const char *url, const char *filename)
 {
@@ -172,7 +148,7 @@ static int fetch_one(struct build_ctx *c, const char *url, const char *filename)
 			return 0;
 		}
 	}
-	if (!manifest_check(c, filename, out)) {
+	if (!checksum_check(c, filename, out)) {
 		unlink(out);
 		fputs("kpkg: checksum verification failed, the file was removed\n", stderr);
 		return 0;

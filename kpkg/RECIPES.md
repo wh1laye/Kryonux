@@ -1,74 +1,69 @@
-# 🍳 Writing kpkg recipes
+# 🍳 How to write a kpkg recipe
 
-A recipe is a plain text file with the `.kpkg` extension. kpkg reads it directly: there is no shell sourcing of the header, so a recipe cannot run code outside its build functions.
+A recipe is a plain text file with the `.kpkg` extension. `kpkg` parses it itself, so the header is never executed as shell code. Only the build functions run in a shell.
 
-## 📁 Layout
-
-In the recipe tree every package lives in its own directory:
+## 📁 Location and name
 
 ```text
 category/name/name-version/name-version.kpkg
 ```
 
-Categories used by Kryonux: `system`, `fs`, `network`, `toolchain`, `build`, `tools`, `libs`, `boot`, `init`, `admin`.
+- Use lowercase names with letters, digits, `-`, `+` and `.`
+- The directory and file name must match `PACKAGE` and `VERSION`
+- Pick the category from: `system`, `fs`, `network`, `toolchain`, `build`, `tools`, `libs`, `boot`, `init`, `admin`
 
-## 🧾 Fields
+## 🧾 Header fields
 
 | Field | Required | Meaning |
 | :--- | :--- | :--- |
 | `PACKAGE` | yes | Package name |
 | `VERSION` | yes | Package version |
 | `DESCRIPTION` | yes | One line description |
-| `LICENSE` | yes | License identifier |
-| `SRC_URI` | yes | Source URLs, separated by spaces. Use `url -> name` to rename a download |
+| `LICENSE` | yes | License of the packaged program |
+| `SRC_URI` | yes | Source URLs separated by spaces. `url -> file` renames the download |
+| `SHA256` | yes | One SHA-256 per source, in the same order as `SRC_URI`, separated by spaces |
 | `HOMEPAGE` | no | Project website |
-| `DEPEND` | no | Build dependencies |
+| `DEPEND` | no | Build dependencies as `category/name` separated by spaces |
 | `RDEPEND` | no | Runtime dependencies |
 | `SLOT` | no | Slot name for parallel versions |
-| `BUILD_FLAGS` | no | Per-recipe build options |
+| `BUILD_FLAGS` | no | Extra flags passed by the default configure step |
 
-Values may span several lines inside double quotes.
+Write values in double quotes. A quoted value may span several lines. Lines that start with `#` are ignored by `kpkg`, but recipes in this repository do not use comments.
 
 ## 🔧 Build functions
 
-| Function | Legacy name | Runs |
-| :--- | :--- | :--- |
-| `prepare` | `src_prepare` | After unpacking, before configuring |
-| `configure` | `src_configure` | Before building |
-| `build` | `src_compile` | Compiles the sources |
-| `install` | `src_install` | Installs into `$DESTDIR` |
-| `pre_install` | `pkg_preinst` | Before files reach the system |
-| `post_install` | `pkg_postinst` | After files reach the system |
-| `pre_remove` | `pkg_prerm` | Before removal |
-| `post_remove` | `pkg_postrm` | After removal |
+All functions are optional. `kpkg` supplies defaults: `./configure --prefix=/usr`, CMake or Meson depending on the source tree, then a parallel build.
 
-Both spellings work. Each function may appear once.
+| Function | Runs |
+| :--- | :--- |
+| `prepare` | After unpacking, before configuring |
+| `configure` | Configures the build |
+| `build` | Compiles |
+| `install` | Installs into `$DESTDIR` |
+| `pre_install`, `post_install` | Before and after files reach the system |
+| `pre_remove`, `post_remove` | Before and after removal |
 
-## 📄 Example
+Available variables: `DESTDIR`, `JOBS`, `BUILD_FLAGS`. The old names `src_prepare`, `src_configure`, `src_compile`, `src_install`, `pkg_preinst`, `pkg_postinst`, `pkg_prerm` and `pkg_postrm` are accepted but should not be used in new recipes.
 
-```text
-PACKAGE=hello
-VERSION=1.0
-DESCRIPTION="Example package"
-LICENSE="GPL-3.0"
-SRC_URI="https://example.org/hello-1.0.tar.gz"
+## 📚 Reference recipes
 
-configure() {
-  ./configure --prefix=/usr
-}
-build() {
-  make
-}
-install() {
-  make DESTDIR="$DESTDIR" install
-}
-```
+`libs/json-c/json-c-0.19.20260627/json-c-0.19.20260627.kpkg` shows a library: a CMake project, a dependency list, flags passed through `BUILD_FLAGS`, and custom `build` and `install` functions.
 
-## ✅ Checking and installing a recipe
+`tools/fastfetch/fastfetch-2.70.0/fastfetch-2.70.0.kpkg` shows an application: every function in order, `configure` written explicitly, and a `post_install` message.
+
+## 🔐 Getting the checksum
 
 ```sh
-kpkg lint hello-1.0.kpkg
-doas kpkg install ./hello-1.0.kpkg
+curl -fLO https://example.org/name-1.0.tar.gz
+sha256sum name-1.0.tar.gz
 ```
 
-`kpkg lint` reports missing fields and syntax errors. `kpkg install` accepts a path to a `.kpkg` file directly; its dependencies are still resolved from the recipe tree. Packages installed this way are recorded in the category `local`.
+Always hash the exact file the `SRC_URI` downloads, after any rename.
+
+## ✅ Checklist
+
+1. Create the directory and file as shown above
+2. Fill every required field
+3. Run `kpkg lint path/to/name-version.kpkg` and fix every message
+4. Run `doas kpkg install ./path/to/name-version.kpkg` on a Kryonux system and confirm it builds
+5. Add a line to `CHANGELOG.md`

@@ -5,6 +5,7 @@ The standalone package manager of Kryonux. Written in C, it builds packages from
 ## ✨ Features
 
 - 🍳 Own recipe format: plain `.kpkg` files, see [RECIPES.md](RECIPES.md)
+- 🔐 Sources are checked against the `SHA256` field of the recipe
 - 📥 Install from the recipe tree or straight from a local `.kpkg` file
 - 🧩 Dependency resolution with per-recipe build options
 - ✍️ `minisign` signature verification for self-updates

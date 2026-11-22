@@ -115,7 +115,7 @@ LIST=$(mktemp); trap 'rm -f "$LIST"' EXIT
 tar -tf "$OUT/$NAME" > "$LIST"
 miss=0
 for f in sbin/init sbin/openrc-init etc/os-release etc/init.d/syslog-ng etc/runlevels/default/syslog-ng \
-         etc/syslog-ng/syslog-ng.conf usr/bin/kpkg etc/kpkg/kpkg.conf \
+         etc/syslog-ng/syslog-ng.conf usr/bin/kpkg usr/bin/fastfetch etc/xdg/fastfetch/config.jsonc etc/kpkg/kpkg.conf \
          usr/sbin/kryonux-users usr/sbin/kryonux-adduser usr/sbin/kryonux-fix \
          etc/login.defs etc/doas.conf; do
   grep -qxE "(\./)?(usr/)?$f" "$LIST" || { printf 'the archive has no %s\n' "$f" >&2; miss=1; }

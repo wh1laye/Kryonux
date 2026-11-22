@@ -130,3 +130,6 @@
   .hm .tb{font-size:13px;padding:14px}
   .hm .fin{padding:38px 18px}
 }
+
+.hero-w::before{content:"";position:absolute;top:-30px;right:-50px;width:520px;height:520px;max-width:70vw;z-index:-1;pointer-events:none;background:conic-gradient(from 210deg at 50% 50%,rgba(186,228,255,.7),rgba(255,255,255,0) 20%,rgba(100,170,255,.45) 38%,rgba(255,255,255,0) 55%,rgba(150,210,255,.6) 75%,rgba(255,255,255,0) 90%,rgba(186,228,255,.7));clip-path:polygon(50% 0,100% 38%,50% 100%,0 38%);opacity:.5}
+.hero h1 em{font-style:normal;background:linear-gradient(120deg,#5cc8ff,#2b6fe0 60%,#8ee9ff);-webkit-background-clip:text;background-clip:text;color:transparent}

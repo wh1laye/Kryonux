@@ -48,6 +48,7 @@ static void set_field(struct recipe *r, const char *key, const char *val)
 	else if (!strcmp(key, "LICENSE")) snprintf(r->license, sizeof r->license, "%s", val);
 	else if (!strcmp(key, "SLOT")) snprintf(r->slot, sizeof r->slot, "%s", val);
 	else if (!strcmp(key, "SRC_URI")) snprintf(r->src_uri, sizeof r->src_uri, "%s", val);
+	else if (!strcmp(key, "SHA256")) snprintf(r->sha256, sizeof r->sha256, "%s", val);
 	else if (!strcmp(key, "DEPEND")) snprintf(r->depend, sizeof r->depend, "%s", val);
 	else if (!strcmp(key, "RDEPEND")) snprintf(r->rdepend, sizeof r->rdepend, "%s", val);
 	else if (!strcmp(key, "BUILD_FLAGS")) snprintf(r->build_flags, sizeof r->build_flags, "%s", val);
@@ -56,7 +57,7 @@ static int key_valid(const char *k)
 {
 	if (!*k) return 0;
 	for (; *k; k++)
-		if (!((*k >= 'A' && *k <= 'Z') || *k == '_')) return 0;
+		if (!((*k >= 'A' && *k <= 'Z') || *k == '_' || (*k >= '0' && *k <= '9'))) return 0;
 	return 1;
 }
 static int body_append(char **body, size_t *len, const char *s)
@@ -483,6 +484,7 @@ int recipe_lint(const char *path)
 	else if (!ver_ok(r.version)) { fprintf(stderr, "kpkg: %s: VERSION has invalid characters\n", path); bad++; }
 	if (!r.description[0]) { fprintf(stderr, "kpkg: %s: DESCRIPTION is missing\n", path); bad++; }
 	if (!r.license[0]) { fprintf(stderr, "kpkg: %s: LICENSE is missing\n", path); bad++; }
+	if (r.src_uri[0] && !r.sha256[0]) { fprintf(stderr, "kpkg: %s: SHA256 is missing\n", path); bad++; }
 	if (!r.src_uri[0] && recipe_phase(&r, "src_install")) { fprintf(stderr, "kpkg: %s: SRC_URI is missing\n", path); bad++; }
 	if (!recipe_phase(&r, "src_install") && !r.depend[0] && !r.rdepend[0]) {
 		fprintf(stderr, "kpkg: %s: the recipe installs nothing and has no dependencies\n", path);
