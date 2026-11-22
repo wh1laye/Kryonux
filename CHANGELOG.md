@@ -22,7 +22,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 
 ### 🗜️ Stage 3
 #### Changed
-- Stage 3 is now minimal: the toolchain, core utilities, filesystem tools, `dhcpcd`, `curl`, `openssh`, `nftables`, `nano` and `kpkg`
+- Stage 3 is now minimal: the toolchain, core utilities, filesystem tools, `dhcpcd`, `curl`, `openssh`, `nftables`, `nano`, `fastfetch` and `kpkg`, plus the base tools every system needs: `openrc`, `limine`, `kmod`, `eudev`, `ncurses`, `readline`, `less`, `file`, `iproute2`, `iputils` and `minisign`
 - Version is `0.0.1`; the builder base is `base-0.0.0` and the ISO consumes the new `base-0.0.1`
 
 #### Removed
@@ -41,6 +41,14 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - The fork is the patch series in `tools/kernel/patches/`: `0001-security-add-kryonk-guard.patch` adds `security/kryonk` with `/proc/kryonk` and restrictive defaults (`kptr_restrict=2`, `dmesg_restrict=1`, `panic_on_oops=1`, disabled with `kryonk.guard=0`). Scripted default edits remain in `kryonk-source.sh` and fail the build in strict mode when they do not apply
 - Version is `0.0.1`; the target CPU level is passed as `-march` instead of relying on third-party patches
 
+#### Added
+- Patches `0002` and `0003`: the one-way `kernel.kryonk.lock` sysctl and the lock state in `/proc/kryonk`
+- More hardening in `kryonk.config`: Landlock, no `kexec`, hibernation, `/proc/kcore`, `TIOCSTI` and `modify_ldt`, strict `/dev/mem` and zeroed call-used registers
+- `tools/kernel/README.md` documents the patch series, build variables and signing
+
+#### Fixed
+- The CI run `kryonk #1` built the kernel but failed with "Error while loading the secret key file". The workflow passes the key as a file path while `tools/sign.sh` treated the variable as the key text. `sign.sh` now accepts a file path or the key text, rejects anything that is not a minisign key, and signs keys without a password with `-W`
+
 #### Removed
 - The CachyOS patch series, key and tag, and the duplicated overlay directories `tools/overlay` and `tools/kernel/overlay`
 
@@ -53,11 +61,12 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - Every cloud was replaced with the Kryonux logo: the header brand mark on all pages, the pre-login check screen, the summer theme, the space theme background and the forum sticker
 - The PWA icons (`icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`) were still the old cloud and are now the Kryonux K
 - The forum sticker `:s_cloud:` is now `:s_kryonux:`, the cloud emoji was removed from the emoji picker, and the "cloud" color preset is now "cryo"
+- The header logo is a tight crop of the K and sits next to `ryonux` like a letter; `canonical` links were added to every page and `theme-color` to the 404 and offline pages
 - Settings have five tabs: Theme, Colors, Glass, Reading and More. The More tab with all extra options (view and comfort, text, appearance, extras) is kept. Each core section has a short hint, and there is a "Reset all settings" button
 - New ice and diamond look: icy blue light and dark palettes, a faint crystal lattice background, a diamond facet behind the home hero and gradient accent buttons
 - In the header the Kryonux logo now replaces the letter K, so the brand reads as the logo followed by `ryonux`
 - Theme stylesheet selectors use `.kryonux`, and the seasonal theme layer class is `zs-logo`
-- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `37`
+- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `38`
 
 #### Added
 - News and RSS entry for `v0.0.1`

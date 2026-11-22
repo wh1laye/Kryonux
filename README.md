@@ -81,13 +81,17 @@ To install `kpkg` on another system:
 curl -fsSL https://raw.githubusercontent.com/wh1laye/Kryonux/main/kpkg/install.sh | sh
 ```
 
+## 🧠 Kernel
+
+`kryonk` follows the Linux 6.18 LTS series from kernel.org and adds the Kryonux security patches: a boot time guard with `/proc/kryonk` and the one-way `kernel.kryonk.lock` sysctl. See [tools/kernel/README.md](tools/kernel/README.md) for the patch list, build variables and CI signing setup.
+
 ## 🗺️ Repository layout
 
 | Path | Contents |
 | :--- | :--- |
 | `kpkg/` | Package manager sources, configuration and installer |
 | `tools/` | Stage 3, ISO and kernel build scripts, tests, forum SQL |
-| `tools/kernel/` | `kryonk` patch series, configuration and boot checks |
+| `tools/kernel/` | `kryonk` patch series, configuration, boot checks and [README](tools/kernel/README.md) |
 | `docs/` | Website sources (Russian and English) |
 | `.github/` | CI workflows, issue and pull request templates |
 

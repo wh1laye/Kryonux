@@ -1,0 +1,30 @@
+From: The Kryonux Project
+Subject: [PATCH] security: kryonk: report the lock state in /proc/kryonk
+
+Shows the lock state and the module loading state.
+---
+diff --git a/security/kryonk/kryonk.c b/security/kryonk/kryonk.c
+--- a/security/kryonk/kryonk.c
++++ b/security/kryonk/kryonk.c
+@@ -10,6 +10,10 @@
+ extern int kptr_restrict;
+ extern int dmesg_restrict;
+ extern int panic_on_oops;
++extern int kryonk_locked;
++#ifdef CONFIG_MODULES
++extern int modules_disabled;
++#endif
+ 
+ static int kryonk_guard = 1;
+ module_param_named(guard, kryonk_guard, int, 0444);
+@@ -23,6 +27,10 @@
+ 	seq_printf(m, "kptr_restrict: %d\n", kptr_restrict);
+ 	seq_printf(m, "dmesg_restrict: %d\n", dmesg_restrict);
+ 	seq_printf(m, "panic_on_oops: %d\n", panic_on_oops);
++	seq_printf(m, "locked: %d\n", kryonk_locked);
++#ifdef CONFIG_MODULES
++	seq_printf(m, "modules_disabled: %d\n", modules_disabled);
++#endif
+ 	return 0;
+ }
+ 

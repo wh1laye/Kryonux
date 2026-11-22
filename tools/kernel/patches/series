@@ -1,1 +1,3 @@
 0001-security-add-kryonk-guard.patch
+0002-security-kryonk-add-lock-sysctl.patch
+0003-security-kryonk-report-lock-state.patch
