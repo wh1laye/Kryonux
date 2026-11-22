@@ -44,11 +44,11 @@ else
   need_file tools/build-stage3.sh
   need_file tools/stage3/build-inside.sh
   need_file tools/stage3/kryonux-packages.list
-  need_file tools/stage3/SOURCES.txt
+  need_file tools/kernel/patches/series
   need_file kpkg/kpkg.c
   need_file kpkg/Makefile
   need_file tools/kernel/kryonk.config
-  need_file tools/overlay/security/kryonk/kryonk.c
+  need_file tools/kernel/patches/0001-security-add-kryonk-guard.patch
   forbid_file tools/stage3/gentoo-stage3.list
   forbid_file tools/stage3/gentoo-exclude.txt
   forbid_file tools/stage3/refresh-list.sh

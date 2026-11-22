@@ -8,10 +8,10 @@ on:
         default: "0.0.1"
       base_tag:
         description: тег релиза с внутренней базой
-        default: "base-0.0.0"
+        default: "base-0.0.1"
       base_version:
         description: версия внутренней базы
-        default: "0.0.0"
+        default: "0.0.1"
       kernel:
         description: версия ядра
         default: "6.18.10"

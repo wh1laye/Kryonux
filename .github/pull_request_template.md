@@ -1,7 +1,8 @@
-что изменено и зачем:
+What changed and why:
 
-проверено:
-- [ ] `make -C kpkg` без предупреждений
-- [ ] `node tools/test-site.js`
-- [ ] `shellcheck -S error` на изменённых скриптах
-- [ ] не поднимается риск для безопасности (root, sudo, загрузка файлов, ввод пользователя)
+Checks:
+- [ ] `make -C kpkg` builds without warnings.
+- [ ] `node tools/test-site.js` passes.
+- [ ] `shellcheck -S error` is clean on the changed scripts.
+- [ ] The change adds no security risk (root, sudo, file downloads, user input).
+- [ ] `CHANGELOG.md` is updated.

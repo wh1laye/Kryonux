@@ -10,22 +10,19 @@ WORK=${WORK:-/var/tmp/kryonk-pin}
 
 say() { printf '==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
-for c in curl tar xz sha256sum awk sort; do
+for c in curl tar xz gpg sha256sum awk sort; do
   command -v "$c" >/dev/null || die "missing command: $c"
 done
+. "$HERE/lib.sh"
 mkdir -p "$WORK"
-fetch() { curl -fL --proto =https --retry 5 --retry-delay 10 --connect-timeout 20 -sS -o "$2" "$1"; }
 
 if [ -z "$KVER" ]; then
-  fetch "https://cdn.kernel.org/pub/linux/kernel/v6.x/" "$WORK/index.html" || die "cannot read the kernel.org index"
-  KVER=$(grep -oE 'linux-6\.[0-9]+(\.[0-9]+)?\.tar\.xz' "$WORK/index.html" | sed -E 's/^linux-//; s/\.tar\.xz$//' | sort -V | tail -1)
-  [ -n "$KVER" ] || die "cannot detect the kernel version"
+  KVER=$(kernel_latest "$WORK/index.html") || die "cannot read the kernel.org index"
+  [ -n "$KVER" ] || die "cannot detect the latest $KERNEL_SERIES kernel"
 fi
-MAJOR=${KVER%%.*}
-TARBALL=$WORK/linux-$KVER.tar.xz
 say "kernel $KVER"
-fetch "https://cdn.kernel.org/pub/linux/kernel/v$MAJOR.x/linux-$KVER.tar.xz" "$TARBALL" || die "download failed"
-SUM=$(sha256sum "$TARBALL" | awk '{print $1}')
+kernel_get "$KVER" "$WORK"
+SUM=$(sha256sum "$WORK/linux-$KVER.tar.xz" | awk '{print $1}')
 
 touch "$PIN"
 grep -v "^$KVER " "$PIN" > "$PIN.new" || true

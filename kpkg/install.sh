@@ -5,8 +5,8 @@ main() {
 	REPO=${KPKG_REPO:-wh1laye/Kryonux}
 	BRANCH=${KPKG_BRANCH:-main}
 	INSTALL_URL=${KPKG_INSTALL_URL:-https://raw.githubusercontent.com/$REPO/$BRANCH/kpkg/install.sh}
-	S3_TAG=${KPKG_STAGE3_TAG:-base-0.0.0}
-	S3_VER=${KPKG_STAGE3_VER:-0.0.0}
+	S3_TAG=${KPKG_STAGE3_TAG:-base-0.0.1}
+	S3_VER=${KPKG_STAGE3_VER:-0.0.1}
 	S3_NAME=kryonux-stage3-amd64-$S3_VER.tar.xz
 	S3=${KPKG_STAGE3:-https://github.com/$REPO/releases/download/$S3_TAG/$S3_NAME}
 	BOX=${KPKG_BOX:-/var/lib/kpkg/box}

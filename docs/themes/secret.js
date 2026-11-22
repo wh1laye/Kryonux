@@ -109,11 +109,11 @@ var PK=[
 function pkgs(cb){cb(PK)}
 function pd(p){return p.d&&(p.d.en||p.d.ru)||''}
 function pkrow(p){return p.n+(p.v?' '+p.v:'')+'  -  '+pd(p)+(p.s==='stage3'?'  [in system]':'  [source]')}
-var CPH=['kpkg 2.2.0 (own recipes), browser demo','usage: kpkg command [args]','','  search string     find a package','  info package      show what would be installed','  list              installed packages','  install [-p] pkg  simulated install','  remove pkg        simulated remove','  sync upgrade clean doctor  simulated','  version','','data comes from the built-in demo list. nothing is installed, this is a static site.'];
+var CPH=['kpkg 0.0.1 (own recipes), browser demo','usage: kpkg command [args]','','  search string     find a package','  info package      show what would be installed','  list              installed packages','  install [-p] pkg  simulated install','  remove pkg        simulated remove','  sync upgrade clean doctor  simulated','  version','','data comes from the built-in demo list. nothing is installed, this is a static site.'];
 CMD.kpkg=function(a){
   var c=a[0],args=a.slice(1).filter(function(x){return x.charAt(0)!=='-'}),dry=a.indexOf('-p')>0||a.indexOf('--pretend')>0;
   if(!c||c==='help'){W(CPH);return}
-  if(c==='version'){P('kpkg 2.2.0');return}
+  if(c==='version'){P('kpkg 0.0.1');return}
   if(c==='sync'){P('syncing Kryonux recipe tree ...');later(function(){P('demo: nothing was changed','#00ff66')},700);return}
   if(c==='upgrade'){P('calculating dependencies ...');later(function(){P('nothing to upgrade, you run a browser tab','#00ff66')},700);return}
   if(c==='clean'){P('kpkg: nothing to clean');return}

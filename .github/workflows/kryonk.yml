@@ -62,7 +62,7 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/out"
           JOBS=$(nproc) MARCH=${{ matrix.march }} \
           KRYONK_VER=${{ inputs.ver }} KVER="${{ inputs.kver }}" \
-          OUT="$GITHUB_WORKSPACE/out" CACHY_REQUIRED=0 \
+          OUT="$GITHUB_WORKSPACE/out" \
           MINISIGN_KEY="${SIGN_KEY:-}" MINISIGN_PASSWORD="$MINISIGN_PASSWORD" \
           bash tools/kernel/build-kryonk.sh
       - name: проверка суммы и подписи

@@ -24,15 +24,15 @@ Kryonux is an independent Linux distribution built from scratch on an LFS-style 
 | Component | What it is | Version |
 | :--- | :--- | :--- |
 | 🐧 **Kryonux** | The distribution | `v0.0.1` |
-| 🧠 **kryonk** | Hardened kernel built from kernel.org sources | `kryonk-0.0.1` |
-| 📦 **kpkg** | Source-based package manager written in C | `2.2.0` |
+| 🧠 **kryonk** | Fork of the Linux 6.18 LTS kernel with the Kryonux security patch series | `kryonk-0.0.1` |
+| 📦 **kpkg** | Source-based package manager written in C | `0.0.1` |
 | 🍳 **kpkg-recipes** | Package recipes in `.kpkg` format | [separate repository](https://github.com/wh1laye/kpkg-recipes) |
-| 🗜️ **Stage 3** | Base root filesystem archive | `kryonux-stage3-amd64-0.0.0.tar.xz` |
+| 🗜️ **Stage 3** | Minimal base root filesystem archive | `kryonux-stage3-amd64-0.0.1.tar.xz` |
 | 💿 **Live ISO** | Bootable installer image | `kryonux-live-amd64-0.0.1.iso` |
 
 ## 🛡️ Highlights
 
-- 🔒 **Hardened kernel**: `kryonk` is built from upstream sources with signature verification, KSPP options and built-in disk and filesystem drivers, so it boots without an initramfs unless LUKS2 is used
+- 🔒 **Hardened kernel**: `kryonk` is a fork of the Linux 6.18 LTS tree. Sources come from kernel.org and are verified with the kernel.org PGP signature, then the Kryonux patch series, KSPP options and built-in disk and filesystem drivers are applied, so it boots without an initramfs unless LUKS2 is used
 - 🧱 **Restrictive defaults**: nftables with `drop` policies, sysctl hardening, limited logins and an unprivileged user with `doas`
 - 🔐 **Full-disk encryption**: optional `LUKS2` with `TPM2` unlock and custom `Secure Boot` UKI images
 - 🖥️ **UEFI and Legacy BIOS** with `ext4` or `btrfs`, booted by `Limine`
@@ -63,15 +63,17 @@ The [handbook](https://wh1laye.github.io/Kryonux/handbook/en/) also covers manua
 ```sh
 kpkg sync
 kpkg search editor
-kpkg info neovim
-kpkg install -a neovim
+kpkg info nano
+kpkg install -a nano
 kpkg upgrade
 kpkg snapshots
 kpkg rollback
+kpkg lint hello-1.0.kpkg
+kpkg install ./hello-1.0.kpkg
 kpkg doctor
 ```
 
-Package forms: `name`, `category/name`, `name@version`. Run `kpkg help` for every command and option.
+Package forms: `name`, `category/name`, `name@version`. Recipes are plain `.kpkg` files, see [kpkg/RECIPES.md](kpkg/RECIPES.md). Run `kpkg help` for every command and option.
 
 To install `kpkg` on another system:
 
@@ -85,15 +87,15 @@ curl -fsSL https://raw.githubusercontent.com/wh1laye/Kryonux/main/kpkg/install.s
 | :--- | :--- |
 | `kpkg/` | Package manager sources, configuration and installer |
 | `tools/` | Stage 3, ISO and kernel build scripts, tests, forum SQL |
-| `tools/kernel/` | `kryonk` configuration, overlay and boot checks |
+| `tools/kernel/` | `kryonk` patch series, configuration and boot checks |
 | `docs/` | Website sources (Russian and English) |
 | `.github/` | CI workflows, issue and pull request templates |
 
 ## 🏗️ Build pipeline
 
-1. 🧠 **kryonk**: kernel built from signed upstream sources, then boot-tested in QEMU
-2. 🗜️ **Stage 3**: base root filesystem assembled with `kpkg` inside a chroot
-3. 💿 **Live ISO**: `squashfs` root, `kryonk` kernel and `Limine`, smoke-tested and install-tested in QEMU
+1. 🧠 **kryonk**: the Linux 6.18 LTS tree from kernel.org with the Kryonux patch series, boot-tested in QEMU
+2. 🗜️ **Stage 3**: a minimal root filesystem, only the toolchain, core utilities and `kpkg` 0.0.1, built with `kpkg` inside a chroot
+3. 💿 **Live ISO 0.0.1**: stage 3 built with `kpkg` 0.0.1, the `kryonk` kernel and `Limine`, smoke-tested and install-tested in QEMU
 4. ✍️ **Signing**: every artifact gets a `sha256` file and a `minisign` signature
 
 ## 🌐 Website

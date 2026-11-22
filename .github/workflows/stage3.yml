@@ -5,7 +5,7 @@ on:
     inputs:
       version:
         description: версия
-        default: "0.0.0"
+        default: "0.0.1"
       refresh_list:
         description: список пакетов берётся из tools/stage3/kryonux-packages.list
         type: boolean
@@ -20,7 +20,7 @@ on:
         default: true
       release_tag:
         description: тег внутреннего релиза базы для сборки iso
-        default: "base-0.0.0"
+        default: "base-0.0.1"
 
 concurrency:
   group: stage3-${{ inputs.version }}
@@ -60,7 +60,7 @@ jobs:
 
       - name: проверка скриптов и kpkg
         run: |
-          for f in tools/build-stage3.sh tools/test-kpkg.sh tools/stage3/*.sh tools/stage3/kryonux-adduser tools/stage3/neofetch tools/stage3/kryonux-firewall tools/stage3/kryonux-audit tools/test-firewall.sh tools/test-forum.sh kpkg/*.sh; do bash -n "$f"; done
+          for f in tools/build-stage3.sh tools/test-kpkg.sh tools/stage3/*.sh tools/stage3/kryonux-adduser tools/stage3/kryonux-firewall tools/stage3/kryonux-audit tools/test-firewall.sh tools/test-forum.sh kpkg/*.sh; do bash -n "$f"; done
           make -C kpkg clean all CC="gcc -Wextra -Werror"
           ./kpkg/kpkg version
           sudo bash tools/test-kpkg.sh

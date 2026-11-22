@@ -8,7 +8,7 @@ Instructions for AI coding agents (OpenCode, Claude Code and others) working in 
 
 - **Author and copyright:** The Kryonux Project
 - **License:** GNU GPLv3 (`LICENSE`, trademark notice in `NOTICE`)
-- **Current version:** `v0.0.1` (website, project, live ISO, `kryonk`). The stage 3 base archive stays at `0.0.0` (`base-0.0.0`). `kpkg` keeps its own version (`2.2.0`, defined in `kpkg/kpkg.c`)
+- **Current version:** `v0.0.1` for the website, project, `kpkg`, stage 3, live ISO and `kryonk`. The live ISO 0.0.1 is built from stage 3 0.0.1, which is built by `kpkg` 0.0.1 (version defined in `kpkg/kpkg.c`). Stage 3 is built inside the previous base release `base-0.0.0`
 - **Target:** `x86_64`, UEFI and Legacy BIOS, `ext4` and `btrfs`, optional `LUKS2` + `TPM2` and custom `Secure Boot` UKI
 
 ## Repositories and paths
@@ -23,7 +23,7 @@ Instructions for AI coding agents (OpenCode, Claude Code and others) working in 
 | :--- | :--- |
 | `kpkg/` | Package manager sources (`*.c`, `kpkg.h`), `Makefile`, `etc/kpkg/`, installer scripts |
 | `tools/` | Stage 3, ISO and kernel build scripts, tests (`test-*.sh`, `test-site.js`), forum SQL |
-| `tools/kernel/` | `kryonk` config, pin files, overlay, boot and userspace checks |
+| `tools/kernel/` | `kryonk` patch series, config, pin files, boot and userspace checks |
 | `tools/stage3/`, `tools/iso/` | Files installed into stage 3 and the live ISO (`kryonux-install`, `kryonux-firewall`, `kryonux-audit` and others) |
 | `docs/` | Static website, Russian pages with English from `docs/i18n.js` and `docs/handbook/en/` |
 | `.github/` | CI workflows and templates |
@@ -52,12 +52,14 @@ Instructions for AI coding agents (OpenCode, Claude Code and others) working in 
 - **Service worker:** bump `V` in `docs/sw.js` when cached website assets change
 - **Changelog:** record every change in `CHANGELOG.md`, newest version first, grouped by component (website, ISO, stage 3, kryonk, kpkg, repository)
 - **kpkg:** read the actual files in `kpkg/` before changing internal logic, flags or filesystem paths. It is source-based and does not use Portage, ebuilds or global `USE` flags
-- **Releases:** the stage 3 base tag and `BASE_VERSION` are inputs of the ISO build; do not change them together with a normal version bump
+- **Kernel:** `kryonk` is a fork of the Linux 6.18 LTS series. Sources come from kernel.org and must be verified with the kernel.org PGP signature. The fork is the patch series in `tools/kernel/patches/` (listed in `series`) plus the scripted edits in `tools/kernel/kryonk-source.sh`. Do not add third-party kernel patch sets
+- **Stage 3:** keep it minimal: toolchain, core utilities, networking basics and `kpkg`. Add a package to `tools/stage3/kryonux-packages.list` only when the system cannot work without it
+- **Recipes:** `.kpkg` format is documented in `kpkg/RECIPES.md`; `kpkg` is independent of Gentoo and other package managers
 - **Git:** commit and push only when asked
 
 ## Release artifacts
 
 - Kernel: `kryonk-0.0.1`
 - Live ISO: `kryonux-live-amd64-0.0.1.iso`
-- Stage 3 base: `kryonux-stage3-amd64-0.0.0.tar.xz`
+- Stage 3: `kryonux-stage3-amd64-0.0.1.tar.xz`
 - Every artifact has a `.sha256` file and a `minisign` signature checked with `docs/kryonux.pub`

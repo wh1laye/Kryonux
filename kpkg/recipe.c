@@ -20,12 +20,24 @@ const char *recipe_phase(const struct recipe *r, const char *name)
 		if (!strcmp(r->phases[i].name, name)) return r->phases[i].body;
 	return NULL;
 }
-static int phase_known(const char *name)
+static const char *const phase_alias[][2] = {
+	{"prepare", "src_prepare"}, {"configure", "src_configure"},
+	{"build", "src_compile"}, {"install", "src_install"},
+	{"pre_install", "pkg_preinst"}, {"post_install", "pkg_postinst"},
+	{"pre_remove", "pkg_prerm"}, {"post_remove", "pkg_postrm"}
+};
+static const char *phase_canon(const char *name)
 {
 	size_t i;
 	for (i = 0; i < sizeof phase_names / sizeof *phase_names; i++)
-		if (!strcmp(phase_names[i], name)) return 1;
-	return 0;
+		if (!strcmp(phase_names[i], name)) return phase_names[i];
+	for (i = 0; i < sizeof phase_alias / sizeof *phase_alias; i++)
+		if (!strcmp(phase_alias[i][0], name)) return phase_alias[i][1];
+	return NULL;
+}
+static int phase_known(const char *name)
+{
+	return phase_canon(name) != NULL;
 }
 static void set_field(struct recipe *r, const char *key, const char *val)
 {
@@ -134,7 +146,7 @@ int recipe_load(const char *path, struct recipe *r)
 				ok = 0;
 				break;
 			}
-			snprintf(pname, sizeof pname, "%s", t);
+			snprintf(pname, sizeof pname, "%s", phase_canon(t));
 			continue;
 		}
 		eq = strchr(t, '=');
@@ -229,8 +241,18 @@ void recipe_expand(struct recipe *r)
 	expand_into(r->src_uri, r, buf, sizeof r->src_uri);
 	memcpy(r->src_uri, buf, sizeof r->src_uri);
 }
+char recipe_local[BUF];
+char recipe_local_name[128];
+char recipe_local_ver[64];
 int recipe_path(const char *cat, const char *name, const char *ver, char *out, size_t n)
 {
+	if (!strcmp(cat, "local")) {
+		if (recipe_local[0] && !strcmp(name, recipe_local_name) && !strcmp(ver, recipe_local_ver)) {
+			snprintf(out, n, "%s", recipe_local);
+			return exists(out);
+		}
+		return 0;
+	}
 	snprintf(out, n, "%s/%s/%s/%s-%s/%s-%s.kpkg", repo, cat, name, name, ver, name, ver);
 	return exists(out);
 }
@@ -445,4 +467,27 @@ int ensure_tree(void)
 	}
 	puts("kpkg: recipe tree is missing, downloading it now");
 	return cmd_sync() == 0;
+}
+int recipe_lint(const char *path)
+{
+	struct recipe r;
+	int bad = 0;
+	recipe_init(&r);
+	if (!recipe_load(path, &r)) {
+		recipe_free(&r);
+		return 1;
+	}
+	if (!r.name[0]) { fprintf(stderr, "kpkg: %s: PACKAGE is missing\n", path); bad++; }
+	else if (!safe_id(r.name)) { fprintf(stderr, "kpkg: %s: PACKAGE has invalid characters\n", path); bad++; }
+	if (!r.version[0]) { fprintf(stderr, "kpkg: %s: VERSION is missing\n", path); bad++; }
+	else if (!ver_ok(r.version)) { fprintf(stderr, "kpkg: %s: VERSION has invalid characters\n", path); bad++; }
+	if (!r.description[0]) { fprintf(stderr, "kpkg: %s: DESCRIPTION is missing\n", path); bad++; }
+	if (!r.license[0]) { fprintf(stderr, "kpkg: %s: LICENSE is missing\n", path); bad++; }
+	if (!r.src_uri[0] && recipe_phase(&r, "src_install")) { fprintf(stderr, "kpkg: %s: SRC_URI is missing\n", path); bad++; }
+	if (!recipe_phase(&r, "src_install") && !r.depend[0] && !r.rdepend[0]) {
+		fprintf(stderr, "kpkg: %s: the recipe installs nothing and has no dependencies\n", path);
+		bad++;
+	}
+	recipe_free(&r);
+	return bad;
 }

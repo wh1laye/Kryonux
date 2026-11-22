@@ -2,82 +2,58 @@
 set -euo pipefail
 
 HERE=$(cd "$(dirname "$0")" && pwd)
-REPO=$(dirname "$HERE")
 SRC_HOME="$HERE/kernel"
 T=$(mktemp -d)
-GNUPGHOME=$(mktemp -d)
-WORK="$T/w"
-OUT="$T/o"
 KRYONK_VER=${KRYONK_VER:-0.0.1}
-export T SRC_HOME REPO GNUPGHOME WORK OUT KRYONK_VER
-mkdir -p "$WORK" "$OUT"
-trap 'rm -rf "$T" "$GNUPGHOME"' EXIT
+export KRYONK_VER
+trap 'rm -rf "$T"' EXIT
 
 fail() { printf 'fail: %s\n' "$*" >&2; exit 1; }
 ok() { printf 'ok: %s\n' "$*"; }
 say() { printf '==> %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
-fetch() { curl -fL --retry 3 --retry-delay 5 --connect-timeout 20 -sS -o "$2" "$1"; }
-export -f say die fetch
+export -f say die
 
-for c in python3 curl gpg tar patch find; do
-  command -v "$c" >/dev/null || fail "нужен $c"
+for c in curl gpg tar xz patch; do
+  command -v "$c" >/dev/null || fail "$c is required"
 done
-[ -f "$SRC_HOME/kryonk-source.sh" ] || fail "нет $SRC_HOME/kryonk-source.sh"
-[ -f "$SRC_HOME/cachyos.pubkey.asc" ] || fail "нет $SRC_HOME/cachyos.pubkey.asc"
+for f in lib.sh kryonk-source.sh patches/series kryonk.config; do
+  [ -f "$SRC_HOME/$f" ] || fail "missing $SRC_HOME/$f"
+done
+. "$SRC_HOME/lib.sh"
 
-api() { curl -fsSL --retry 3 --retry-delay 5 --connect-timeout 20 -H 'Accept: application/vnd.github+json' "$1" 2>/dev/null || true; }
-pick() { python3 -c 'import json,sys
-raw=sys.stdin.read()
-try:
-    d=json.loads(raw)
-except Exception:
-    d=None
-if isinstance(d,list):
-    d=d[0] if d else {}
-if not isinstance(d,dict):
-    d={}
-print(d.get("tag_name") or d.get("name") or "")'; }
+while read -r name; do
+  case $name in ''|\#*) continue ;; esac
+  [ -f "$SRC_HOME/patches/$name" ] || fail "the series lists a missing patch: $name"
+done < "$SRC_HOME/patches/series"
+ok "every patch in the series exists"
 
-TAG=${CACHY_TAG:-}
-[ -n "$TAG" ] || TAG=$(api "https://api.github.com/repos/CachyOS/linux/releases/latest" | pick)
-[ -n "$TAG" ] || TAG=$(api "https://api.github.com/repos/CachyOS/linux/releases?per_page=1" | pick)
-[ -n "$TAG" ] || TAG=$(api "https://api.github.com/repos/CachyOS/linux/tags?per_page=1" | pick)
-[ -n "$TAG" ] || TAG=$(cat "$SRC_HOME/cachyos-tag.txt" 2>/dev/null || true)
-[ -n "$TAG" ] || fail "не получен тег cachyos, задай CACHY_TAG вручную"
-export TAG
-say "тег cachyos: $TAG"
+KVER=${KVER:-$(kernel_latest "$T/index.html")}
+[ -n "$KVER" ] || fail "cannot detect the latest $KERNEL_SERIES kernel"
+kernel_get "$KVER" "$T"
+ok "kernel.org PGP signature verifies for linux-$KVER"
 
-TAR="$TAG.tar.gz"
-export TAR
-mkdir -p "$T/dl" "$T/src" "$T/check-src"
-BASE="https://github.com/CachyOS/linux/releases/download/$TAG"
-fetch "$BASE/$TAR" "$T/dl/$TAR" || fail "не скачался $TAR"
-fetch "$BASE/$TAR.asc" "$T/dl/$TAR.asc" || fail "не скачалась подпись $TAR.asc"
+printf 'fake\n' > "$T/bad.sign"
+if kernel_pgp "$T/linux-$KVER.tar.xz" "$T/bad.sign"; then
+  fail "a forged signature was accepted"
+fi
+ok "a forged signature is rejected"
 
-gpg --batch --quiet --import "$SRC_HOME/cachyos.pubkey.asc" >/dev/null 2>&1 || fail "ключ cachyos не импортируется"
-gpg --batch --verify "$T/dl/$TAR.asc" "$T/dl/$TAR" >/dev/null 2>&1 || fail "gpg подпись исходника не совпала"
-ok "скачан и проверён исходник cachyos"
-
-tar xf "$T/dl/$TAR" -C "$T/src" --strip-components=1
-[ -f "$T/src/Makefile" ] && [ -d "$T/src/kernel" ] || fail "архив не похож на дерево ядра"
-ok "архив содержит дерево исходников ядра"
-
-cp -a "$T/src/." "$T/check-src/"
+mkdir -p "$T/src"
+tar -xf "$T/linux-$KVER.tar.xz" -C "$T/src" --strip-components=1
+[ -f "$T/src/Makefile" ] && [ -d "$T/src/security" ] || fail "the archive is not a kernel tree"
 (
-  cd "$T/check-src"
-  say() { printf '==> %s\n' "$*"; }
-  die() { printf 'error: %s\n' "$*" >&2; exit 1; }
-  fetch() { curl -fL --retry 3 --retry-delay 5 --connect-timeout 20 -sS -o "$2" "$1"; }
+  cd "$T/src"
+  while read -r name; do
+    case $name in ''|\#*) continue ;; esac
+    patch -p1 --forward --batch -N < "$SRC_HOME/patches/$name" >/dev/null
+  done < "$SRC_HOME/patches/series"
+  STRICT=1
   . "$SRC_HOME/kryonk-source.sh"
   kryonk_source
-) || fail "kryonk_source не отработал на исходнике cachyos"
-ok "kryonk_source применяет наши правки"
+) || fail "the kryonk series or source edits do not apply to linux-$KVER"
+ok "the kryonk series and source edits apply to linux-$KVER"
 
-printf 'fake sig\n' > "$T/dl/bad.asc"
-if gpg --batch --verify "$T/dl/bad.asc" "$T/dl/$TAR" >/dev/null 2>&1; then
-  fail "gpg принял поддельную подпись"
-fi
-ok "gpg отвергает поддельную подпись"
-
-echo "все тесты пройдены"
+grep -q 'SECURITY_KRYONK' "$T/src/security/Makefile" || fail "the guard is not wired into security/Makefile"
+ok "the guard is wired into the build"
+echo "all tests passed"

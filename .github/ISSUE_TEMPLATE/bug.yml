@@ -1,26 +1,32 @@
-name: ошибка
-description: что-то работает не так
+name: Bug report
+description: Report something that does not work as expected.
 labels: [bug]
 body:
   - type: input
     id: ver
     attributes:
-      label: версия iso или stage 3
+      label: ISO or stage 3 version
+      description: Use the version from the release name, for example 0.0.1.
+      placeholder: "0.0.1"
     validations:
       required: true
   - type: input
     id: hw
     attributes:
-      label: железо и режим загрузки (uefi или bios)
+      label: Hardware and boot mode
+      description: Name the machine or virtual machine, and say whether it boots with UEFI or BIOS.
   - type: textarea
     id: steps
     attributes:
-      label: шаги воспроизведения
+      label: Steps to reproduce
+      description: List the exact commands or actions, starting from a fresh boot.
     validations:
       required: true
   - type: textarea
     id: out
     attributes:
-      label: что ожидал и что получил, вывод команд
+      label: Expected and actual result
+      description: Describe what you expected and what happened instead. Paste the command output.
+      render: shell
     validations:
       required: true

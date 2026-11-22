@@ -1,5 +1,5 @@
 #include "kpkg.h"
-#define VERSION "2.2.0"
+#define VERSION "0.0.1"
 const char *cp_version = VERSION;
 void usage(void)
 {
@@ -8,7 +8,8 @@ void usage(void)
 	     "  sync                           download the recipe tree (kpkg-recipes)\n"
 	     "  update [--force] [--unsigned]  update kpkg itself from GitHub releases\n"
 	     "  fix                            recreate directories, fetch recipes, run doctor\n"
-	     "  install [-p] [-a] [-o] [--jobs N] [--force] package...\n"
+	     "  install [-p] [-a] [-o] [--jobs N] [--force] package|file.kpkg...\n"
+	     "  lint    file.kpkg...\n"
 	     "  remove  [-p] [-a] [--force] package...\n"
 	     "  upgrade [-p] [-a] [--jobs N] [--no-snapshot]\n"
 	     "  clean   [-p] [-a]\n"
@@ -55,6 +56,8 @@ int main(int argc, char **argv)
 		r = 0;
 	} else if (!strcmp(c, "update")) {
 		r = host_ok() ? cmd_update(argc - 2, argv + 2) : 1;
+	} else if (!strcmp(c, "lint")) {
+		r = cmd_lint(argc - 2, argv + 2);
 	} else if (!strcmp(c, "fix")) {
 		r = host_ok() ? cmd_fix() : 1;
 	} else if (!strcmp(c, "sync")) {

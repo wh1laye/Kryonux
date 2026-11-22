@@ -1,14 +1,13 @@
 #!/bin/bash
 set -u
 
-VERSION=${1:-0.0.0}
+VERSION=${1:-0.0.1}
 STRICT=${2:-0}
 
 say() { printf '==> %s\n' "$*"; }
 
 F=/var/tmp/s3files
 ST=/var/tmp/s3stamp
-SRC=/var/tmp/s3src
 PKG=/var/tmp/kpkg-src
 L=/var/tmp/s3log
 REPORT=/var/tmp/kryonux-report.txt
@@ -73,21 +72,23 @@ install_set() {
 }
 
 layout() {
-  install -d /usr/share/kryonux
   [ -f "$F/logo.txt" ] && install -m644 "$F/logo.txt" /usr/share/kryonux/logo.txt
   [ -f "$F/logo.ansi" ] && install -m644 "$F/logo.ansi" /usr/share/kryonux/logo.ansi
   [ -f "$F/logo.png" ] && install -m644 "$F/logo.png" /usr/share/kryonux/logo.png
+  local f src
   for f in kryonux-users kryonux-adduser kryonux-fix kryonux-firewall kryonux-audit; do
-    [ -f "$F/$f" ] && install -m755 "$F/$f" /usr/sbin/$f
+    src=$F/$f
+    [ -f "$src" ] || src=$F/$f.sh
+    [ -f "$src" ] || return 1
+    install -m755 "$src" /usr/sbin/$f
   done
-  [ -f "$F/kryonux-audit" ] || true
   printf 'kryonux\n' > /etc/hostname
   grep -q '^ID=kryonux' /etc/os-release
 }
 
 clean() {
   rm -rf /var/cache/kpkg/distfiles/* /var/tmp/kpkg-build/* \
-    /var/tmp/s3src /var/tmp/kpkg-src /root/.cache /tmp/* /etc/resolv.conf
+    /var/tmp/kpkg-src /root/.cache /tmp/* /etc/resolv.conf
 }
 
 step kpkg-setup setup_kpkg || exit 1

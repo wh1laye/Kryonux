@@ -1,0 +1,86 @@
+From: The Kryonux Project
+Subject: [PATCH 1/1] security: add the kryonk guard
+
+Adds security/kryonk with /proc/kryonk and restrictive boot defaults.
+---
+diff --git a/security/kryonk/Kconfig b/security/kryonk/Kconfig
+--- a/security/kryonk/Kconfig
++++ b/security/kryonk/Kconfig
+@@ -0,0 +1,10 @@
++config SECURITY_KRYONK
++	bool "Kryonux kernel guard"
++	depends on SECURITY
++	default y
++	help
++	  Kryonux kernel guard. Exposes /proc/kryonk with the fork version
++	  and the current hardening state, and enforces restrictive boot
++	  defaults for kernel pointer exposure, dmesg access, oops handling
++	  and kernel module loading. Disable with the kryonk.guard=0 boot
++	  parameter.
+diff --git a/security/kryonk/Makefile b/security/kryonk/Makefile
+--- a/security/kryonk/Makefile
++++ b/security/kryonk/Makefile
+@@ -0,0 +1 @@
++obj-$(CONFIG_SECURITY_KRYONK)	+= kryonk.o
+diff --git a/security/kryonk/kryonk.c b/security/kryonk/kryonk.c
+--- a/security/kryonk/kryonk.c
++++ b/security/kryonk/kryonk.c
+@@ -0,0 +1,58 @@
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/printk.h>
++#include <linux/proc_fs.h>
++#include <linux/seq_file.h>
++#include <generated/utsrelease.h>
++#include "kryonk_version.h"
++
++extern int kptr_restrict;
++extern int dmesg_restrict;
++extern int panic_on_oops;
++
++static int kryonk_guard = 1;
++module_param_named(guard, kryonk_guard, int, 0444);
++MODULE_PARM_DESC(guard, "enforce restrictive boot defaults");
++
++static int kryonk_show(struct seq_file *m, void *v)
++{
++	seq_printf(m, "kryonk %s\n", KRYONK_VERSION);
++	seq_printf(m, "release %s\n", UTS_RELEASE);
++	seq_printf(m, "guard: %s\n", kryonk_guard ? "on" : "off");
++	seq_printf(m, "kptr_restrict: %d\n", kptr_restrict);
++	seq_printf(m, "dmesg_restrict: %d\n", dmesg_restrict);
++	seq_printf(m, "panic_on_oops: %d\n", panic_on_oops);
++	return 0;
++}
++
++static int kryonk_open(struct inode *inode, struct file *file)
++{
++	return single_open(file, kryonk_show, NULL);
++}
++
++static const struct proc_ops kryonk_proc_ops = {
++	.proc_open	= kryonk_open,
++	.proc_read	= seq_read,
++	.proc_lseek	= seq_lseek,
++	.proc_release	= single_release,
++};
++
++static int __init kryonk_init(void)
++{
++	if (kryonk_guard) {
++		kptr_restrict = 2;
++		dmesg_restrict = 1;
++		panic_on_oops = 1;
++	}
++	if (!proc_create("kryonk", 0444, NULL, &kryonk_proc_ops))
++		pr_warn("kryonk: cannot create /proc/kryonk\n");
++	pr_info("kryonk: fork %s, guard %s\n", KRYONK_VERSION,
++		kryonk_guard ? "on" : "off");
++	return 0;
++}
++late_initcall(kryonk_init);
++
++MODULE_LICENSE("GPL");
++MODULE_AUTHOR("The Kryonux Project");
++MODULE_DESCRIPTION("Kryonux kernel guard");

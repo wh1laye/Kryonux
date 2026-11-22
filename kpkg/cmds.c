@@ -169,6 +169,41 @@ static int execute_plan(int force)
 	if (!r) printf("kpkg: transaction finished: %d package(s)\n", nplan);
 	return r;
 }
+static int local_recipe(const char *arg, char *cat, size_t cn, char *name, size_t nn, char *ver, size_t vn)
+{
+	size_t l = strlen(arg);
+	struct recipe r;
+	int ok = 0;
+	if (l < 6 || strcmp(arg + l - 5, ".kpkg") || !exists(arg)) return 0;
+	recipe_init(&r);
+	if (recipe_load(arg, &r) && safe_id(r.name) && ver_ok(r.version)) {
+		if (!realpath(arg, recipe_local)) snprintf(recipe_local, sizeof recipe_local, "%s", arg);
+		snprintf(recipe_local_name, sizeof recipe_local_name, "%s", r.name);
+		snprintf(recipe_local_ver, sizeof recipe_local_ver, "%s", r.version);
+		snprintf(cat, cn, "local");
+		snprintf(name, nn, "%s", r.name);
+		snprintf(ver, vn, "%s", r.version);
+		ok = 1;
+	} else {
+		fprintf(stderr, "kpkg: %s is not a valid recipe\n", arg);
+	}
+	recipe_free(&r);
+	return ok;
+}
+int cmd_lint(int argc, char **argv)
+{
+	int i, bad = 0;
+	if (argc < 1) {
+		fputs("kpkg: specify at least one .kpkg file\n", stderr);
+		return 1;
+	}
+	for (i = 0; i < argc; i++) {
+		int n = recipe_lint(argv[i]);
+		if (n) bad += n;
+		else printf("ok: %s\n", argv[i]);
+	}
+	return bad ? 1 : 0;
+}
 int cmd_install(int argc, char **argv)
 {
 	struct opts o;
@@ -183,6 +218,10 @@ int cmd_install(int argc, char **argv)
 	if (!ensure_tree()) goto out;
 	plan_reset();
 	for (i = 0; i < npk; i++) {
+		if (local_recipe(pkgs[i], cat, sizeof cat, name, sizeof name, ver, sizeof ver)) {
+			if (!visit(cat, name, ver, !o.oneshot)) goto out;
+			continue;
+		}
 		if (!resolve_name(pkgs[i], cat, sizeof cat, name, sizeof name, ver, sizeof ver)) goto out;
 		if (!visit(cat, name, ver, !o.oneshot)) goto out;
 	}

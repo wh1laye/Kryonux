@@ -3,9 +3,9 @@ set -eu
 
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(dirname "$HERE")
-VERSION=${VERSION:-0.0.0}
-BASE_TAG=${BASE_TAG:-1.6}
-BASE_VERSION=${BASE_VERSION:-1.6}
+VERSION=${VERSION:-0.0.1}
+BASE_TAG=${BASE_TAG:-base-0.0.0}
+BASE_VERSION=${BASE_VERSION:-0.0.0}
 BASE_VERIFY=${BASE_VERIFY:-1}
 PUB=${PUB:-$REPO/docs/kryonux.pub}
 MINISIGN_KEY=${MINISIGN_KEY:-}
@@ -21,7 +21,7 @@ die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 for c in curl tar xz sha256sum unshare mount chroot; do command -v "$c" >/dev/null || die "missing command: $c"; done
 case $WORK in /|/usr*|/etc*|/home|/root|/var|/boot) die "unsafe work directory: $WORK" ;; esac
 
-mkdir -p "$WORK/src" "$OUT"
+mkdir -p "$OUT"
 
 fetch() { curl -fL --proto =https --retry 8 --retry-delay 15 --connect-timeout 20 -C - -sS -o "$2" "$1"; }
 
@@ -61,17 +61,9 @@ else
   rm -rf "$ROOT"; mkdir -p "$ROOT"
   xz -dc "$BASEFILE" | tar -xpf - -C "$ROOT" --numeric-owner --xattrs --xattrs-include='*'
 fi
-grep -qE '^ID="?(kryonux|kryonux)"?' "$ROOT/etc/os-release" || die "the base does not look like Kryonux stage 3"
+grep -qE '^ID="?kryonux"?' "$ROOT/etc/os-release" || die "the base does not look like Kryonux stage 3"
 
-say "sources (sha256 verified)"
-while IFS='|' read -r name sum url; do
-  [ -n "$name" ] || continue
-  [ -f "$WORK/src/$name" ] || fetch "$url" "$WORK/src/$name" || die "download failed: $url"
-  [ "$(sha256sum "$WORK/src/$name" | cut -d' ' -f1)" = "$sum" ] || { rm -f "$WORK/src/$name"; die "sha256 mismatch: $name"; }
-done < "$HERE/stage3/SOURCES.txt"
-
-mkdir -p "$ROOT/var/tmp/s3src" "$ROOT/var/tmp/s3files" "$ROOT/var/tmp/kpkg-src"
-cp "$WORK"/src/* "$ROOT/var/tmp/s3src/"
+mkdir -p "$ROOT/var/tmp/s3files" "$ROOT/var/tmp/kpkg-src"
 cp -R "$HERE"/stage3/. "$ROOT/var/tmp/s3files/"
 cp -R "$REPO"/kpkg/. "$ROOT/var/tmp/kpkg-src/"
 
@@ -123,9 +115,8 @@ LIST=$(mktemp); trap 'rm -f "$LIST"' EXIT
 tar -tf "$OUT/$NAME" > "$LIST"
 miss=0
 for f in sbin/init sbin/openrc-init etc/os-release etc/init.d/syslog-ng etc/runlevels/default/syslog-ng \
-         etc/syslog-ng/syslog-ng.conf usr/bin/fastfetch usr/bin/kpkg etc/kpkg/kpkg.conf \
-         usr/share/kryonux/logo.txt usr/share/kryonux/logo.ansi usr/share/kryonux/logo.png \
-         etc/xdg/fastfetch/config.jsonc usr/bin/neofetch usr/sbin/kryonux-users usr/sbin/kryonux-adduser usr/sbin/kryonux-fix \
+         etc/syslog-ng/syslog-ng.conf usr/bin/kpkg etc/kpkg/kpkg.conf \
+         usr/sbin/kryonux-users usr/sbin/kryonux-adduser usr/sbin/kryonux-fix \
          etc/login.defs etc/doas.conf; do
   grep -qxE "(\./)?(usr/)?$f" "$LIST" || { printf 'the archive has no %s\n' "$f" >&2; miss=1; }
 done

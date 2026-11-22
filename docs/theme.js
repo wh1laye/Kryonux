@@ -239,8 +239,8 @@
   });
   function dot(t){return '<i class="dt" style="background:'+(t==='auto'?'linear-gradient(90deg,#f6f8fc 50%,#1a1c20 50%)':BG[t])+'"></i>'}
   function extra(){var o='',k,L=['night','nord','dracula','sepia'];if(secOn())L=L.concat(['matrix','amber']);for(k=0;k<L.length;k++)o+='<button type="button" data-th="'+L[k]+'">'+dot(L[k])+T(NM[L[k]])+'</button>';return o}
-  var TABS=[['look','вид'],['glass','стекло'],['text','текст'],['more','ещё']];
-  function tabGet(){try{var v=localStorage.getItem('sptab');if(/^(look|glass|text|more)$/.test(v))return v}catch(e){}return 'look'}
+  var TABS=[['look','тема'],['color','цвета'],['glass','стекло'],['text','чтение']];
+  function tabGet(){try{var v=localStorage.getItem('sptab');if(/^(look|color|glass|text)$/.test(v))return v}catch(e){}return 'look'}
   function setTab(v){
     if(!sp)return;
     var b=sp.querySelector('.spb');
@@ -256,7 +256,7 @@
     if(!b)return;
     [].forEach.call(b.children,function(n){
       if(!n.classList||!n.classList.contains('sps')||n.hasAttribute('data-t'))return;
-      n.setAttribute('data-t',n.classList.contains('zss')?'look':'more');
+      n.setAttribute('data-t','look');
     });
   }
   function fill(){
@@ -272,11 +272,11 @@
     x+='<div class="sph"><div class="sphr"><b>'+T('настройки')+'</b><button type="button" class="spx" data-a="close" aria-label="'+T('закрыть')+'">'+XI+'</button></div><div class="spt" role="tablist">';
     for(i=0;i<TABS.length;i++)x+='<button type="button" role="tab" data-tb="'+TABS[i][0]+'">'+T(TABS[i][1])+'</button>';
     x+='</div></div>';
-    x+='<div class="sps" data-t="look"><h4>'+T('тема')+'</h4><div class="sgm"><button type="button" data-th="light">'+dot('light')+T('светлая')+'</button><button type="button" data-th="gray">'+dot('gray')+T('серая')+'</button><button type="button" data-th="auto">'+dot('auto')+T('авто')+'</button></div><div class="sgm" style="margin-top:6px">'+extra()+'</div></div>';
-    x+='<div class="sps" data-t="look"><h4>'+T('язык')+'</h4><div class="sgm"><button type="button" data-lg="ru">Русский</button><button type="button" data-lg="en">English</button></div></div>';
-    x+='<div class="sps" data-t="text"><h4>'+T('чтение')+'</h4><p class="spm">'+T('размер текста')+'</p><div class="sgm"><button type="button" data-rfs="0">'+T('обычный')+'</button><button type="button" data-rfs="1">'+T('крупнее')+'</button><button type="button" data-rfs="2">'+T('ещё крупнее')+'</button></div>';
+    x+='<div class="sps" data-t="look"><h4>'+T('тема')+'</h4><p class="spm">'+T('цвета всего сайта. «авто» следует за системой')+'</p><div class="sgm"><button type="button" data-th="light">'+dot('light')+T('светлая')+'</button><button type="button" data-th="gray">'+dot('gray')+T('серая')+'</button><button type="button" data-th="auto">'+dot('auto')+T('авто')+'</button></div><div class="sgm" style="margin-top:6px">'+extra()+'</div></div>';
+    x+='<div class="sps" data-t="look"><h4>'+T('язык')+'</h4><p class="spm">'+T('язык интерфейса и справочника')+'</p><div class="sgm"><button type="button" data-lg="ru">Русский</button><button type="button" data-lg="en">English</button></div></div>';
+    x+='<div class="sps" data-t="text"><h4>'+T('чтение')+'</h4><p class="spm">'+T('размер текста и контраст')+'</p><div class="sgm"><button type="button" data-rfs="0">'+T('обычный')+'</button><button type="button" data-rfs="1">'+T('крупнее')+'</button><button type="button" data-rfs="2">'+T('ещё крупнее')+'</button></div>';
     x+='<label class="spc"><input type="checkbox" data-rk="hc"><span>'+T('высокий контраст')+'</span></label><label class="spc"><input type="checkbox" data-rk="cmd"><span>'+T('только команды в справочнике')+'</span></label></div>';
-    x+='<div class="sps" data-t="glass"><h4>'+T('стекло')+'</h4><label class="spc"><input type="checkbox" data-k="gl"><span>'+T('жидкое стекло')+'</span></label>';
+    x+='<div class="sps" data-t="glass"><h4>'+T('стекло')+'</h4><p class="spm">'+T('полупрозрачные панели с размытием')+'</p><label class="spc"><input type="checkbox" data-k="gl"><span>'+T('жидкое стекло')+'</span></label>';
     x+='<div class="gpv" aria-hidden="true"><i class="gp1"></i><i class="gp2"></i><i class="gp3"></i><div class="gpc"><b></b><span>kryonux</span></div></div>';
     x+='<p class="spm">'+T('стиль')+'</p><div class="sgm gst">';
     for(i=0;i<GLN.length;i++)x+='<button type="button" data-gp="'+GLN[i][0]+'">'+T(GLN[i][1])+'</button>';
@@ -285,17 +285,18 @@
     x+='</div>';
     for(i=0;i<GLC.length;i++)x+='<label class="spc"><input type="checkbox" data-gc="'+GLC[i][0]+'"><span>'+T(GLC[i][1])+'</span></label>';
     x+='<button type="button" class="spq" data-a="rgl">'+T('сбросить стекло')+'</button></div>';
-    x+='<div class="sps" data-t="look"><h4>'+T('акцентный цвет')+'</h4><p class="spm">'+T('кнопки и детали')+'</p><div class="spp" data-box="apre">';
+    x+='<div class="sps" data-t="color"><h4>'+T('акцентный цвет')+'</h4><p class="spm">'+T('кнопки и детали')+'</p><div class="spp" data-box="apre">';
     for(i=0;i<APRE.length;i++)x+='<button type="button" class="pr" data-ap="'+i+'" style="background:linear-gradient(135deg,'+APRE[i][0]+','+APRE[i][1]+')" aria-label="'+APRE[i][0]+'"></button>';
     x+='</div><div class="spr"><label>'+T('цвет 1')+'<input type="color" data-k="c1"></label><label>'+T('цвет 2')+'<input type="color" data-k="c2"></label></div>';
     x+='<label class="spc"><input type="checkbox" data-k="ag"><span>'+T('градиент')+'</span></label>';
     x+='<div class="spv"><span class="pv1">'+T('кнопка')+'</span><span class="pv2"></span></div>';
     x+='<button type="button" class="spq" data-a="racc">'+T('сбросить')+'</button></div>';
-    x+='<div class="sps" data-t="look"><h4>'+T('фон сайта')+'</h4><label class="spc"><input type="checkbox" data-k="bon"><span>'+T('включить градиент фона')+'</span></label>';
+    x+='<div class="sps" data-t="color"><h4>'+T('фон сайта')+'</h4><p class="spm">'+T('градиент за содержимым страницы')+'</p><label class="spc"><input type="checkbox" data-k="bon"><span>'+T('включить градиент фона')+'</span></label>';
     x+='<div class="spr"><label>'+T('цвет 1')+'<input type="color" data-k="b1"></label><label>'+T('цвет 2')+'<input type="color" data-k="b2"></label></div>';
     x+='<label class="spa"><span>'+T('угол')+'</span><input type="range" min="0" max="360" data-k="ba"><em data-k="bav"></em></label>';
     x+='<p class="spm">'+T('пресеты')+'</p><div class="spp" data-box="bpre"></div>';
     x+='<button type="button" class="spq" data-a="rbg">'+T('сбросить')+'</button></div>';
+    x+='<div class="spf"><button type="button" class="spq" data-a="rall">'+T('сбросить все настройки')+'</button></div>';
     x+='</div>';
     sp.innerHTML=x;rdSync();setTab(tabGet());assign();
   }
@@ -341,6 +342,7 @@
           else if(a==='racc'){resetAcc();refresh()}
           else if(a==='rbg'){resetGrad();refresh()}
           else if(a==='rgl'){resetGl();refresh()}
+          else if(a==='rall'){resetAcc();resetGrad();resetGl();setAuto();refresh()}
           return;
         }
         if(n.hasAttribute('data-th')){var tv=n.getAttribute('data-th');if(tv==='auto')setAuto();else window.KryonuxTheme.set(tv);refresh();return}
