@@ -1,7 +1,7 @@
 (function(){
 var d=document,h=d.documentElement,sc=d.currentScript;
 var BASE=sc?sc.src.replace(/themes\.js.*$/,''):'';
-var V='19';
+var V='20';
 var FILES={ny:'newyear',hw:'halloween',su:'summer',sp:'spring',cs:'space',fo:'forest',au:'autumn',oc:'ocean',ar:'aurora',cy:'cyber',sk:'sunset',rn:'rain'};
 var NAMES=[['off','выкл'],['auto','авто'],['ny','новый год'],['hw','хэллоуин'],['su','лето'],['sp','весна'],['cs','космос'],['fo','лес'],['au','осень'],['oc','океан'],['ar','сияние'],['cy','киберпанк'],['sk','закат'],['rn','дождь']];
 var FXN=[['full','полные'],['low','лёгкие'],['off','выкл']];
@@ -90,7 +90,7 @@ function ctx(){
       var b=d.querySelector('.brand'),s=b&&b.querySelector('svg');
       if(!b||!s)return;
       var P=s.querySelector('path'),cd=P&&P.getAttribute('d')||'M14 18.5A17.5 17.5 0 1 1 49 18.5z';
-      if(typeof html==='function')html=html(cd);
+      if(typeof html==='function')html=html('');
       var e=d.createElement('b');e.className='zsl';e.innerHTML=html;
       if(o&&o.fit){
         e.style.width='32px';b.appendChild(e);

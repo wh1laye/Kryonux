@@ -242,7 +242,7 @@ void recipe_expand(struct recipe *r)
 	expand_into(r->src_uri, r, buf, sizeof r->src_uri);
 	memcpy(r->src_uri, buf, sizeof r->src_uri);
 }
-char recipe_local[BUF];
+char recipe_local[PATH_MAX];
 char recipe_local_name[128];
 char recipe_local_ver[64];
 int recipe_path(const char *cat, const char *name, const char *ver, char *out, size_t n)

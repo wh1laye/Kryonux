@@ -41,6 +41,15 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - `build-inside.sh` looked for `kryonux-users` and `kryonux-fix` without the `.sh` suffix, so they were never installed and the archive check failed
 - `build-stage3.sh` defaulted to the base release `1.6`
 
+### 🧪 Tests
+#### Added
+- `tools/test-iso.sh` with 67 checks: the files `mkiso.sh` needs exist, scripts parse, versions match `kpkg` everywhere, artifact names agree, the kernel builds in the live system filesystems, the live init and installer have what they need, the stage 3 list covers the ISO tools, and no foreign names remain. It runs in CI
+- kpkg tests grew from 13 to 31: recipe linting, installing from a local `.kpkg` file, `kpkg checksum` and SHA256 mismatch handling
+- `tools/test-recipes.sh` in the recipes repository
+
+#### Fixed
+- CI failed to compile `kpkg/cmds.c` with `-Werror=format-truncation`; the local recipe path buffer is now `PATH_MAX` long
+
 ### 🧠 kryonk
 #### Changed
 - `kryonk` is now a fork of the Linux 6.18 LTS series built from kernel.org sources. Tarballs are verified with the kernel.org PGP signature; the latest 6.18.y release is resolved automatically and can be pinned with `tools/kernel/pin-kernel.sh`
@@ -67,7 +76,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 #### Changed
 - Every cloud was replaced with the Kryonux logo: the header brand mark on all pages, the pre-login check screen, the summer theme, the space theme background and the forum sticker
 - The PWA icons (`icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`) were still the old cloud and are now the Kryonux K
-- The summer theme flies real clouds again and the space theme flies meteorites; the Kryonux logo no longer drifts across the themes. Logo icons stay in the header, the pre-login screen and the forum sticker
+- The summer theme flies redesigned fluffy clouds with a soft shadow, and the space theme drops meteorites and comets diagonally down the screen in separate lanes so they no longer overlap or fly sideways. The purple K over the header in the space theme is gone: the seasonal brand overlays no longer redraw the logo shape; the Kryonux logo no longer drifts across the themes. Logo icons stay in the header, the pre-login screen and the forum sticker
 - The forum sticker `:s_cloud:` is now `:s_kryonux:`, the cloud emoji was removed from the emoji picker, and the "cloud" color preset is now "cryo"
 - The header logo is a tight crop of the K and sits next to `ryonux` like a letter; `canonical` links were added to every page and `theme-color` to the 404 and offline pages
 - Settings have five tabs: Theme, Colors, Glass, Reading and More. The More tab with all extra options (view and comfort, text, appearance, extras) is kept. Each core section has a short hint, and there is a "Reset all settings" button
@@ -76,7 +85,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - New ice and diamond look: icy blue light and dark palettes, a faint crystal lattice background, a diamond facet behind the home hero and gradient accent buttons
 - In the header the Kryonux logo now replaces the letter K, so the brand reads as the logo followed by `ryonux`
 - Theme stylesheet selectors use `.kryonux`, and the seasonal theme layer class is `zs-logo`
-- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `40`
+- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `41`
 
 #### Added
 - News and RSS entry for `v0.0.1`

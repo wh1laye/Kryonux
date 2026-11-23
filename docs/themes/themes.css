@@ -29,7 +29,7 @@ html[data-calm="1"],html[data-calm="1"] body,html[data-calm="1"] body::before,ht
 .zso{position:fixed}
 .zsc{position:fixed;left:0;top:0;width:100%;height:100%}
 html.zs-still .zs *,html.zs-still .zsb *{animation:none!important}
-html.zs-still .zs-fly,html.zs-still .zs-shoot,html.zs-still .zs-bolt{display:none!important}
+html.zs-still .zs-fly,html.zs-still .zs-shoot,html.zs-still .zs-bolt,html.zs-still .zs-fall{display:none!important}
 html.zs-still .zs-logo{left:var(--sx,30%)!important}
 html.zs-still .zs-bulb{opacity:1}
 html.zs-still .zs-star{opacity:.85}
@@ -192,3 +192,10 @@ html[data-season="oc"] .zs-wv{filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
 .mdg[open]>summary::after{content:"\25B4"}
 .mdg>.spc{padding:2px 12px}
 .mdg>.spc:last-child{padding-bottom:10px}
+
+@keyframes zsfall{0%{transform:translate3d(-8vw,-18vh,0);opacity:0}8%{opacity:1}88%{opacity:1}100%{transform:translate3d(40vw,112vh,0);opacity:0}}
+.zs-fall{left:var(--x,10%);top:0;animation:zsfall var(--d,32s) linear infinite;animation-delay:var(--dl,0s);will-change:transform,opacity;pointer-events:none}
+.zs-rock svg{display:block;animation:zsspin 14s linear infinite;filter:drop-shadow(0 0 6px rgba(160,190,255,.25))}
+.zs-cmt svg{display:block;transform:rotate(35deg);filter:drop-shadow(0 0 8px rgba(255,255,255,.55))}
+.zs-logo svg{filter:drop-shadow(0 6px 9px rgba(70,130,200,.28))}
+@media(prefers-reduced-motion:reduce){.zs-fall{animation:none;opacity:0}}

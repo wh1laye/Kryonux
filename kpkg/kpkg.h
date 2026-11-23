@@ -3,6 +3,7 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
@@ -58,7 +59,7 @@ void list_add(char ***v, int *n, const char *s); void list_free(char **v, int n)
 void recipe_init(struct recipe *r); void recipe_free(struct recipe *r);
 int recipe_load(const char *path, struct recipe *r); const char *recipe_phase(const struct recipe *r, const char *name);
 void recipe_expand(struct recipe *r);
-extern char recipe_local[BUF]; extern char recipe_local_name[128]; extern char recipe_local_ver[64];
+extern char recipe_local[PATH_MAX]; extern char recipe_local_name[128]; extern char recipe_local_ver[64];
 int recipe_lint(const char *path); int recipe_ver_ok(const char *s);
 int recipe_path(const char *cat, const char *name, const char *ver, char *out, size_t n);
 int recipe_best(const char *cat, const char *name, char *ver, size_t n);

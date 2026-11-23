@@ -35,6 +35,8 @@ Instructions for AI coding agents (OpenCode, Claude Code and others) working in 
 - Check JavaScript syntax: `node --check <file>`
 - Check shell scripts: `bash -n <file>` and `shellcheck -x <file>` (config in `.shellcheckrc`)
 - Stage 3 gate: `bash tools/test-stage3-gate.sh`
+- ISO checks: `bash tools/test-iso.sh`
+- kpkg checks: `bash tools/test-kpkg.sh`
 - Most other `tools/test-*.sh` scripts need root, a chroot or QEMU; read a script before running it
 
 ## Rules

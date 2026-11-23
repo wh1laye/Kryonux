@@ -13,9 +13,8 @@
   window.KryonuxSeason.reg('cs',{
     init:function(k){
       var m=k.mobile(),wd=k.wide(),gh=m?30:40,i;
-      for(i=0;i<(m?3:6);i++)k.el('zs-logo',k.svg('0 0 136 86',NEB),'left:'+k.rnd(-30,60).toFixed(1)+'%;top:'+Math.round(k.rnd(gh*.1,gh*.85))+'px;width:'+Math.round(k.rnd(m?34:46,m?64:96))+'px;animation-duration:'+Math.round(k.rnd(70,150))+'s;animation-delay:'+(-i*21).toFixed(1)+'s;opacity:.92');
+      for(i=0;i<(m?3:5);i++)k.el('zs-fall zs-rock',k.svg('0 0 136 86',NEB),'--x:'+(((i+k.rnd(.1,.9))/(m?3:5))*82).toFixed(1)+'%;width:'+Math.round(k.rnd(m?34:44,m?58:84))+'px;--d:'+Math.round(k.rnd(26,46))+'s;--dl:'+(-(i*9+k.rnd(0,5))).toFixed(1)+'s');
       k.el('zs-moon',k.svg('0 0 64 64',MOON),'left:6%;width:56px;height:56px');
-      k.logo(function(cd){return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 40" style="display:block;overflow:visible"><path d="'+cd+'" fill="#bb86fc" stroke="#9370db" stroke-width="1.2"/><circle cx="12" cy="9" r="2" fill="#fff" opacity=".85"/><circle cx="18" cy="11" r="1.5" fill="#fff" opacity=".7"/></svg>'},0,0,0,{fit:true});
       k.el('',k.strip(gh,[{d:k.hill(1000,gh*.7,gh*.55,9,15),fill:'#05050a',line:'#2a2a4e',w:2},{d:k.hill(1000,gh*.92,gh*.4,11,21),fill:'#0a0a12',line:'#3a3a66',w:2}]),'left:0;right:0;bottom:0;height:'+gh+'px',true);
       var sat=k.el('zs-fly zs-orbit',k.svg('0 0 62 42',SATELLITE),'right:6%;top:'+Math.round(gh*.3)+'px;width:'+(m?38:60)+'px;animation-duration:'+(m?100:140)+'s;animation-delay:-60s');
       sat.innerHTML='<div>'+sat.innerHTML+'</div>';
@@ -39,7 +38,7 @@
       if(k.pc()){
         for(i=0;i<8;i++)k.el('zs-shoot','','left:'+k.rnd(4,84).toFixed(1)+'%;top:'+k.rnd(4,48).toFixed(1)+'%;animation-delay:'+(-i*3.0).toFixed(1)+'s;animation-duration:'+(9+i*4.0).toFixed(1)+'s',true);
         for(i=0;i<10;i++)k.el('zs-glint','','left:'+k.rnd(2,98).toFixed(1)+'%;bottom:'+Math.round(k.rnd(gh*.2,gh*.9))+'px;animation-delay:'+(-k.rnd(0,3)).toFixed(2)+'s;animation-duration:'+k.rnd(2,4.4).toFixed(1)+'s',true);
-        for(i=0;i<4;i++)k.el('zs-fly zs-comet',k.svg('0 0 94 52',COMET),'left:'+k.rnd(0,42).toFixed(1)+'%;top:'+k.rnd(10,52).toFixed(1)+'%;width:'+(m?48:78)+'px;animation-duration:'+(m?120:170)+'s;animation-delay:'+(-i*24).toFixed(1)+'s');
+        for(i=0;i<(m?2:4);i++)k.el('zs-fall zs-cmt',k.svg('0 0 94 52',COMET),'--x:'+(((i+k.rnd(.15,.85))/(m?2:4))*80+8).toFixed(1)+'%;width:'+(m?48:78)+'px;--d:'+Math.round(k.rnd(14,24))+'s;--dl:'+(-(i*6+k.rnd(0,4))).toFixed(1)+'s');
       }
     }
   });

@@ -111,6 +111,18 @@ The site is static and lives in `docs/`.
 
 Run the site checks with `node tools/test-site.js`.
 
+## 🧪 Tests
+
+```sh
+bash tools/test-kpkg.sh        # package manager, recipes, checksums
+bash tools/test-iso.sh         # ISO, installer, versions, stage 3 list
+bash tools/test-stage3-gate.sh # stage 3 rules
+bash tools/test-kernel-patches.sh # kernel patch series on the latest 6.18
+node tools/test-site.js        # website
+```
+
+The recipe tree has its own checks in [kpkg-recipes](https://github.com/wh1laye/kpkg-recipes).
+
 ## 🤝 Contributing
 
 Contributions are welcome: bug reports, recipes and kernel or `kpkg` improvements. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first. Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
