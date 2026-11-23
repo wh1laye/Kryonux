@@ -6,6 +6,7 @@ REPO=$(dirname "$(dirname "$HERE")")
 KVER=${KVER:-}
 KRYONK_VER=${KRYONK_VER:-0.0.1}
 MARCH=${MARCH:-x86-64-v3}
+KRYONK_LEVEL=${KRYONK_LEVEL:-full}
 WORK=${WORK:-/var/tmp/kryonk-build}
 OUT=${OUT:-$PWD}
 JOBS=${JOBS:-$(nproc)}
@@ -76,6 +77,7 @@ cd "$SRCDIR"
 ours=0
 if [ -f "$HERE/patches/series" ]; then
   while read -r name; do
+    if [ "$KRYONK_LEVEL" = safe ] && [ "$ours" -ge 1 ]; then break; fi
     case $name in ''|\#*) continue ;; esac
     [ -f "$HERE/patches/$name" ] || die "the series lists a missing patch: $name"
     patch -p1 --forward --batch -N < "$HERE/patches/$name" > "$WORK/ours.log" 2>&1 || { tail -20 "$WORK/ours.log" >&2; die "Kryonux patch failed: $name"; }
@@ -89,10 +91,11 @@ say "Kryonux patches applied: $ours"
   kryonk_source
 )
 
-say "config: x86_64_defconfig + kryonk.config ($MARCH)"
+say "config: x86_64_defconfig + kryonk.config ($MARCH, level $KRYONK_LEVEL)"
 make x86_64_defconfig
 FRAG=$WORK/kryonk-frag.config
 cat "$HERE/kryonk.config" > "$FRAG"
+if [ "$KRYONK_LEVEL" = full ] && [ -f "$HERE/kryonk-extra.config" ]; then cat "$HERE/kryonk-extra.config" >> "$FRAG"; fi
 printf 'CONFIG_MODULES=y\nCONFIG_MODULE_UNLOAD=y\n' >> "$FRAG"
 ./scripts/kconfig/merge_config.sh -m .config "$FRAG"
 make olddefconfig
@@ -108,6 +111,12 @@ KCF=""; [ "$MARCH" = x86-64 ] || KCF="-march=$MARCH"
 if ! make -j"$JOBS" KCFLAGS="$KCF" bzImage modules; then
   say "the parallel build failed, repeating it with one job to show the real error"
   make -j1 KCFLAGS="$KCF" bzImage modules 2>&1 | tail -n 80 >&2 || true
+  if [ "$KRYONK_LEVEL" = full ]; then
+    echo "::warning::the full kryonk build failed, repeating with the proven base series and config"
+    say "falling back to the safe level: patch 0001 and the base config only"
+    rm -rf "$SRCDIR"
+    exec env KRYONK_LEVEL=safe bash "$0" "$@"
+  fi
   die "the kernel build failed, see the error above"
 fi
 

@@ -353,6 +353,24 @@ static int resolve_jobs(void)
 	}
 	return 2;
 }
+static void protect_configs(const char *image, char **files, int nf)
+{
+	int i;
+	char src[BUF + 256], dst[BUF + 256], side[BUF + 280], *a[5];
+	struct stat st;
+	for (i = 0; i < nf; i++) {
+		if (strncmp(files[i], "etc/", 4)) continue;
+		snprintf(dst, sizeof dst, "/%s", files[i]);
+		snprintf(src, sizeof src, "%s/%s", image, files[i]);
+		if (lstat(dst, &st) != 0 || !S_ISREG(st.st_mode)) continue;
+		if (lstat(src, &st) != 0 || !S_ISREG(st.st_mode)) continue;
+		a[0] = "cmp"; a[1] = "-s"; a[2] = src; a[3] = dst; a[4] = NULL;
+		if (have("cmp") && run(a) == 0) continue;
+		snprintf(side, sizeof side, "%s.kpkg-new", src);
+		if (rename(src, side) == 0)
+			printf("kpkg: kept your /%s, the new version is /%s.kpkg-new\n", files[i], files[i]);
+	}
+}
 int pkg_build_install(const char *cat, const char *name, const char *ver, int explicit, int force)
 {
 	struct build_ctx c;
@@ -401,7 +419,7 @@ int pkg_build_install(const char *cat, const char *name, const char *ver, int ex
 		fprintf(stderr, "kpkg: cannot create source directory %s\n", path);
 		goto out;
 	}
-	printf("kpkg: building %s/%s-%s with %d jobs\n", cat, name, ver, c.jobcount);
+	printf("%s::%s kpkg: building %s/%s-%s with %d jobs\n", C('b'), C('0'), cat, name, ver, c.jobcount);
 	if (!fetch_distfiles(&c)) goto fail;
 	if (!extract_sources(&c)) goto fail;
 	if (run_named_phase(&c, "src_prepare") != 0) goto fail;
@@ -418,6 +436,7 @@ int pkg_build_install(const char *cat, const char *name, const char *ver, int ex
 		goto fail;
 	}
 	if (!check_conflicts(&c, files, nf, force)) goto fail;
+	if (!force) protect_configs(c.image, files, nf);
 	snprintf(srcarg, sizeof srcarg, "%s/.", c.image);
 	a[0] = "cp"; a[1] = "-a"; a[2] = srcarg; a[3] = "/"; a[4] = NULL;
 	if (run(a) != 0) {
@@ -434,7 +453,7 @@ int pkg_build_install(const char *cat, const char *name, const char *ver, int ex
 		printf("kpkg: upgraded %s/%s %s -> %s\n", cat, name, oldver, ver);
 	}
 	if (explicit || old_explicit) world_add(cat, name);
-	printf("kpkg: installed %s/%s-%s (%d files)\n", cat, name, ver, nf);
+	printf("%s::%s kpkg: installed %s/%s-%s (%d files)\n", C('g'), C('0'), cat, name, ver, nf);
 	if (recipe_phase(&c.r, "pkg_postinst")) run_phase(&c, "pkg_postinst", recipe_phase(&c.r, "pkg_postinst"), "/");
 	if (!keep_workdir) rm_tree(c.base);
 	r = 0;

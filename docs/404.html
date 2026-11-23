@@ -20,8 +20,8 @@
 <body>
 <div class="box">
 <p class="code">404</p>
-<h1>Страница не найдена</h1>
-<p>Такой страницы нет или она переехала. Вернись на главную или открой нужный раздел.</p>
+<h1 id="h">Страница не найдена</h1>
+<p id="t">Такой страницы нет или она переехала. Вернись на главную или открой нужный раздел.</p>
 <div class="row" id="lk"></div>
 </div>
 <script>
@@ -34,10 +34,13 @@ function draw(){
 var l=window.KryonuxTheme&&window.KryonuxTheme.getLang?window.KryonuxTheme.getLang():'ru';
 document.documentElement.lang=l;
 document.title=tr('страница не найдена: Kryonux');
+document.getElementById('h').textContent=tr('Страница не найдена');
+document.getElementById('t').textContent=tr('Такой страницы нет или она переехала. Вернись на главную или открой нужный раздел.');
 document.getElementById('lk').innerHTML=links.map(function(x){return '<a class="'+x[2]+'" href="'+b+x[0]+'">'+tr(x[1])+'</a>'}).join('');
 }
 window.addEventListener('kryonuxlang',draw);
 draw();
+window.addEventListener('load',draw);
 })();
 </script>
 </body>

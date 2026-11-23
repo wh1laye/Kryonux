@@ -21,7 +21,7 @@ make -C "$SRC" clean >/dev/null
 cp "$SRC"/*.c "$SRC"/*.h "$T/"
 gcc -O2 -std=gnu17 -Wall -Wextra -Wsign-conversion -Wformat=2 -Wno-format-truncation \
   -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=3 \
-  -DCONF="\"$T/kpkg.conf\"" -DDBDIR="\"$T/db\"" -DLOCKFILE="\"$T/lock\"" \
+  -DCONF="\"$T/kpkg.conf\"" -DDBDIR="\"$T/db\"" -DLOCKFILE="\"$T/lock\"" -DHOLDFILE="\"$T/hold\"" \
   -pie -Wl,-z,relro,-z,now -o "$T/kpkg" \
   "$T"/kpkg.c "$T"/util.c "$T"/lock.c "$T"/recipe.c "$T"/db.c "$T"/build.c "$T"/cmds.c "$T"/snap.c "$T"/update.c
 
@@ -121,8 +121,67 @@ check checksum-then-lint 0 "$(run lint "$T/rec/fill-1.0.kpkg")" "ok:"
 run checksum "$T/rec/fill-1.0.kpkg" >/dev/null
 if [ "$(grep -c '^SHA256=' "$T/rec/fill-1.0.kpkg")" = 1 ]; then printf 'PASS  checksum-idempotent\n'; pass=$((pass+1)); else printf 'FAIL  checksum-idempotent\n'; fail=$((fail+1)); fi
 check checksum-missing-source 1 "$(run checksum "$T/rec/dupfunc-1.0.kpkg")" "dupfunc"
-check checksum-mismatch-blocks-install 1 "$(KPKG_FORCE=1 run install badsum)" "SHA256 mismatch"
+if [ "$(id -u)" = 0 ]; then
+  check install-asks-without-yes 1 "$(KPKG_FORCE=1 run install badsum)" "pass -y"
+  check checksum-mismatch-blocks-install 1 "$(KPKG_FORCE=1 run install -y badsum)" "SHA256 mismatch"
+  check assume-yes-env 1 "$(KPKG_ASSUME_YES=1 KPKG_FORCE=1 run install badsum)" "SHA256 mismatch"
+fi
 check unknown-command 1 "$(run frobnicate)" "usage"
+
+check hold-empty 0 "$(run hold)" "no packages are held"
+check hold-add 0 "$(run hold fastfetch)" "fastfetch is held"
+check hold-list 0 "$(run hold)" "fastfetch"
+run hold fastfetch >/dev/null
+if [ "$(grep -c '^fastfetch$' "$T/hold")" = 1 ]; then printf 'PASS  hold-idempotent\n'; pass=$((pass+1)); else printf 'FAIL  hold-idempotent\n'; fail=$((fail+1)); fi
+check hold-invalid-name 1 "$(run hold 'bad name')" "invalid package name"
+check hold-release 0 "$(run unhold fastfetch)" "is released"
+if ! grep -q fastfetch "$T/hold"; then printf 'PASS  hold-file-cleared\n'; pass=$((pass+1)); else printf 'FAIL  hold-file-cleared\n'; fail=$((fail+1)); fi
+
+if [ "$(id -u)" = 0 ]; then
+  mkdir -p "$T/e2e/e2e-1.0"
+  echo data > "$T/e2e/e2e-1.0/README"
+  tar -czf "$T/src/e2e-1.0.tar.gz" -C "$T/e2e" e2e-1.0
+  E2ESUM=$(sha256sum "$T/src/e2e-1.0.tar.gz" | awk '{print $1}')
+  mkrec() {
+    cat > "$T/rec/e2e-$1.kpkg" <<REC
+PACKAGE=e2e
+VERSION=$1
+DESCRIPTION="End to end test package"
+LICENSE="MIT"
+SRC_URI="$T/src/e2e-1.0.tar.gz"
+SHA256="$E2ESUM"
+configure() {
+  true
+}
+build() {
+  true
+}
+install() {
+  mkdir -p "\$DESTDIR/etc" "\$DESTDIR/usr/local/bin"
+  printf '%s\n' "$2" > "\$DESTDIR/etc/kpkg-e2e.conf"
+  printf '#!/bin/sh\necho e2e %s\n' "$1" > "\$DESTDIR/usr/local/bin/kpkg-e2e"
+  chmod 755 "\$DESTDIR/usr/local/bin/kpkg-e2e"
+}
+REC
+  }
+  rm -f /etc/kpkg-e2e.conf /etc/kpkg-e2e.conf.kpkg-new /usr/local/bin/kpkg-e2e
+  mkrec 1.0 factory-v1
+  mkrec 1.1 factory-v2
+  check e2e-install 0 "$(KPKG_FORCE=1 run install -y "$T/rec/e2e-1.0.kpkg")" "installed local/e2e-1.0"
+  if [ -x /usr/local/bin/kpkg-e2e ] && grep -qx factory-v1 /etc/kpkg-e2e.conf; then printf 'PASS  e2e-files-installed\n'; pass=$((pass+1)); else printf 'FAIL  e2e-files-installed\n'; fail=$((fail+1)); fi
+  check e2e-owns 0 "$(run owns /usr/local/bin/kpkg-e2e)" "e2e"
+  printf 'mine\n' > /etc/kpkg-e2e.conf
+  check e2e-upgrade 0 "$(KPKG_FORCE=1 run install -y "$T/rec/e2e-1.1.kpkg")" "installed local/e2e-1.1"
+  if grep -q 'e2e 1.1' /usr/local/bin/kpkg-e2e; then printf 'PASS  e2e-binary-upgraded\n'; pass=$((pass+1)); else printf 'FAIL  e2e-binary-upgraded\n'; fail=$((fail+1)); fi
+  if grep -qx mine /etc/kpkg-e2e.conf && grep -qx factory-v2 /etc/kpkg-e2e.conf.kpkg-new; then printf 'PASS  e2e-config-kept\n'; pass=$((pass+1)); else printf 'FAIL  e2e-config-kept\n'; fail=$((fail+1)); fi
+  run hold e2e >/dev/null
+  check e2e-held-not-downgraded 0 "$(KPKG_FORCE=1 run install -y "$T/rec/e2e-1.0.kpkg")" "is held at 1.1"
+  if grep -q 'e2e 1.1' /usr/local/bin/kpkg-e2e; then printf 'PASS  e2e-hold-kept-version\n'; pass=$((pass+1)); else printf 'FAIL  e2e-hold-kept-version\n'; fail=$((fail+1)); fi
+  run unhold e2e >/dev/null
+  check e2e-remove 0 "$(KPKG_FORCE=1 run remove -y e2e)" "e2e"
+  if [ ! -e /usr/local/bin/kpkg-e2e ]; then printf 'PASS  e2e-removed\n'; pass=$((pass+1)); else printf 'FAIL  e2e-removed\n'; fail=$((fail+1)); fi
+  rm -f /etc/kpkg-e2e.conf /etc/kpkg-e2e.conf.kpkg-new /usr/local/bin/kpkg-e2e
+fi
 
 printf '\nkpkg tests: %d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" = 0 ] || exit 1

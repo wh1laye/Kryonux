@@ -47,7 +47,7 @@ check "installer can format ext4" "grep -q 'mkfs.ext4' '$INS'"
 check "installer can format btrfs" "grep -q 'mkfs.btrfs' '$INS'"
 check "installer reads the squashfs from the ISO" "grep -q 'rootfs.squashfs' '$INS'"
 
-for p in toolchain/gcc toolchain/binutils system/glibc system/linux-headers init/openrc boot/limine system/kmod system/eudev system/util-linux fs/e2fsprogs fs/dosfstools fs/btrfs-progs network/dhcpcd network/openssh network/nftables admin/doas tools/minisign tools/fastfetch; do
+for p in toolchain/gcc toolchain/binutils system/glibc system/linux-headers init/openrc boot/limine system/kmod system/eudev system/util-linux fs/e2fsprogs fs/dosfstools fs/btrfs-progs network/dhcpcd network/openssh network/nftables admin/doas tools/minisign tools/fastfetch tools/squashfs-tools tools/libisoburn fs/cryptsetup libs/zstd tools/cpio; do
   check "stage3 list has $p" "grep -qx '$p' '$LIST'"
 done
 check "stage3 list has no duplicates" "[ -z \"\$(sort '$LIST' | uniq -d)\" ]"

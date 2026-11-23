@@ -54,7 +54,7 @@ char *trim(char *s); int exists(const char *p); int is_dir(const char *p);
 int mkdirs(const char *path); int safe_dir(const char *p); void rm_tree(const char *path);
 void loadconf(void); void osid(char *out, size_t n); int host_allowed(char *id, size_t n);
 int host_ok(void); int need_root(void); int have(const char *cmd);
-int fetch(const char *url, const char *out); int vercmp(const char *a, const char *b);
+int fetch(const char *url, const char *out); extern int use_color; const char *C(char k); void ui_init(void); int vercmp(const char *a, const char *b);
 void list_add(char ***v, int *n, const char *s); void list_free(char **v, int n); int list_has(char **v, int n, const char *s);
 void recipe_init(struct recipe *r); void recipe_free(struct recipe *r);
 int recipe_load(const char *path, struct recipe *r); const char *recipe_phase(const struct recipe *r, const char *name);
@@ -83,7 +83,7 @@ int cmd_sync(void); int cmd_install(int argc, char **argv); int cmd_remove(int a
 int cmd_upgrade(int argc, char **argv); int cmd_clean(int argc, char **argv);
 int cmd_search(int argc, char **argv); int cmd_info(int argc, char **argv); int cmd_list(void);
 int cmd_files(int argc, char **argv); int cmd_owns(int argc, char **argv);
-int cmd_lint(int argc, char **argv); int cmd_checksum(int argc, char **argv); int cmd_doctor(void); int cmd_fix(void);
+int cmd_lint(int argc, char **argv); int cmd_hold(int argc, char **argv, int add); int cmd_checksum(int argc, char **argv); int cmd_doctor(void); int cmd_fix(void);
 int root_btrfs(char *dev, size_t n); int sn_is_name(const char *s); int sn_label_ok(const char *s);
 int top_mount(void); void top_umount(void); int sn_names(const char *dir, char ***out);
 void sn_prune(const char *dir); void sn_stamp(char *out, size_t n, int full);

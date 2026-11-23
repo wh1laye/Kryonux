@@ -10,3 +10,4 @@
 - After editing `kpkg/` run `make -C kpkg` and remove the build output
 - After editing shell scripts run `bash -n` and `shellcheck -x`
 - Add a `CHANGELOG.md` entry for every change before finishing
+- You cannot push from a chat, so end with the exact `git add`, `git commit -m "type: what changed"` and `git push` commands, as `AGENTS.md` describes

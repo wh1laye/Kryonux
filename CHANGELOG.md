@@ -41,6 +41,25 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - `build-inside.sh` looked for `kryonux-users` and `kryonux-fix` without the `.sh` suffix, so they were never installed and the archive check failed
 - `build-stage3.sh` defaulted to the base release `1.6`
 
+### 📦 kpkg (confirmation, config protection and hold)
+#### Added
+- `kpkg install`, `remove` and `upgrade` now ask for confirmation like `apt` or `pacman`; pass `-y` (or set `KPKG_ASSUME_YES=1`) to skip it. Without a terminal and without `-y` they refuse to continue. `-p` still shows the plan without asking
+- Colored plan and progress output on a terminal; plain text in logs and with `NO_COLOR`
+- Config protection: a file in `/etc` that already exists and differs is kept, and the new version is saved next to it as `.kpkg-new`
+- `kpkg hold`, `kpkg unhold`: held packages are not changed by `install` or `upgrade`; the list is `/etc/kpkg/hold`
+- GNU sources are retried from `ftpmirror.gnu.org` and `mirrors.kernel.org` when `ftp.gnu.org` is unreachable
+- Tests for the confirmation, `hold`, config protection and a real end to end install, upgrade, hold and removal of a package: 50 tests in total
+
+### 🗜️ Stage 3 (fastfetch and installer tools)
+#### Changed
+- New `fastfetch` configuration with a blue K logo built from block characters. It is installed to `/etc/xdg/fastfetch/config.jsonc` and `fastfetch` is put on hold, so an upgrade cannot replace the configuration
+- Added the tools the installer and ISO build use: `squashfs-tools`, `xorriso`, `cryptsetup` with `lvm2`, `popt`, `json-c`, `zstd`, `cpio` and `psmisc`. Every one has a recipe in `kpkg-recipes`
+- `dracut`, `sbsigntools` and `tpm2-tools` still have no recipes, so the optional Secure Boot and TPM2 installer features cannot be built yet
+
+### 🧪 Tests (workflow)
+#### Added
+- `tests.yml` workflow: run it from the Actions tab with **Run workflow**. It builds `kpkg` and runs the kpkg tests, the ISO and stage 3 checks, the website checks and the shell script checks. Tick the option to also test the kernel patches on the latest 6.18 kernel
+
 ### 🧪 Tests
 #### Added
 - `tools/test-iso.sh` with 67 checks: the files `mkiso.sh` needs exist, scripts parse, versions match `kpkg` everywhere, artifact names agree, the kernel builds in the live system filesystems, the live init and installer have what they need, the stage 3 list covers the ISO tools, and no foreign names remain. It runs in CI
@@ -62,6 +81,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - `tools/kernel/README.md` documents the patch series, build variables and signing
 
 #### Fixed
+- The kernel build now has a safe fallback. The extra hardening options moved to `kryonk-extra.config`. If the full build (all three patches and the extra options) fails, the script prints the real error and repeats the build with patch 0001 and `kryonk.config` only, the combination that built in CI run #1. Set `KRYONK_LEVEL=safe` to force it
 - The CI run `kryonk #2` failed late in the build. Patch 0002 referenced `modules_disabled`, which the 6.18 kernel no longer exports, so the final link failed. The patch no longer touches it, and `ZERO_CALL_USED_REGS` was removed from `kryonk.config`. A failed parallel build is now repeated with one job so the real compiler error is printed
 - The CI run `kryonk #1` built the kernel but failed with "Error while loading the secret key file". The workflow passes the key as a file path while `tools/sign.sh` treated the variable as the key text. `sign.sh` now accepts a file path or the key text, rejects anything that is not a minisign key, and signs keys without a password with `-W`
 
@@ -76,6 +96,8 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 #### Changed
 - Every cloud was replaced with the Kryonux logo: the header brand mark on all pages, the pre-login check screen, the summer theme, the space theme background and the forum sticker
 - The PWA icons (`icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`) were still the old cloud and are now the Kryonux K
+- The moon in the space theme was removed because it covered the header text
+- The 404 page now follows the language: its title and text are translated for English users
 - The summer theme flies redesigned fluffy clouds with a soft shadow, and the space theme drops meteorites and comets diagonally down the screen in separate lanes so they no longer overlap or fly sideways. The purple K over the header in the space theme is gone: the seasonal brand overlays no longer redraw the logo shape; the Kryonux logo no longer drifts across the themes. Logo icons stay in the header, the pre-login screen and the forum sticker
 - The forum sticker `:s_cloud:` is now `:s_kryonux:`, the cloud emoji was removed from the emoji picker, and the "cloud" color preset is now "cryo"
 - The header logo is a tight crop of the K and sits next to `ryonux` like a letter; `canonical` links were added to every page and `theme-color` to the 404 and offline pages

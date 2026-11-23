@@ -10,6 +10,8 @@ void usage(void)
 	     "  fix                            recreate directories, fetch recipes, run doctor\n"
 	     "  install [-p] [-a] [-o] [--jobs N] [--force] package|file.kpkg...\n"
 	     "  lint    file.kpkg...\n"
+	     "  hold    [package...]            keep packages at the installed version\n"
+	     "  unhold  package...             allow upgrades again\n"
 	     "  checksum file.kpkg...         download the sources and write SHA256\n"
 	     "  remove  [-p] [-a] [--force] package...\n"
 	     "  upgrade [-p] [-a] [--jobs N] [--no-snapshot]\n"
@@ -40,6 +42,7 @@ static int args_pretend(int argc, char **argv)
 }
 int main(int argc, char **argv)
 {
+	ui_init();
 	const char *c;
 	int r = 1;
 	if (argc < 2) {
@@ -57,6 +60,10 @@ int main(int argc, char **argv)
 		r = 0;
 	} else if (!strcmp(c, "update")) {
 		r = host_ok() ? cmd_update(argc - 2, argv + 2) : 1;
+	} else if (!strcmp(c, "hold")) {
+		r = cmd_hold(argc - 2, argv + 2, 1);
+	} else if (!strcmp(c, "unhold")) {
+		r = cmd_hold(argc - 2, argv + 2, 0);
 	} else if (!strcmp(c, "checksum")) {
 		r = cmd_checksum(argc - 2, argv + 2);
 	} else if (!strcmp(c, "lint")) {

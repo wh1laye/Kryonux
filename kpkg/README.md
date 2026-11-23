@@ -9,6 +9,7 @@ The standalone package manager of Kryonux. Written in C, it builds packages from
 - 📥 Install from the recipe tree or straight from a local `.kpkg` file
 - 🧩 Dependency resolution with per-recipe build options
 - ✍️ `minisign` signature verification for self-updates
+- ✋ Asks for confirmation before changing the system (`-y` skips it), keeps your edited `/etc` files and can hold packages
 - 📸 Automatic `btrfs` snapshots before upgrades, with `kpkg rollback`
 - 🩺 Environment diagnostics with `kpkg doctor` and `kpkg fix`
 
@@ -27,6 +28,7 @@ make
 | `install` | Install packages by name or from a `.kpkg` file |
 | `remove` | Remove packages |
 | `upgrade` | Upgrade installed packages |
+| `hold`, `unhold` | Keep a package at the installed version |
 | `lint` | Check `.kpkg` files for errors |
 | `checksum` | Download sources and write the `SHA256` field |
 | `search`, `info`, `list` | Query recipes and installed packages |

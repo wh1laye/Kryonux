@@ -17,11 +17,16 @@ toolchain/perl
 toolchain/pkgconf
 toolchain/python
 libs/gmp
+libs/json-c
+libs/libburn
+libs/libisofs
 libs/libmnl
 libs/libnftnl
 libs/libsodium
 libs/mpc
 libs/mpfr
+libs/popt
+libs/zstd
 system/bash
 system/bzip2
 system/coreutils
@@ -37,9 +42,11 @@ system/kmod
 system/less
 system/libxcrypt
 system/linux-headers
+system/lvm2
 system/ncurses
 system/openssl
 system/procps
+system/psmisc
 system/readline
 system/sed
 system/shadow
@@ -48,6 +55,7 @@ system/util-linux
 system/xz-utils
 system/zlib
 fs/btrfs-progs
+fs/cryptsetup
 fs/dosfstools
 fs/e2fsprogs
 network/curl
@@ -59,7 +67,10 @@ network/openssh
 admin/doas
 init/openrc
 boot/limine
+tools/cpio
 tools/fastfetch
+tools/libisoburn
 tools/minisign
 tools/mtools
 tools/nano
+tools/squashfs-tools

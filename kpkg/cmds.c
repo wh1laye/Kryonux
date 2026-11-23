@@ -1,6 +1,6 @@
 #include <limits.h>
 #include "kpkg.h"
-struct opts { int pretend; int ask; int oneshot; int force; int no_snapshot; };
+struct opts { int pretend; int ask; int yes; int oneshot; int force; int no_snapshot; };
 struct plan_item { char cat[128]; char name[128]; char ver[64]; char oldver[64]; int explicit; int upgrade; };
 static struct plan_item plan[MAXPLAN];
 static int nplan;
@@ -32,6 +32,7 @@ static int parse_opts(int argc, char **argv, struct opts *o, char ***pkgs, int *
 	for (i = 0; i < argc; i++) {
 		if (!strcmp(argv[i], "-p") || !strcmp(argv[i], "--pretend")) o->pretend = 1;
 		else if (!strcmp(argv[i], "-a") || !strcmp(argv[i], "--ask")) o->ask = 1;
+		else if (!strcmp(argv[i], "-y") || !strcmp(argv[i], "--yes")) o->yes = 1;
 		else if (!strcmp(argv[i], "-o") || !strcmp(argv[i], "--oneshot")) o->oneshot = 1;
 		else if (!strcmp(argv[i], "--force") || !strcmp(argv[i], "-f")) o->force = 1;
 		else if (!strcmp(argv[i], "--no-snapshot")) o->no_snapshot = 1;
@@ -47,18 +48,20 @@ static int parse_opts(int argc, char **argv, struct opts *o, char ***pkgs, int *
 			list_add(pkgs, npk, argv[i]);
 		}
 	}
+	if (getenv("KPKG_ASSUME_YES")) o->yes = 1;
+	if (!o->yes && !o->pretend) o->ask = 1;
 	return 1;
 }
 static int confirm(void)
 {
 	char ans[16];
 	if (!isatty(0)) {
-		fputs("kpkg: cannot ask without a terminal, drop -a\n", stderr);
+		fputs("kpkg: confirmation is required and there is no terminal, pass -y to proceed\n", stderr);
 		return 0;
 	}
-	fputs("kpkg: proceed? [y/N] ", stderr);
-	if (!fgets(ans, sizeof ans, stdin) || (ans[0] != 'y' && ans[0] != 'Y')) return 0;
-	return 1;
+	fprintf(stderr, "\n%s::%s Proceed? [Y/n] ", C('b'), C('0'));
+	if (!fgets(ans, sizeof ans, stdin)) return 0;
+	return !(ans[0] == 'n' || ans[0] == 'N');
 }
 static int find_category(const char *name, char *cat, size_t cn)
 {
@@ -74,6 +77,89 @@ static int find_category(const char *name, char *cat, size_t cn)
 	}
 	list_free(cats, nc);
 	return found;
+}
+#ifndef HOLDFILE
+#define HOLDFILE "/etc/kpkg/hold"
+#endif
+static int is_held(const char *cat, const char *name)
+{
+	char line[300], key[260];
+	FILE *f = fopen(HOLDFILE, "r");
+	int held = 0;
+	if (!f) return 0;
+	snprintf(key, sizeof key, "%s/%s", cat, name);
+	while (fgets(line, sizeof line, f)) {
+		char *s = trim(line);
+		if (!*s || *s == '#') continue;
+		if (!strcmp(s, name) || !strcmp(s, key)) { held = 1; break; }
+	}
+	fclose(f);
+	return held;
+}
+int cmd_hold(int argc, char **argv, int add)
+{
+	char line[300], **keep = NULL, dir[BUF], *sl;
+	int i, n = 0, r = 0, j, found;
+	FILE *f;
+	if (add && argc == 0) {
+		f = fopen(HOLDFILE, "r");
+		if (!f) { puts("kpkg: no packages are held"); return 0; }
+		while (fgets(line, sizeof line, f)) {
+			char *s = trim(line);
+			if (*s && *s != '#') puts(s);
+		}
+		fclose(f);
+		return 0;
+	}
+	if (argc < 1) {
+		fputs("kpkg: specify at least one package\n", stderr);
+		return 1;
+	}
+	if (!need_root()) return 1;
+	f = fopen(HOLDFILE, "r");
+	if (f) {
+		while (fgets(line, sizeof line, f)) {
+			char *s = trim(line);
+			char **grown;
+			if (!*s) continue;
+			grown = realloc(keep, sizeof *keep * (size_t)(n + 1));
+			if (!grown) { fclose(f); return 1; }
+			keep = grown;
+			keep[n++] = strdup(s);
+		}
+		fclose(f);
+	}
+	for (i = 0; i < argc; i++) {
+		if (!safe_id(argv[i]) && !strchr(argv[i], '/')) {
+			fprintf(stderr, "kpkg: invalid package name %s\n", argv[i]);
+			r = 1;
+			continue;
+		}
+		found = 0;
+		for (j = 0; j < n; j++) if (keep[j] && !strcmp(keep[j], argv[i])) found = 1;
+		if (add && !found) {
+			char **grown = realloc(keep, sizeof *keep * (size_t)(n + 1));
+			if (!grown) return 1;
+			keep = grown;
+			keep[n++] = strdup(argv[i]);
+			printf("kpkg: %s is held\n", argv[i]);
+		} else if (!add && found) {
+			for (j = 0; j < n; j++) if (keep[j] && !strcmp(keep[j], argv[i])) { free(keep[j]); keep[j] = NULL; }
+			printf("kpkg: %s is released\n", argv[i]);
+		}
+	}
+	snprintf(dir, sizeof dir, "%s", HOLDFILE);
+	sl = strrchr(dir, '/');
+	if (sl) { *sl = 0; mkdirs(dir); }
+	f = fopen(HOLDFILE, "w");
+	if (!f) {
+		fprintf(stderr, "kpkg: cannot write %s\n", HOLDFILE);
+		return 1;
+	}
+	for (j = 0; j < n; j++) if (keep[j]) { fprintf(f, "%s\n", keep[j]); free(keep[j]); }
+	fclose(f);
+	free(keep);
+	return r;
 }
 static int visit(const char *cat, const char *name, const char *ver, int explicit)
 {
@@ -94,6 +180,12 @@ static int visit(const char *cat, const char *name, const char *ver, int explici
 	}
 	list_add(&visiting, &nvisiting, key);
 	if (db_installed_version(cat, name, inst, sizeof inst) && !strcmp(inst, ver)) {
+		list_add(&visited, &nvisited, key);
+		visiting_pop();
+		return 1;
+	}
+	if (inst[0] && is_held(cat, name)) {
+		printf("kpkg: %s is held at %s, not changing it\n", key, inst);
 		list_add(&visited, &nvisited, key);
 		visiting_pop();
 		return 1;
@@ -152,9 +244,9 @@ static void print_plan(void)
 	int i;
 	for (i = 0; i < nplan; i++) {
 		if (plan[i].upgrade)
-			printf("upgrade  %s/%s %s -> %s%s\n", plan[i].cat, plan[i].name, plan[i].oldver, plan[i].ver, plan[i].explicit ? "" : " (dependency)");
+			printf("%supgrade%s  %s/%s %s -> %s%s\n", C('y'), C('0'), plan[i].cat, plan[i].name, plan[i].oldver, plan[i].ver, plan[i].explicit ? "" : " (dependency)");
 		else
-			printf("install  %s/%s-%s%s\n", plan[i].cat, plan[i].name, plan[i].ver, plan[i].explicit ? "" : " (dependency)");
+			printf("%sinstall%s  %s/%s-%s%s\n", C('g'), C('0'), plan[i].cat, plan[i].name, plan[i].ver, plan[i].explicit ? "" : " (dependency)");
 	}
 }
 static int execute_plan(int force)

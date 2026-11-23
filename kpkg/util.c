@@ -215,7 +215,27 @@ int have(const char *cmd)
 	free(dup);
 	return ok;
 }
+static int fetch_one_url(const char *url, const char *out);
 int fetch(const char *url, const char *out)
+{
+	static const char *const gnu[] = {"https://ftpmirror.gnu.org/gnu/", "https://mirrors.kernel.org/gnu/", "https://ftp.gnu.org/gnu/", NULL};
+	const char *pre[] = {"https://ftp.gnu.org/gnu/", "https://ftpmirror.gnu.org/gnu/", NULL};
+	int i, j;
+	if (fetch_one_url(url, out) == 0) return 0;
+	for (i = 0; pre[i]; i++) {
+		size_t l = strlen(pre[i]);
+		if (strncmp(url, pre[i], l)) continue;
+		for (j = 0; gnu[j]; j++) {
+			char alt[BUF];
+			if (!strcmp(gnu[j], pre[i])) continue;
+			snprintf(alt, sizeof alt, "%s%s", gnu[j], url + l);
+			fprintf(stderr, "kpkg: retrying from %s\n", gnu[j]);
+			if (fetch_one_url(alt, out) == 0) return 0;
+		}
+	}
+	return 1;
+}
+static int fetch_one_url(const char *url, const char *out)
 {
 	char *a[24];
 	int n = 0;
@@ -223,8 +243,8 @@ int fetch(const char *url, const char *out)
 	if (!isatty(2)) a[n++] = "-sS";
 	a[n++] = "--proto"; a[n++] = "=http,https";
 	a[n++] = "--proto-redir"; a[n++] = "=https";
-	a[n++] = "--retry"; a[n++] = "2";
-	a[n++] = "--connect-timeout"; a[n++] = "15";
+	a[n++] = "--retry"; a[n++] = "1";
+	a[n++] = "--connect-timeout"; a[n++] = "10";
 	a[n++] = "--speed-limit"; a[n++] = "10000";
 	a[n++] = "--speed-time"; a[n++] = "30";
 	a[n++] = "-o"; a[n++] = (char *)out;
@@ -271,4 +291,23 @@ int list_has(char **v, int n, const char *s)
 	for (i = 0; i < n; i++)
 		if (!strcmp(v[i], s)) return 1;
 	return 0;
+}
+
+int use_color;
+const char *C(char k)
+{
+	if (!use_color) return "";
+	switch (k) {
+	case 'b': return "\033[1;36m";
+	case 'g': return "\033[1;32m";
+	case 'y': return "\033[1;33m";
+	case 'r': return "\033[1;31m";
+	case 'd': return "\033[2m";
+	default: return "\033[0m";
+	}
+}
+void ui_init(void)
+{
+	const char *t = getenv("TERM");
+	use_color = isatty(1) && !getenv("NO_COLOR") && t && strcmp(t, "dumb");
 }

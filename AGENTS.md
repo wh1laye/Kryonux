@@ -57,7 +57,7 @@ Instructions for AI coding agents (OpenCode, Claude Code and others) working in 
 - **Kernel:** `kryonk` is a fork of the Linux 6.18 LTS series. Sources come from kernel.org and must be verified with the kernel.org PGP signature. The fork is the patch series in `tools/kernel/patches/` (listed in `series`) plus the scripted edits in `tools/kernel/kryonk-source.sh`. Do not add third-party kernel patch sets
 - **Stage 3:** keep it minimal: toolchain, core utilities, networking basics and `kpkg`. Add a package to `tools/stage3/kryonux-packages.list` only when the system cannot work without it
 - **Recipes:** the recipe tree is the separate repository `wh1laye/kpkg-recipes`, reset to a clean layout with two reference recipes. `.kpkg` format is documented in `kpkg/RECIPES.md`; every recipe needs a `SHA256`; `kpkg` is independent of Gentoo and other package managers
-- **Git:** commit and push only when asked
+- **Git:** commit and push only when asked, using the style described in "Finishing a task"
 
 ## Release artifacts
 
@@ -65,3 +65,18 @@ Instructions for AI coding agents (OpenCode, Claude Code and others) working in 
 - Live ISO: `kryonux-live-amd64-0.0.1.iso`
 - Stage 3: `kryonux-stage3-amd64-0.0.1.tar.xz`
 - Every artifact has a `.sha256` file and a `minisign` signature checked with `docs/kryonux.pub`
+
+## Finishing a task
+
+When a task is done, finish in one of two ways:
+
+1. If you can push, commit and push yourself with a message in the style `type: what was fixed or changed`. Use these types: `feat`, `fix`, `docs`, `test`, `ci`, `build`, `refactor`, `perf`, `style` and `chore`. Examples: `docs: fix the changelog dates`, `fix: keep /etc files on kpkg upgrade`, `test: add the iso checks`. Use lower case, the imperative mood and at most 72 characters. Add a short body when the reason is not obvious
+2. If you cannot push, as in a chat, do not claim that you pushed. End your answer with the exact commands for the user to run, for example:
+
+```sh
+git add -A
+git commit -m "docs: fix the changelog dates"
+git push
+```
+
+Before finishing, make sure that `CHANGELOG.md` is updated and that the checks listed in this file pass.

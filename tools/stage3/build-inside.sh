@@ -59,7 +59,7 @@ install_set() {
   while read -r line; do
     case $line in ''|\#*) continue ;; esac
     say "install: $line"
-    if kpkg install --force "$line" > "$L/$(printf '%s' "$line" | tr / -).log" 2>&1; then
+    if kpkg install -y --force "$line" > "$L/$(printf '%s' "$line" | tr / -).log" 2>&1; then
       ok=$((ok+1))
     else
       fail=$((fail+1))
@@ -78,6 +78,8 @@ layout() {
   local f src
   install -d /etc/xdg/fastfetch
   install -m644 "$F/fastfetch.jsonc" /etc/xdg/fastfetch/config.jsonc
+  install -d /etc/kpkg
+  grep -qx fastfetch /etc/kpkg/hold 2>/dev/null || printf 'fastfetch\n' >> /etc/kpkg/hold
   for f in kryonux-users kryonux-adduser kryonux-fix kryonux-firewall kryonux-audit; do
     src=$F/$f
     [ -f "$src" ] || src=$F/$f.sh

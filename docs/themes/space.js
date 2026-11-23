@@ -14,7 +14,6 @@
     init:function(k){
       var m=k.mobile(),wd=k.wide(),gh=m?30:40,i;
       for(i=0;i<(m?3:5);i++)k.el('zs-fall zs-rock',k.svg('0 0 136 86',NEB),'--x:'+(((i+k.rnd(.1,.9))/(m?3:5))*82).toFixed(1)+'%;width:'+Math.round(k.rnd(m?34:44,m?58:84))+'px;--d:'+Math.round(k.rnd(26,46))+'s;--dl:'+(-(i*9+k.rnd(0,5))).toFixed(1)+'s');
-      k.el('zs-moon',k.svg('0 0 64 64',MOON),'left:6%;width:56px;height:56px');
       k.el('',k.strip(gh,[{d:k.hill(1000,gh*.7,gh*.55,9,15),fill:'#05050a',line:'#2a2a4e',w:2},{d:k.hill(1000,gh*.92,gh*.4,11,21),fill:'#0a0a12',line:'#3a3a66',w:2}]),'left:0;right:0;bottom:0;height:'+gh+'px',true);
       var sat=k.el('zs-fly zs-orbit',k.svg('0 0 62 42',SATELLITE),'right:6%;top:'+Math.round(gh*.3)+'px;width:'+(m?38:60)+'px;animation-duration:'+(m?100:140)+'s;animation-delay:-60s');
       sat.innerHTML='<div>'+sat.innerHTML+'</div>';

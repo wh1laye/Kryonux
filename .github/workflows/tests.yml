@@ -1,0 +1,71 @@
+name: tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      kernel_patches:
+        description: Also test the kernel patch series on the latest 6.18 kernel (downloads about 140 MB)
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - 'kpkg/**'
+      - 'tools/**'
+      - 'docs/**'
+      - '.github/workflows/tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  kpkg:
+    name: kpkg
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Build kpkg with warnings as errors
+        run: make -C kpkg
+      - name: Run the kpkg tests
+        run: sudo env "PATH=$PATH" bash tools/test-kpkg.sh
+
+  iso:
+    name: iso and stage 3
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: ISO checks
+        run: bash tools/test-iso.sh
+      - name: Stage 3 gate
+        run: bash tools/test-stage3-gate.sh
+
+  site:
+    name: website
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Check JavaScript syntax
+        run: find docs tools -name '*.js' -not -name '591.supabase.js' -print0 | xargs -0 -n1 node --check
+      - name: Website checks
+        run: node tools/test-site.js
+
+  scripts:
+    name: shell scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Syntax
+        run: find . -name '*.sh' -not -path './.git/*' -print0 | xargs -0 -n1 bash -n
+      - name: shellcheck
+        run: find . -name '*.sh' -not -path './.git/*' -print0 | xargs -0 shellcheck -S error
+
+  kernel-patches:
+    name: kernel patches
+    if: ${{ github.event.inputs.kernel_patches == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Install gpg and xz
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq gnupg xz-utils
+      - name: Kernel patch series
+        run: bash tools/test-kernel-patches.sh
