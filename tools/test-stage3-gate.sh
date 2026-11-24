@@ -56,6 +56,8 @@ else
   forbid_text tools/stage3/build-inside.sh 'portageq|/etc/portage|/var/db/repos/gentoo' "build-inside has no foreign package manager paths"
   need_text tools/stage3/kryonux-packages.list '^(system|fs|network|toolchain|build|tools|libs|boot|init|admin)/' "package list uses our categories"
   forbid_text tools/stage3/kryonux-packages.list '^(sys-apps|sys-libs|sys-devel|dev-libs|dev-build|dev-lang|app-|net-|virtual|acct-)' "package list has no foreign categories"
+  forbid_text tools/build-stage3.sh 'base-0\.0\.0' "stage 3 has no default base release"
+  need_text tools/build-stage3.sh 'debootstrap' "stage 3 can bootstrap without a base release"
   need_text kpkg/Makefile 'non-Kryonux' "make install refuses foreign systems"
   need_text tools/kernel/kryonk.config 'CONFIG_SECURITY_KRYONK=y' "kernel has the kryonk layer"
 fi

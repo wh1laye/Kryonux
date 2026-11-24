@@ -21,6 +21,12 @@ on:
       release_tag:
         description: тег внутреннего релиза базы для сборки iso
         default: "base-0.0.1"
+      base_tag:
+        description: тег предыдущей базы, внутри которой собирать; пусто для самой первой сборки stage 3
+        default: ""
+      base_version:
+        description: версия архива предыдущей базы; пусто для самой первой сборки stage 3
+        default: ""
 
 concurrency:
   group: stage3-${{ inputs.version }}
@@ -50,13 +56,17 @@ jobs:
       - name: проверка параметров
         env:
           VERSION: ${{ inputs.version }}
+          BASE_TAG: ${{ inputs.base_tag }}
+          BASE_VERSION: ${{ inputs.base_version }}
         run: |
           case "$VERSION" in ''|*[!0-9A-Za-z._-]*) echo "::error::неверная версия"; exit 1 ;; esac
+          case "$BASE_TAG$BASE_VERSION" in *[!0-9A-Za-z._-]*) echo "::error::неверная база"; exit 1 ;; esac
+          if { [ -n "$BASE_TAG" ] && [ -z "$BASE_VERSION" ]; } || { [ -z "$BASE_TAG" ] && [ -n "$BASE_VERSION" ]; }; then echo "::error::base_tag и base_version задаются вместе"; exit 1; fi
 
       - name: зависимости проверок и сборки
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq minisign gnupg
+          sudo apt-get install -y -qq minisign gnupg debootstrap ubuntu-keyring
 
       - name: проверка скриптов и kpkg
         run: |
@@ -85,10 +95,12 @@ jobs:
           VERSION: ${{ inputs.version }}
           REFRESH_LIST: ${{ inputs.refresh_list && '1' || '0' }}
           STRICT: ${{ inputs.strict && '1' || '0' }}
+          BASE_TAG: ${{ inputs.base_tag }}
+          BASE_VERSION: ${{ inputs.base_version }}
         run: |
           set -o pipefail
           mkdir -p "$PWD/out"
-          sudo -E env WORK=/mnt/stage3 OUT="$PWD/out" VERSION="$VERSION" REFRESH_LIST="$REFRESH_LIST" STRICT="$STRICT" \
+          sudo -E env WORK=/mnt/stage3 OUT="$PWD/out" VERSION="$VERSION" REFRESH_LIST="$REFRESH_LIST" STRICT="$STRICT" BASE_TAG="$BASE_TAG" BASE_VERSION="$BASE_VERSION" \
             bash tools/build-stage3.sh 2>&1 | tee "$RUNNER_TEMP/build.log"
           ls -lh out
 

@@ -180,10 +180,10 @@ function render(q){
     list=list.slice(0,40);
   }
   items=list;
-  if(!list.length){res.innerHTML='<div class="sxe">ничего не найдено</div>';return}
+  if(!list.length){res.innerHTML='<div class="sxe">'+esc(T('ничего не найдено'))+'</div>';return}
   res.innerHTML=list.map(function(x,n){
     var r=x.r;
-    var head=r.tag==='H2'?'глава':r.sec;
+    var head=r.tag==='H2'?T('глава'):r.sec;
     return '<div class="sxh" data-n="'+n+'" data-i="'+n+'"><b>'+esc(head)+(r.m?'<i>'+r.m+'</i>':'')+'</b><span>'+(toks.length?snip(r,toks):esc(r.t))+'</span></div>';
   }).join('');
   mark(0);

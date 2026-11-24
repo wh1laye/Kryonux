@@ -29,7 +29,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 ### 🗜️ Stage 3
 #### Changed
 - Stage 3 is now minimal: the toolchain, core utilities, filesystem tools, `dhcpcd`, `curl`, `openssh`, `nftables`, `nano`, `fastfetch` and `kpkg`, plus the build tools `m4`, `autoconf`, `automake`, `libtool`, `bison`, `flex`, `pkgconf`, `gmp`, `mpfr` and `mpc`, and the base tools every system needs: `openrc`, `limine`, `kmod`, `eudev`, `ncurses`, `readline`, `less`, `file`, `iproute2`, `iputils` and `minisign`
-- Version is `0.0.1`; the builder base is `base-0.0.0` and the ISO consumes the new `base-0.0.1`
+- Version is `0.0.1`; this is the first stage 3, so it has no previous base release, and the ISO consumes the new `base-0.0.1`
 
 #### Removed
 - The Gentoo style extra package list, `SOURCES.txt` and its download loop, `neofetch`, the old logo assets, `make-logo.py`, `tools/pack-fetch.sh` and the `fetch-pack` workflow, and `man-db`, `man-pages`, `psmisc`, `wget`, `rsync`, `git`, `screen`, `autoconf`, `automake` and `libtool` from the package set
@@ -38,6 +38,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - `fastfetch` with the Kryonux K logo: the configuration moved from `docs/config.jsonc` to `tools/stage3/fastfetch.jsonc` and is installed as `/etc/xdg/fastfetch/config.jsonc`
 
 #### Fixed
+- The `stage3` workflow failed with `404` while downloading `base-0.0.0/kryonux-stage3-amd64-0.0.0.tar.xz`: that release never existed. `build-stage3.sh` no longer defaults to a previous base. Without `BASE`, or `BASE_TAG` and `BASE_VERSION`, it bootstraps the first stage 3 from a minimal `noble` seed made by `debootstrap`, builds every package with `kpkg` and removes the seed `apt` and `dpkg` before packing. The workflow has the new optional inputs `base_tag` and `base_version` for later builds inside an earlier Kryonux base
 - `build-inside.sh` looked for `kryonux-users` and `kryonux-fix` without the `.sh` suffix, so they were never installed and the archive check failed
 - `build-stage3.sh` defaulted to the base release `1.6`
 
@@ -93,6 +94,13 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - Version is `0.0.1` and the default base is the stage 3 `base-0.0.1`
 
 ### 🌐 Website
+#### Fixed
+- The 404 page no longer depends on `i18n.js`: it has its own Russian and English text, picks the language from the saved setting, the `/en/` path or the browser, and the English title is capitalized
+- The `Космос` season theme button stayed Russian in the English interface; it is now `Space`
+- The pre-login check screen in `gate.js` was Russian only; it now follows the language
+- The `Ctrl+K` palette showed the handbook chapter names and `Тема: сепия` in Russian in English mode
+- The handbook search showed `глава` and `ничего не найдено` in Russian on the English handbook
+
 #### Changed
 - Every cloud was replaced with the Kryonux logo: the header brand mark on all pages, the pre-login check screen, the summer theme, the space theme background and the forum sticker
 - The PWA icons (`icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`) were still the old cloud and are now the Kryonux K
@@ -107,12 +115,17 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - New ice and diamond look: icy blue light and dark palettes, a faint crystal lattice background, a diamond facet behind the home hero and gradient accent buttons
 - In the header the Kryonux logo now replaces the letter K, so the brand reads as the logo followed by `ryonux`
 - Theme stylesheet selectors use `.kryonux`, and the seasonal theme layer class is `zs-logo`
-- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `41`
+- Handbook, home page, hidden terminal and news show version `v0.0.1`; service worker cache version bumped to `42`
 
 #### Added
 - News and RSS entry for `v0.0.1`
 
 ### 📚 Repository
+#### Fixed
+- The `ci` run of `kpkg-recipes` failed with `No url found for submodule path 'cloudpkg/recipes'`: the old repository is gone, no `.gitmodules` or submodule remains in either repository
+- The `recipes` workflow of `kpkg-recipes` failed with `kpkg is not available`: `test-kpkg.sh` runs `make clean` and deleted the freshly built `kpkg`. The workflow now builds `kpkg` after the kpkg tests
+- `AGENTS.md` no longer says that stage 3 is built inside `base-0.0.0`
+
 #### Added
 - `AGENTS.md` with project context for OpenCode and other agents
 

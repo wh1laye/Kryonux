@@ -6,6 +6,8 @@ Scripts for building the base system (stage 3), the live ISO and the `kryonk` ke
 
 `build-stage3.sh` starts a chroot and runs `stage3/build-inside.sh`, which installs packages with `kpkg` from the list in `stage3/kryonux-packages.list`.
 
+The first stage 3 has no previous base: without `BASE` (or `BASE_TAG` and `BASE_VERSION`) the script bootstraps a minimal seed with `debootstrap`, builds everything with `kpkg` and removes the seed `apt` and `dpkg` before packing. Later builds can run inside an earlier base: `BASE_TAG=base-0.0.1 BASE_VERSION=0.0.1 sudo -E bash tools/build-stage3.sh`.
+
 ## 💿 Building the live ISO
 
 `mkiso.sh` unpacks the stage 3 archive and the `kryonk` kernel, then `iso/mkiso-inside.sh` assembles the `squashfs` image and the `Limine` boot setup.

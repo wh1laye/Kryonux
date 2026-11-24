@@ -4,12 +4,18 @@ set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
 REPO=$(dirname "$HERE")
 VERSION=${VERSION:-0.0.1}
-BASE_TAG=${BASE_TAG:-base-0.0.0}
-BASE_VERSION=${BASE_VERSION:-0.0.0}
+BASE_TAG=${BASE_TAG:-}
+BASE_VERSION=${BASE_VERSION:-}
+SEED_SUITE=${SEED_SUITE:-noble}
+SEED_MIRROR=${SEED_MIRROR:-http://archive.ubuntu.com/ubuntu}
 BASE_VERIFY=${BASE_VERIFY:-1}
 PUB=${PUB:-$REPO/docs/kryonux.pub}
 MINISIGN_KEY=${MINISIGN_KEY:-}
-BASE=${BASE:-https://github.com/wh1laye/Kryonux/releases/download/$BASE_TAG/kryonux-stage3-amd64-$BASE_VERSION.tar.xz}
+BASE=${BASE:-}
+if [ -z "$BASE" ] && [ -n "$BASE_TAG" ] && [ -n "$BASE_VERSION" ]; then
+  BASE=https://github.com/wh1laye/Kryonux/releases/download/$BASE_TAG/kryonux-stage3-amd64-$BASE_VERSION.tar.xz
+fi
+SEEDED=0
 WORK=${WORK:-/var/tmp/kryonux-stage3-build}
 OUT=${OUT:-$PWD}
 ROOT=$WORK/root
@@ -38,9 +44,34 @@ base_sig() {
   esac
 }
 
-say "base: $BASE"
+seed_root() {
+  command -v debootstrap >/dev/null || die "debootstrap is missing, it is needed to bootstrap the first stage 3"
+  say "no base release: bootstrapping the first stage 3 from a $SEED_SUITE seed"
+  rm -rf "$ROOT"; mkdir -p "$ROOT"
+  debootstrap --variant=minbase \
+    --include=build-essential,ca-certificates,curl,xz-utils,perl,python3,texinfo,bison,flex,m4,gawk,bc,file,gnupg,minisign \
+    "$SEED_SUITE" "$ROOT" "$SEED_MIRROR" || die "debootstrap failed"
+  printf 'NAME="Kryonux"\nID=kryonux\nPRETTY_NAME="Kryonux"\nVERSION_ID="%s"\n' "$VERSION" > "$ROOT/etc/os-release"
+  SEEDED=1
+}
+
+unseed() {
+  say "removing the seed package manager"
+  rm -rf "$ROOT/var/lib/dpkg" "$ROOT/var/lib/apt" "$ROOT/var/cache/apt" "$ROOT/var/log/apt" \
+    "$ROOT/etc/apt" "$ROOT/etc/dpkg" "$ROOT/usr/share/doc" "$ROOT/usr/share/man" "$ROOT/usr/share/info"
+  for b in apt apt-get apt-cache apt-config apt-key apt-mark apt-cdrom dpkg dpkg-deb dpkg-query dpkg-divert dpkg-split dpkg-trigger dpkg-statoverride dpkg-maintscript-helper; do
+    rm -f "$ROOT/usr/bin/$b" "$ROOT/usr/sbin/$b"
+  done
+}
+
+if [ -n "$BASE" ]; then
+  say "base: $BASE"
+fi
 case $BASE in
+  '')
+    BASEFILE='' ;;
   http*://*)
+    mkdir -p "$WORK"
     fetch "$BASE" "$WORK/base.tar.xz" || die "download failed: $BASE"
     fetch "$BASE.sha256" "$WORK/base.sha256" || die "download failed: $BASE.sha256"
     [ "$(cut -d' ' -f1 "$WORK/base.sha256")" = "$(sha256sum "$WORK/base.tar.xz" | cut -d' ' -f1)" ] || die "base sha256 mismatch"
@@ -56,6 +87,9 @@ esac
 
 if [ "${RESUME:-0}" = 1 ] && [ -d "$ROOT/var/tmp/s3stamp" ]; then
   say "RESUME=1: continuing in $ROOT"
+  [ -d "$ROOT/var/lib/dpkg" ] && SEEDED=1
+elif [ -z "$BASEFILE" ]; then
+  seed_root
 else
   say "unpacking the base into $ROOT"
   rm -rf "$ROOT"; mkdir -p "$ROOT"
@@ -88,6 +122,7 @@ enter bash /var/tmp/s3files/build-inside.sh "$VERSION" "${STRICT:-0}" \
   }
 
 rm -f "$ROOT/etc/resolv.conf"
+[ "$SEEDED" = 1 ] && unseed
 NAME=kryonux-stage3-amd64-$VERSION.tar.xz
 
 if [ -s "$ROOT/var/tmp/kryonux-report.txt" ]; then

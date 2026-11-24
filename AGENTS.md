@@ -8,7 +8,7 @@ Instructions for AI coding agents (OpenCode, Claude Code and others) working in 
 
 - **Author and copyright:** The Kryonux Project
 - **License:** GNU GPLv3 (`LICENSE`, trademark notice in `NOTICE`)
-- **Current version:** `v0.0.1` for the website, project, `kpkg`, stage 3, live ISO and `kryonk`. The live ISO 0.0.1 is built from stage 3 0.0.1, which is built by `kpkg` 0.0.1 (version defined in `kpkg/kpkg.c`). Stage 3 is built inside the previous base release `base-0.0.0`
+- **Current version:** `v0.0.1` for the website, project, `kpkg`, stage 3, live ISO and `kryonk`. The live ISO 0.0.1 is built from stage 3 0.0.1, which is built by `kpkg` 0.0.1 (version defined in `kpkg/kpkg.c`). Stage 3 0.0.1 is the first stage 3: there is no earlier base release, so `tools/build-stage3.sh` bootstraps it from a `debootstrap` seed; later versions can be built inside an earlier base with `BASE_TAG` and `BASE_VERSION`
 - **Target:** `x86_64`, UEFI and Legacy BIOS, `ext4` and `btrfs`, optional `LUKS2` + `TPM2` and custom `Secure Boot` UKI
 
 ## Repositories and paths
