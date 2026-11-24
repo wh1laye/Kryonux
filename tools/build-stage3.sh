@@ -48,7 +48,7 @@ seed_root() {
   command -v debootstrap >/dev/null || die "debootstrap is missing, it is needed to bootstrap the first stage 3"
   say "no base release: bootstrapping the first stage 3 from a $SEED_SUITE seed"
   rm -rf "$ROOT"; mkdir -p "$ROOT"
-  debootstrap --variant=minbase \
+  debootstrap --variant=minbase --components=main,universe \
     --include=build-essential,ca-certificates,curl,xz-utils,perl,python3,texinfo,bison,flex,m4,gawk,bc,file,gnupg,minisign \
     "$SEED_SUITE" "$ROOT" "$SEED_MIRROR" || die "debootstrap failed"
   printf 'NAME="Kryonux"\nID=kryonux\nPRETTY_NAME="Kryonux"\nVERSION_ID="%s"\n' "$VERSION" > "$ROOT/etc/os-release"

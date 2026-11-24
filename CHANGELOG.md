@@ -38,7 +38,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - `fastfetch` with the Kryonux K logo: the configuration moved from `docs/config.jsonc` to `tools/stage3/fastfetch.jsonc` and is installed as `/etc/xdg/fastfetch/config.jsonc`
 
 #### Fixed
-- The `stage3` workflow failed with `404` while downloading `base-0.0.0/kryonux-stage3-amd64-0.0.0.tar.xz`: that release never existed. `build-stage3.sh` no longer defaults to a previous base. Without `BASE`, or `BASE_TAG` and `BASE_VERSION`, it bootstraps the first stage 3 from a minimal `noble` seed made by `debootstrap`, builds every package with `kpkg` and removes the seed `apt` and `dpkg` before packing. The workflow has the new optional inputs `base_tag` and `base_version` for later builds inside an earlier Kryonux base
+- The `stage3` workflow failed with `404` while downloading `base-0.0.0/kryonux-stage3-amd64-0.0.0.tar.xz`: that release never existed. `build-stage3.sh` no longer defaults to a previous base. Without `BASE`, or `BASE_TAG` and `BASE_VERSION`, it bootstraps the first stage 3 from a minimal `noble` seed made by `debootstrap`, builds every package with `kpkg` and removes the seed `apt` and `dpkg` before packing; the seed uses the `main` and `universe` components because `texinfo` and `minisign` live in `universe`. The workflow has the new optional inputs `base_tag` and `base_version` for later builds inside an earlier Kryonux base
 - `build-inside.sh` looked for `kryonux-users` and `kryonux-fix` without the `.sh` suffix, so they were never installed and the archive check failed
 - `build-stage3.sh` defaulted to the base release `1.6`
 
@@ -124,6 +124,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 #### Fixed
 - The `ci` run of `kpkg-recipes` failed with `No url found for submodule path 'cloudpkg/recipes'`: the old repository is gone, no `.gitmodules` or submodule remains in either repository
 - The `recipes` workflow of `kpkg-recipes` failed with `kpkg is not available`: `test-kpkg.sh` runs `make clean` and deleted the freshly built `kpkg`. The workflow now builds `kpkg` after the kpkg tests
+- `test-recipes.sh` in `kpkg-recipes` scanned the checked out `kryonux/` directory for old names and failed on `AGENTS.md` and `test-iso.sh`; it now skips that directory
 - `AGENTS.md` no longer says that stage 3 is built inside `base-0.0.0`
 
 #### Added
