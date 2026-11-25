@@ -50,6 +50,9 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - The 404 page is always English: no language switch, no translation scripts, `translate="no"`
 
 ### 🗂️ Repository
+#### Fixed
+- `test-firewall.sh` rejected the `kernel.core_pattern = |/bin/false` line of `sysctl-kryonux.conf` and failed the stage 3 workflow; the sysctl line check now allows it and multi-number values such as `kernel.printk`
+
 #### Added
 - `kpkg-recipes`: the release workflow uses a pinned `actions/checkout`, and the README shows only the number of recipes instead of the full list
 - `tools/test-all.sh` runs the scripts, C code (including UBSan and ASan), kpkg, security, fastfetch, website, stage 3, ISO and kernel checks in one go

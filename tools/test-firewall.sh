@@ -65,7 +65,7 @@ fi
 
 while IFS= read -r l; do
   case $l in ''|'#'*) continue ;; esac
-  printf '%s\n' "$l" | grep -qE '^-?[a-z0-9_.]+ = [0-9]+$' || die "плохая строка sysctl: $l"
+  printf '%s\n' "$l" | grep -qE '^-?[a-z0-9_.]+ = ([0-9]+( [0-9]+)*|\|/bin/false)$' || die "плохая строка sysctl: $l"
 done < "$HERE/stage3/sysctl-kryonux.conf"
 pass "sysctl-kryonux.conf разобран"
 
