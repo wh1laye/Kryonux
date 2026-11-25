@@ -1,53 +1,34 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en" translate="no">
 <head>
 <script>document.write('<base href="'+(location.hostname.slice(-10)==='github.io'?'/Kryonux/':'/')+'">')</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Страница не найдена: Kryonux</title>
+<title>Page not found: Kryonux</title>
 <meta name="theme-color" content="#f1f7ff">
 <meta name="robots" content="noindex">
+<meta name="google" content="notranslate">
+<meta http-equiv="content-language" content="en">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="fonts.css?v=1">
 <style>*{box-sizing:border-box}html{--bg:#1a1c20;--surf:#22252a;--line:#33373e;--ink:#e6e8ec;--mute:#98a2ae;--ac:#8fb4f0;--onac:#11151b}html[data-theme=light]{--bg:#f6f8fc;--surf:#fff;--line:#e2e8f2;--ink:#17202e;--mute:#66758a;--ac:#3563c9;--onac:#fff}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);color:var(--ink);font:16px/1.65 "Comfortaa",system-ui,sans-serif;font-weight:700;-webkit-font-smoothing:antialiased}.box{width:min(520px,100%);text-align:center}.code{font:600 88px/1 "IBM Plex Mono",ui-monospace,monospace;color:var(--ac);letter-spacing:-.04em;margin:0 0 6px}h1{font-size:26px;margin:0 0 8px;font-weight:700}p{color:var(--mute);margin:0 0 24px}.row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}a{display:inline-block;padding:9px 18px;border:1px solid var(--line);border-radius:10px;background:var(--surf);color:var(--ink);text-decoration:none;font-weight:500;transition:border-color .12s}a:hover{border-color:var(--ac)}a.p{background:var(--ac);border-color:var(--ac);color:var(--onac)}</style>
 <script>(function(){var t='gray',v,o={light:1,night:1,nord:1,dracula:1,sepia:1};try{v=localStorage.getItem('theme');if(o[v]||((v==='matrix'||v==='amber')&&localStorage.getItem('sec')==='1'))t=v}catch(e){}document.documentElement.setAttribute('data-theme',t)})()</script>
-<script src="theme.js?v=18"></script>
-<script src="typo.js?v=2"></script>
 </head>
 <body>
 <div class="box">
 <p class="code">404</p>
-<h1 id="h">Страница не найдена</h1>
-<p id="t">Такой страницы нет или она переехала. Вернись на главную или открой нужный раздел.</p>
+<h1>Page not found</h1>
+<p>This page does not exist or has moved. Go back to the home page or open the section you need.</p>
 <div class="row" id="lk"></div>
 </div>
 <script>
 (function(){
 var p=location.pathname.split('/').filter(Boolean);
 var b=location.hostname.slice(-9)==='github.io'&&p.length?'/'+p[0]+'/':'/';
-var S={
-ru:{title:'Страница не найдена: Kryonux',h:'Страница не найдена',t:'Такой страницы нет или она переехала. Вернись на главную или открой нужный раздел.',links:[['','Главная','p'],['handbook/','Справочник',''],['news/','Новое',''],['forum/','Форум',''],['releases/','Релизы','']]},
-en:{title:'Page not found: Kryonux',h:'Page not found',t:'This page does not exist or has moved. Go back to the home page or open the section you need.',links:[['','Home','p'],['handbook/en/','Handbook',''],['news/','News',''],['forum/','Forum',''],['releases/','Releases','']]}
-};
-function lang(){
-var l=null;
-try{l=localStorage.getItem('lang')}catch(e){}
-if(l==='ru'||l==='en')return l;
-if(/(^|\/)en(\/|$)/.test(location.pathname))return 'en';
-return /^(ru|uk|be|kk)/.test((navigator.language||'ru').toLowerCase())?'ru':'en';
-}
-function draw(){
-var l=lang(),c=S[l];
-document.documentElement.lang=l;
-document.title=c.title;
-document.getElementById('h').textContent=c.h;
-document.getElementById('t').textContent=c.t;
-document.getElementById('lk').innerHTML=c.links.map(function(x){return '<a class="'+x[2]+'" href="'+b+x[0]+'">'+x[1]+'</a>'}).join('');
-}
-window.addEventListener('kryonuxlang',draw);
-draw();
+var L=[['','Home','p'],['handbook/en/','Handbook',''],['news/','News',''],['forum/','Forum',''],['releases/','Releases','']];
+document.getElementById('lk').innerHTML=L.map(function(x){return '<a class="'+x[2]+'" href="'+b+x[0]+'">'+x[1]+'</a>'}).join('');
 })();
 </script>
 </body>

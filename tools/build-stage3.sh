@@ -16,6 +16,7 @@ if [ -z "$BASE" ] && [ -n "$BASE_TAG" ] && [ -n "$BASE_VERSION" ]; then
   BASE=https://github.com/wh1laye/Kryonux/releases/download/$BASE_TAG/kryonux-stage3-amd64-$BASE_VERSION.tar.xz
 fi
 SEEDED=0
+RECIPES_TARBALL=${RECIPES_TARBALL:-}
 WORK=${WORK:-/var/tmp/kryonux-stage3-build}
 OUT=${OUT:-$PWD}
 ROOT=$WORK/root
@@ -100,6 +101,13 @@ grep -qE '^ID="?kryonux"?' "$ROOT/etc/os-release" || die "the base does not look
 mkdir -p "$ROOT/var/tmp/s3files" "$ROOT/var/tmp/kpkg-src"
 cp -R "$HERE"/stage3/. "$ROOT/var/tmp/s3files/"
 cp -R "$REPO"/kpkg/. "$ROOT/var/tmp/kpkg-src/"
+if [ -n "$RECIPES_TARBALL" ]; then
+  [ -s "$RECIPES_TARBALL" ] && [ -s "$RECIPES_TARBALL.minisig" ] || die "RECIPES_TARBALL needs the file and its .minisig"
+  command -v minisign >/dev/null || die "minisign is missing"
+  minisign -V -p "$PUB" -m "$RECIPES_TARBALL" -x "$RECIPES_TARBALL.minisig" >/dev/null || die "recipe tree signature does not match $PUB"
+  cp "$RECIPES_TARBALL" "$ROOT/var/tmp/recipes.tar.gz"
+  cp "$RECIPES_TARBALL.minisig" "$ROOT/var/tmp/recipes.tar.gz.minisig"
+fi
 
 enter() {
   unshare -m sh -c '
@@ -143,14 +151,14 @@ say "packing: $OUT/$NAME"
 tar -C "$ROOT" --numeric-owner --xattrs --xattrs-include='*' \
   --exclude=./var/tmp/s3stamp --exclude=./var/tmp/s3log \
   --exclude=./var/tmp/kpkg-build/* --exclude=./var/tmp/kpkg-src/* \
-  --exclude=./var/cache/kpkg/distfiles/* -cpf - . | xz -T0 -9 > "$OUT/$NAME"
+  --exclude=./var/tmp/recipes.tar.gz --exclude=./var/tmp/recipes.tar.gz.minisig --exclude=./var/cache/kpkg/distfiles/* -cpf - . | xz -T0 -9 > "$OUT/$NAME"
 
 say "checking the archive"
 LIST=$(mktemp); trap 'rm -f "$LIST"' EXIT
 tar -tf "$OUT/$NAME" > "$LIST"
 miss=0
 for f in sbin/init sbin/openrc-init etc/os-release etc/init.d/syslog-ng etc/runlevels/default/syslog-ng \
-         etc/syslog-ng/syslog-ng.conf usr/bin/kpkg usr/bin/fastfetch etc/xdg/fastfetch/config.jsonc etc/kpkg/kpkg.conf \
+         etc/syslog-ng/syslog-ng.conf usr/bin/kpkg usr/bin/fastfetch etc/xdg/fastfetch/config.jsonc etc/kpkg/kpkg.conf etc/kpkg/config.kpkg etc/kpkg/kryonux.pub \
          usr/sbin/kryonux-users usr/sbin/kryonux-adduser usr/sbin/kryonux-fix \
          etc/login.defs etc/doas.conf; do
   grep -qxE "(\./)?(usr/)?$f" "$LIST" || { printf 'the archive has no %s\n' "$f" >&2; miss=1; }

@@ -4,8 +4,50 @@ All notable changes to The Kryonux Project are recorded here.
 
 Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO `v0.0.1`, stage 3 `v0.0.1`, kernel `kryonk-0.0.1`, kpkg `0.0.1`.
 
-## [v0.0.1] - 2026-11-22
+## [v0.0.1] - 2026-11-25
 
+### 📦 kpkg
+#### Added
+- `/etc/kpkg/config.kpkg`: optional settings (`JOBS`, `CFLAGS`, `CXXFLAGS`, `LDFLAGS`, `NICE`, `ASK`, `SNAPSHOTS`, `MIN_BATTERY`, `KEEP_WORKDIR`); it ships empty and an empty file changes nothing, see `kpkg/CONFIG.md`
+- The install plan shows the package name, version, description, source URL and SHA256 prefix and asks `Download, verify and build these packages? [Y/n]` before anything is downloaded
+- `kpkg check [tree]` lints every recipe in a tree and checks the layout, category and dependencies
+- `kpkg sync --file tree.tar.gz` installs a recipe tree from a local archive that has a valid `.minisig`
+- Recipes can ship extra files in a `files/` directory next to the `.kpkg`, available as `$FILESDIR`
+- The lock file records the holder pid, an interrupted install (power loss, crash) is detected and reported on the next run and in `kpkg doctor`, signals are blocked while files are copied and the database is written, and changes are refused on a battery below `MIN_BATTERY`
+
+#### Fixed
+- Stage 3 build: every package failed because the unpacked source directory was never entered (`scandir` counted `.` and `..`), so `make mrproper` ran without a Makefile in `linux-headers`
+- `bsearch` was called with a null pointer when no package was installed (found by UBSan)
+- `--force` overwrote edited `/etc` files; they are now always kept as `.kpkg-new`
+- The `kpkg checksum` temporary file name was predictable; it now uses `mkstemp`
+
+#### Changed
+- A source without `SHA256` is never built, the checksum count must match the source count, `http://` sources and unknown header fields are lint errors, and a recipe cannot switch verification off
+- `kpkg sync` requires a minisign signature and the public key, it no longer falls back to trusting HTTPS; the default tree URL is the signed `recipes-latest` release
+- `kpkg update --unsigned`, `install.sh --insecure` and the unsigned branch download in `kpkg-setup.sh` were removed
+- Build phases run with a clean environment and a fixed `PATH`; downloads allow https only
+
+### 🧱 Stage 3
+#### Added
+- `tools/stage3/kryonux-extra.list`: optional packages installed when their recipe has a checksum
+- The build is fed a signed recipe tree (`RECIPES_TARBALL`), so it does not depend on a published release
+
+#### Fixed
+- The build stops after the same dependency fails twice instead of repeating a 20 minute failure for every package
+- `kryonux-fix` piped an unsigned script from a branch into `bash` and called the removed `kpkg vdb`; it now runs `kpkg update`, `kpkg sync` and `kpkg doctor`
+
+#### Changed
+- Extra `sysctl`, `modprobe` and `sshd` hardening; `kernel.core_pattern` no longer writes dumps
+
+### 🌐 Website
+#### Fixed
+- The 404 page is always English: no language switch, no translation scripts, `translate="no"`
+
+### 🗂️ Repository
+#### Added
+- `tools/test-all.sh` runs the scripts, C code (including UBSan and ASan), kpkg, security, fastfetch, website, stage 3, ISO and kernel checks in one go
+
+### 📦 kpkg (earlier in this release)
 ### 📦 kpkg
 #### Added
 - `kpkg lint` checks `.kpkg` files for missing fields and syntax errors

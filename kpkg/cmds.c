@@ -1,7 +1,7 @@
 #include <limits.h>
 #include "kpkg.h"
 struct opts { int pretend; int ask; int yes; int oneshot; int force; int no_snapshot; };
-struct plan_item { char cat[128]; char name[128]; char ver[64]; char oldver[64]; int explicit; int upgrade; };
+struct plan_item { char cat[128]; char name[128]; char ver[64]; char oldver[64]; char desc[160]; char src[240]; char sum[20]; int explicit; int upgrade; };
 static struct plan_item plan[MAXPLAN];
 static int nplan;
 static char **visiting;
@@ -49,19 +49,20 @@ static int parse_opts(int argc, char **argv, struct opts *o, char ***pkgs, int *
 		}
 	}
 	if (getenv("KPKG_ASSUME_YES")) o->yes = 1;
-	if (!o->yes && !o->pretend) o->ask = 1;
+	if (!o->yes && !o->pretend && cfg_ask) o->ask = 1;
 	return 1;
 }
-static int confirm(void)
+static int confirm(const char *question)
 {
 	char ans[16];
 	if (!isatty(0)) {
 		fputs("kpkg: confirmation is required and there is no terminal, pass -y to proceed\n", stderr);
 		return 0;
 	}
-	fprintf(stderr, "\n%s::%s Proceed? [Y/n] ", C('b'), C('0'));
+	fprintf(stderr, "\n%s::%s %s [Y/n] ", C('b'), C('0'), question);
 	if (!fgets(ans, sizeof ans, stdin)) return 0;
-	return !(ans[0] == 'n' || ans[0] == 'N');
+	ans[strcspn(ans, "\n")] = 0;
+	return !ans[0] || !strcasecmp(ans, "y") || !strcasecmp(ans, "yes");
 }
 static int find_category(const char *name, char *cat, size_t cn)
 {
@@ -164,7 +165,7 @@ int cmd_hold(int argc, char **argv, int add)
 static int visit(const char *cat, const char *name, const char *ver, int explicit)
 {
 	char key[260], inst[64] = "", path[BUF + 256], dcat[128], dname[128], dver[64];
-	char **deps = NULL, *slash;
+	char desc[160] = "", srcs[240] = "", sums[20] = "", **deps = NULL, *slash;
 	int nd = 0, i, ok = 1;
 	struct recipe r;
 	recipe_init(&r);
@@ -203,6 +204,9 @@ static int visit(const char *cat, const char *name, const char *ver, int explici
 	snprintf(r.name, sizeof r.name, "%s", name);
 	snprintf(r.version, sizeof r.version, "%s", ver);
 	recipe_expand(&r);
+	snprintf(desc, sizeof desc, "%.159s", r.description);
+	snprintf(srcs, sizeof srcs, "%.239s", r.src_uri);
+	snprintf(sums, sizeof sums, "%.16s", r.sha256);
 	dep_split(r.depend, &deps, &nd);
 	dep_split(r.rdepend, &deps, &nd);
 	for (i = 0; i < nd && ok; i++) {
@@ -228,6 +232,9 @@ static int visit(const char *cat, const char *name, const char *ver, int explici
 		snprintf(plan[nplan].name, sizeof plan[nplan].name, "%s", name);
 		snprintf(plan[nplan].ver, sizeof plan[nplan].ver, "%s", ver);
 		snprintf(plan[nplan].oldver, sizeof plan[nplan].oldver, "%s", inst);
+		snprintf(plan[nplan].desc, sizeof plan[nplan].desc, "%s", desc);
+		snprintf(plan[nplan].src, sizeof plan[nplan].src, "%s", srcs);
+		snprintf(plan[nplan].sum, sizeof plan[nplan].sum, "%s", sums);
 		plan[nplan].explicit = explicit;
 		plan[nplan].upgrade = inst[0] ? 1 : 0;
 		nplan++;
@@ -242,12 +249,20 @@ done:
 static void print_plan(void)
 {
 	int i;
+	char first[240], *sp;
 	for (i = 0; i < nplan; i++) {
 		if (plan[i].upgrade)
 			printf("%supgrade%s  %s/%s %s -> %s%s\n", C('y'), C('0'), plan[i].cat, plan[i].name, plan[i].oldver, plan[i].ver, plan[i].explicit ? "" : " (dependency)");
 		else
 			printf("%sinstall%s  %s/%s-%s%s\n", C('g'), C('0'), plan[i].cat, plan[i].name, plan[i].ver, plan[i].explicit ? "" : " (dependency)");
+		if (plan[i].desc[0]) printf("           %s%s%s\n", C('d'), plan[i].desc, C('0'));
+		snprintf(first, sizeof first, "%s", plan[i].src);
+		sp = strpbrk(first, " \t");
+		if (sp) *sp = 0;
+		if (first[0]) printf("           %ssource %s%s\n", C('d'), first, C('0'));
+		if (plan[i].sum[0]) printf("           %ssha256 %s...%s\n", C('d'), plan[i].sum, C('0'));
 	}
+	printf("\n%d package(s), every source is checked against its SHA256 before it is built\n", nplan);
 }
 static int execute_plan(int force)
 {
@@ -287,14 +302,21 @@ static int local_recipe(const char *arg, char *cat, size_t cn, char *name, size_
 }
 static int sum_source(const char *url, char *hash)
 {
-	char tmp[BUF], got[BUF];
+	char tmp[BUF] = "/var/tmp/kpkg-checksum.XXXXXX", got[BUF];
 	char *a[4];
-	int ok = 0;
-	snprintf(tmp, sizeof tmp, "/var/tmp/kpkg-checksum.%ld", (long)getpid());
-	unlink(tmp);
+	int ok = 0, tfd;
+	tfd = mkstemp(tmp);
+	if (tfd < 0) {
+		perror("kpkg: mkstemp");
+		return 0;
+	}
+	close(tfd);
 	if (url[0] == '/') {
 		a[0] = "cp"; a[1] = (char *)url; a[2] = tmp; a[3] = NULL;
-		if (run(a) != 0) return 0;
+		if (run(a) != 0) {
+			unlink(tmp);
+			return 0;
+		}
 	} else if (fetch(url, tmp) != 0) {
 		fprintf(stderr, "kpkg: download failed: %s\n", url);
 		unlink(tmp);
@@ -427,7 +449,8 @@ int cmd_install(int argc, char **argv)
 		r = 0;
 		goto out;
 	}
-	if (o.ask && !confirm()) goto out;
+	if (!power_ok()) goto out;
+	if (o.ask && !confirm("Download, verify and build these packages?")) goto out;
 	r = execute_plan(o.force);
 out:
 	list_free(pkgs, npk);
@@ -494,7 +517,7 @@ int cmd_remove(int argc, char **argv)
 		r = 0;
 		goto out;
 	}
-	if (o.ask && !confirm()) goto out;
+	if (o.ask && !confirm("Remove these packages?")) goto out;
 	for (i = 0; i < nplan; i++) {
 		db_remove(plan[i].cat, plan[i].name, plan[i].ver, NULL, 0);
 		world_del(plan[i].cat, plan[i].name);
@@ -541,7 +564,8 @@ int cmd_upgrade(int argc, char **argv)
 		r = 0;
 		goto out;
 	}
-	if (o.ask && !confirm()) goto out;
+	if (!power_ok()) goto out;
+	if (o.ask && !confirm("Download, verify and build these upgrades?")) goto out;
 	if (!o.no_snapshot && sn_keep > 0 && sn_auto()) goto out;
 	r = execute_plan(o.force);
 out:
@@ -570,7 +594,7 @@ int cmd_clean(int argc, char **argv)
 		puts("kpkg: would clear distfiles and build directories");
 		return 0;
 	}
-	if (o.ask && !confirm()) return 1;
+	if (o.ask && !confirm("Remove orphans and clear the caches?")) return 1;
 	for (pass = 0; pass < 10; pass++) {
 		n = db_all(&all);
 		any = 0;
@@ -749,8 +773,9 @@ int cmd_doctor(void)
 {
 	char id[64];
 	int bad = 0, i;
-	static const char *req[] = { "bash", "curl", "tar", "gcc", "make", "gzip", "xz", "sha512sum", "find", "cp", NULL };
-	static const char *opt[] = { "unzip", "zstd", "minisign", "btrfs", "ldconfig", NULL };
+	static const char *req[] = { "bash", "curl", "tar", "gcc", "make", "gzip", "xz", "sha256sum", "minisign", "find", "cp", NULL };
+	static const char *opt[] = { "unzip", "zstd", "btrfs", "ldconfig", NULL };
+	char pending[256];
 	osid(id, sizeof id);
 	row("system id", id);
 	bad += !check("write access to /", access("/", W_OK) == 0);
@@ -758,6 +783,15 @@ int cmd_doctor(void)
 	bad += !check("distfiles directory", exists(distdir));
 	bad += !check("build directory", exists(workdir));
 	bad += !check("installed database", exists(INSTALLED));
+	bad += !check("signature public key", exists(PUBKEY));
+	row("config.kpkg", cfg_config_loaded ? "loaded" : "not present, defaults are used");
+	if (txn_interrupted(pending, sizeof pending)) {
+		row("last transaction", "INTERRUPTED");
+		fprintf(stderr, "kpkg: the last change of %s did not finish (power loss or crash), reinstall it with --force\n", pending);
+		bad++;
+	} else {
+		row("last transaction", "ok");
+	}
 	for (i = 0; req[i]; i++) bad += !check(req[i], have(req[i]));
 	for (i = 0; opt[i]; i++) row(opt[i], have(opt[i]) ? "present" : "absent (optional)");
 	printf("%s\n", bad ? "problems found" : "all good");
@@ -806,53 +840,11 @@ static int count_tree(const char *dir, int *ncats, int *npkgs)
 	*npkgs = p;
 	return c > 0;
 }
-int cmd_sync(void)
+static int sync_install(const char *fin)
 {
-	char part[BUF], fin[BUF], nw[BUF], old[BUF], sig[BUF + 16], sigurl[640];
+	char nw[BUF], old[BUF];
 	char *a[12];
 	int ncats = 0, npkgs = 0;
-	if (!need_root()) return 1;
-	if (!have("curl") || !have("tar")) {
-		fputs("kpkg: sync needs curl and tar\n", stderr);
-		return 1;
-	}
-	if (!mkdirs(distdir)) {
-		fprintf(stderr, "kpkg: cannot create %s\n", distdir);
-		return 1;
-	}
-	snprintf(part, sizeof part, "%s/recipes.tar.gz.part", distdir);
-	snprintf(fin, sizeof fin, "%s/recipes.tar.gz", distdir);
-	printf("kpkg: downloading recipe tree: %s\n", recipes_url);
-	fflush(stdout);
-	unlink(part);
-	if (fetch(recipes_url, part) != 0) {
-		fputs("kpkg: recipe tree download failed, check the network and recipes_url\n", stderr);
-		unlink(part);
-		return 1;
-	}
-	snprintf(sigurl, sizeof sigurl, "%s.minisig", recipes_url);
-	snprintf(sig, sizeof sig, "%s.minisig", part);
-	if (fetch(sigurl, sig) == 0) {
-		if (have("minisign") && exists(PUBKEY)) {
-			if (!verify_sig(part, sig)) {
-				fputs("kpkg: recipe tree signature mismatch, sync aborted\n", stderr);
-				unlink(part);
-				unlink(sig);
-				return 1;
-			}
-			puts("kpkg: minisign signature verified");
-		} else {
-			fputs("kpkg: signature downloaded but minisign or the public key is missing, not verified\n", stderr);
-		}
-		unlink(sig);
-	} else {
-		fputs("kpkg: no detached signature published for the recipe tree, trusting HTTPS\n", stderr);
-	}
-	unlink(fin);
-	if (rename(part, fin) != 0) {
-		perror("kpkg: rename");
-		return 1;
-	}
 	snprintf(nw, sizeof nw, "%s.new", repo);
 	snprintf(old, sizeof old, "%s.old", repo);
 	rm_tree(nw);
@@ -862,9 +854,10 @@ int cmd_sync(void)
 	}
 	puts("kpkg: extracting the recipe tree");
 	fflush(stdout);
-	a[0] = "tar"; a[1] = "xzf"; a[2] = fin; a[3] = "--strip-components=1"; a[4] = "--no-same-owner"; a[5] = "-C"; a[6] = nw; a[7] = NULL;
+	a[0] = "tar"; a[1] = "xzf"; a[2] = (char *)fin; a[3] = "--strip-components=1"; a[4] = "--no-same-owner"; a[5] = "--no-same-permissions"; a[6] = "-C"; a[7] = nw; a[8] = NULL;
 	if (run(a) != 0) {
 		fputs("kpkg: cannot extract the recipe archive\n", stderr);
+		rm_tree(nw);
 		return 1;
 	}
 	if (!count_tree(nw, &ncats, &npkgs)) {
@@ -885,4 +878,80 @@ int cmd_sync(void)
 	rm_tree(old);
 	printf("kpkg: recipe tree updated: %d packages in %d categories\n", npkgs, ncats);
 	return 0;
+}
+static int sync_verify(const char *tarball, const char *sig)
+{
+	if (!have("minisign")) {
+		fputs("kpkg: minisign is required, the recipe tree is never installed unverified\n", stderr);
+		return 0;
+	}
+	if (!exists(PUBKEY)) {
+		fprintf(stderr, "kpkg: public key not found: %s\n", PUBKEY);
+		return 0;
+	}
+	if (!verify_sig(tarball, sig)) {
+		fputs("kpkg: recipe tree signature mismatch, sync aborted\n", stderr);
+		return 0;
+	}
+	puts("kpkg: minisign signature verified");
+	return 1;
+}
+int cmd_sync_file(const char *file)
+{
+	char sig[BUF + 16];
+	if (!need_root()) return 1;
+	if (!exists(file)) {
+		fprintf(stderr, "kpkg: no such file: %s\n", file);
+		return 1;
+	}
+	snprintf(sig, sizeof sig, "%s.minisig", file);
+	if (!exists(sig)) {
+		fprintf(stderr, "kpkg: no signature %s, a recipe tree without a minisign signature is refused\n", sig);
+		return 1;
+	}
+	if (!sync_verify(file, sig)) return 1;
+	return sync_install(file);
+}
+int cmd_sync(void)
+{
+	char part[BUF], fin[BUF], sig[BUF + 16], sigurl[640];
+	if (!need_root()) return 1;
+	if (!have("curl") || !have("tar")) {
+		fputs("kpkg: sync needs curl and tar\n", stderr);
+		return 1;
+	}
+	if (!mkdirs(distdir)) {
+		fprintf(stderr, "kpkg: cannot create %s\n", distdir);
+		return 1;
+	}
+	snprintf(part, sizeof part, "%s/recipes.tar.gz.part", distdir);
+	snprintf(fin, sizeof fin, "%s/recipes.tar.gz", distdir);
+	snprintf(sig, sizeof sig, "%s.minisig", part);
+	printf("kpkg: downloading recipe tree: %s\n", recipes_url);
+	fflush(stdout);
+	unlink(part);
+	unlink(sig);
+	if (fetch(recipes_url, part) != 0) {
+		fputs("kpkg: recipe tree download failed, check the network and recipes_url\n", stderr);
+		unlink(part);
+		return 1;
+	}
+	snprintf(sigurl, sizeof sigurl, "%s.minisig", recipes_url);
+	if (fetch(sigurl, sig) != 0) {
+		fputs("kpkg: the recipe tree has no published minisign signature, it is refused\n", stderr);
+		unlink(part);
+		return 1;
+	}
+	if (!sync_verify(part, sig)) {
+		unlink(part);
+		unlink(sig);
+		return 1;
+	}
+	unlink(sig);
+	unlink(fin);
+	if (rename(part, fin) != 0) {
+		perror("kpkg: rename");
+		return 1;
+	}
+	return sync_install(fin);
 }

@@ -37,9 +37,15 @@ if [ -z "$SRC" ]; then
   if [ -f "$HERE/kpkg.c" ]; then
     SRC="$HERE"
   else
-    say "downloading kpkg sources"
-    curl -fL --retry 3 --connect-timeout 20 -o "$TMP/repo.tar.gz" "https://codeload.github.com/$REPO/tar.gz/refs/heads/$BRANCH"
-    tar xf "$TMP/repo.tar.gz" -C "$TMP"
+    command -v minisign >/dev/null || die "minisign is required to verify the kpkg sources"
+    [ -f /etc/kpkg/kryonux.pub ] || die "public key /etc/kpkg/kryonux.pub is missing"
+    say "downloading signed kpkg sources"
+    REL=https://github.com/$REPO/releases/download/kpkg-latest
+    curl -fL --proto =https --retry 3 --connect-timeout 20 -o "$TMP/repo.tar.gz" "$REL/kpkg-src.tar.gz"
+    curl -fL --proto =https --retry 3 --connect-timeout 20 -o "$TMP/repo.tar.gz.minisig" "$REL/kpkg-src.tar.gz.minisig"
+    minisign -Vq -p /etc/kpkg/kryonux.pub -x "$TMP/repo.tar.gz.minisig" -m "$TMP/repo.tar.gz" || die "source signature mismatch"
+    say "minisign signature verified"
+    tar xf "$TMP/repo.tar.gz" -C "$TMP" --no-same-owner
     SRC=$(echo "$TMP"/*/kpkg)
   fi
 fi

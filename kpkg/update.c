@@ -56,13 +56,12 @@ int cmd_update(int argc, char **argv)
 	const char *repo_id = getenv("KPKG_REPO"), *br = getenv("KPKG_BRANCH");
 	char *a[12];
 	ssize_t l;
-	int force = 0, unsigned_ok = 0, i, r = 1, newer;
+	int force = 0, i, r = 1, newer;
 	static const char *need[] = { "curl", "tar", "make", "gcc" };
 	for (i = 0; i < argc; i++) {
 		if (!strcmp(argv[i], "--force") || !strcmp(argv[i], "-f")) force = 1;
-		else if (!strcmp(argv[i], "--unsigned")) unsigned_ok = 1;
 		else {
-			fputs("kpkg: usage: kpkg update [--force] [--unsigned]\n", stderr);
+			fputs("kpkg: usage: kpkg update [--force]\n", stderr);
 			return 1;
 		}
 	}
@@ -73,18 +72,6 @@ int cmd_update(int argc, char **argv)
 		return 1;
 	}
 	if (!need_root()) return 1;
-	if (unsigned_ok) {
-		char ans[16];
-		if (!isatty(0)) {
-			fputs("kpkg: --unsigned requires an interactive terminal\n", stderr);
-			return 1;
-		}
-		fprintf(stderr, "kpkg: --unsigned downloads %s (%s) without signature verification and runs it as root\ntype unsigned to continue: ", repo_id, br);
-		if (!fgets(ans, sizeof ans, stdin) || strcmp(ans, "unsigned\n")) {
-			fputs("kpkg: aborted\n", stderr);
-			return 1;
-		}
-	}
 	for (i = 0; i < 4; i++) {
 		if (!have(need[i])) {
 			fprintf(stderr, "kpkg: update needs %s\n", need[i]);
@@ -102,30 +89,23 @@ int cmd_update(int argc, char **argv)
 		return 1;
 	}
 	snprintf(tgz, sizeof tgz, "%s/src.tar.gz", tmp);
-	if (unsigned_ok) {
-		fputs("kpkg: warning, signature verification disabled (--unsigned)\n", stderr);
-		snprintf(url, sizeof url, "https://codeload.github.com/%s/tar.gz/refs/heads/%s", repo_id, br);
-	} else {
-		snprintf(url, sizeof url, "https://github.com/%s/releases/download/%s/%s", repo_id, UPD_TAG, UPD_ASSET);
-		snprintf(surl, sizeof surl, "%s.minisig", url);
-		snprintf(sigf, sizeof sigf, "%s/src.tar.gz.minisig", tmp);
-	}
-	printf("kpkg: checking %s (%s)\n", repo_id, unsigned_ok ? br : UPD_TAG);
+	snprintf(url, sizeof url, "https://github.com/%s/releases/download/%s/%s", repo_id, UPD_TAG, UPD_ASSET);
+	snprintf(surl, sizeof surl, "%s.minisig", url);
+	snprintf(sigf, sizeof sigf, "%s/src.tar.gz.minisig", tmp);
+	printf("kpkg: checking %s (%s)\n", repo_id, UPD_TAG);
 	if (fetch(url, tgz) != 0) {
 		fputs("kpkg: cannot download the update\n", stderr);
 		goto out;
 	}
-	if (!unsigned_ok) {
-		if (fetch(surl, sigf) != 0) {
-			fputs("kpkg: cannot download the signature\n", stderr);
-			goto out;
-		}
-		if (!verify_sig(tgz, sigf)) {
-			fputs("kpkg: signature mismatch, update aborted\n", stderr);
-			goto out;
-		}
-		puts("kpkg: minisign signature verified");
+	if (fetch(surl, sigf) != 0) {
+		fputs("kpkg: cannot download the signature\n", stderr);
+		goto out;
 	}
+	if (!verify_sig(tgz, sigf)) {
+		fputs("kpkg: signature mismatch, update aborted\n", stderr);
+		goto out;
+	}
+	puts("kpkg: minisign signature verified");
 	a[0] = "tar"; a[1] = "xzf"; a[2] = tgz; a[3] = "--strip-components=2"; a[4] = "--no-same-owner";
 	a[5] = "-C"; a[6] = tmp; a[7] = "--wildcards"; a[8] = "*/kpkg/*"; a[9] = NULL;
 	if (run(a) != 0 || !remote_ver(tmp, rv, sizeof rv)) {

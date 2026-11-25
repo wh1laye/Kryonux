@@ -20,10 +20,10 @@ CONF
 make -C "$SRC" clean >/dev/null
 cp "$SRC"/*.c "$SRC"/*.h "$T/"
 gcc -O2 -std=gnu17 -Wall -Wextra -Wsign-conversion -Wformat=2 -Wno-format-truncation \
-  -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=3 \
-  -DCONF="\"$T/kpkg.conf\"" -DDBDIR="\"$T/db\"" -DLOCKFILE="\"$T/lock\"" -DHOLDFILE="\"$T/hold\"" \
+  -fstack-protector-strong -fPIE -D_FORTIFY_SOURCE=3 ${KPKG_TEST_CFLAGS:-} \
+  -DCONF="\"$T/kpkg.conf\"" -DUSERCONF="\"$T/config.kpkg\"" -DDBDIR="\"$T/db\"" -DLOCKFILE="\"$T/lock\"" -DHOLDFILE="\"$T/hold\"" \
   -pie -Wl,-z,relro,-z,now -o "$T/kpkg" \
-  "$T"/kpkg.c "$T"/util.c "$T"/lock.c "$T"/recipe.c "$T"/db.c "$T"/build.c "$T"/cmds.c "$T"/snap.c "$T"/update.c
+  "$T"/kpkg.c "$T"/util.c "$T"/lock.c "$T"/recipe.c "$T"/db.c "$T"/build.c "$T"/cmds.c "$T"/snap.c "$T"/update.c "$T"/check.c
 
 mkdir -p "$T/pkg/hello-1.0"
 printf '#!/bin/sh\necho configured\n' > "$T/pkg/hello-1.0/configure"
@@ -126,6 +126,34 @@ if [ "$(id -u)" = 0 ]; then
   check checksum-mismatch-blocks-install 1 "$(KPKG_FORCE=1 run install -y badsum)" "SHA256 mismatch"
   check assume-yes-env 1 "$(KPKG_ASSUME_YES=1 KPKG_FORCE=1 run install badsum)" "SHA256 mismatch"
 fi
+: > "$T/config.kpkg"
+chmod 644 "$T/config.kpkg"
+check config-empty-loads 1 "$(run doctor)" "config.kpkg"
+printf 'JOBS=3\nCFLAGS="-O2 -pipe"\nBOGUS=1\nLDFLAGS="-wrapper evil"\n' > "$T/config.kpkg"
+check config-unknown-key 0 "$(run version)" "unknown option BOGUS"
+check config-bad-flags 0 "$(run version)" "LDFLAGS has unsupported"
+check plan-shows-source 0 "$(run install -p "$T/rec/good-1.0.kpkg")" "source $T/src/hello-1.0.tar.gz"
+check plan-shows-description 0 "$(run install -p "$T/rec/good-1.0.kpkg")" "Good recipe"
+check plan-shows-sha256 0 "$(run install -p "$T/rec/good-1.0.kpkg")" "sha256 "
+printf 'PACKAGE=plain\nVERSION=1.0\nDESCRIPTION="Plain http"\nLICENSE="MIT"\nSRC_URI="http://example.org/a.tar.gz"\nSHA256="%s"\n' "$SUM" > "$T/rec/plain-1.0.kpkg"
+check lint-http-refused 1 "$(run lint "$T/rec/plain-1.0.kpkg")" "must use https"
+printf 'PACKAGE=skip\nVERSION=1.0\nDESCRIPTION="Skip"\nLICENSE="MIT"\nSRC_URI="%s"\nSHA256="%s"\nSKIP_CHECKSUM="yes"\n' "$T/src/hello-1.0.tar.gz" "$SUM" > "$T/rec/skip-1.0.kpkg"
+check lint-no-skip-field 1 "$(run lint "$T/rec/skip-1.0.kpkg")" "unknown header field SKIP_CHECKSUM"
+printf 'PACKAGE=short\nVERSION=1.0\nDESCRIPTION="Short"\nLICENSE="MIT"\nSRC_URI="%s %s"\nSHA256="%s"\n' "$T/src/hello-1.0.tar.gz" "$T/src/hello-1.0.tar.gz" "$SUM" > "$T/rec/short-1.0.kpkg"
+check lint-checksum-count 1 "$(run lint "$T/rec/short-1.0.kpkg")" "2 sources but 1 checksums"
+check update-unsigned-gone 1 "$(KPKG_FORCE=1 run update --unsigned)" "usage: kpkg update [--force]"
+printf 'tree\n' > "$T/fake-tree.tar.gz"
+check sync-needs-signature 1 "$(KPKG_FORCE=1 run sync --file "$T/fake-tree.tar.gz")" "without a minisign signature is refused"
+mkdir -p "$T/ctree/libs/ok/ok-1.0"
+cp "$T/rec/good-1.0.kpkg" "$T/ctree/libs/ok/ok-1.0/ok-1.0.kpkg"
+sed -i 's/PACKAGE=good/PACKAGE=ok/' "$T/ctree/libs/ok/ok-1.0/ok-1.0.kpkg"
+check tree-check-good 0 "$(run check "$T/ctree")" "1 recipes checked, 0 problems"
+mkdir -p "$T/ctree/libs/badcat/badcat-1.0" "$T/ctree/weird/x/x-1.0"
+printf 'PACKAGE=badcat\nVERSION=1.0\nDESCRIPTION="Needs a missing dependency"\nLICENSE="MIT"\nDEPEND="libs/nothing"\n' > "$T/ctree/libs/badcat/badcat-1.0/badcat-1.0.kpkg"
+check tree-check-missing-dep 1 "$(run check "$T/ctree")" "dependency libs/nothing has no recipe"
+check tree-check-category 1 "$(run check "$T/ctree")" "unknown category weird"
+rm -rf "$T/ctree/libs/badcat" "$T/ctree/weird"
+check tree-check-clean 0 "$(run check "$T/ctree")" "1 recipes checked, 0 problems"
 check unknown-command 1 "$(run frobnicate)" "usage"
 
 check hold-empty 0 "$(run hold)" "no packages are held"
@@ -154,7 +182,7 @@ configure() {
   true
 }
 build() {
-  true
+  test -f README
 }
 install() {
   mkdir -p "\$DESTDIR/etc" "\$DESTDIR/usr/local/bin"
@@ -180,6 +208,37 @@ REC
   run unhold e2e >/dev/null
   check e2e-remove 0 "$(KPKG_FORCE=1 run remove -y e2e)" "e2e"
   if [ ! -e /usr/local/bin/kpkg-e2e ]; then printf 'PASS  e2e-removed\n'; pass=$((pass+1)); else printf 'FAIL  e2e-removed\n'; fail=$((fail+1)); fi
+  : > "$T/config.kpkg"
+  mkdir -p "$T/cfg/cfg-1.0"
+  echo data > "$T/cfg/cfg-1.0/README"
+  tar -czf "$T/src/cfg-1.0.tar.gz" -C "$T/cfg" cfg-1.0
+  CFGSUM=$(sha256sum "$T/src/cfg-1.0.tar.gz" | awk '{print $1}')
+  cat > "$T/rec/cfg-1.0.kpkg" <<REC
+PACKAGE=cfg
+VERSION=1.0
+DESCRIPTION="Config test package"
+LICENSE="MIT"
+SRC_URI="$T/src/cfg-1.0.tar.gz"
+SHA256="$CFGSUM"
+configure() {
+  true
+}
+build() {
+  test -f README
+}
+install() {
+  mkdir -p "\$DESTDIR/usr/local/share"
+  printf '%s|%s\n' "\$JOBS" "\$CFLAGS" > "\$DESTDIR/usr/local/share/kpkg-cfg-test"
+}
+REC
+  printf 'JOBS=3\nCFLAGS="-O2 -pipe"\n' > "$T/config.kpkg"
+  check config-applied 0 "$(KPKG_FORCE=1 run install -y "$T/rec/cfg-1.0.kpkg")" "installed local/cfg-1.0"
+  if [ "$(cat /usr/local/share/kpkg-cfg-test 2>/dev/null)" = "3|-O2 -pipe" ]; then printf 'PASS  config-reaches-build\n'; pass=$((pass+1)); else printf 'FAIL  config-reaches-build\n'; fail=$((fail+1)); fi
+  KPKG_FORCE=1 run remove -y cfg >/dev/null
+  rm -f /usr/local/share/kpkg-cfg-test
+  : > "$T/config.kpkg"
+  printf 'PACKAGE=nosum2\nVERSION=1.0\nDESCRIPTION="No checksum"\nLICENSE="MIT"\nSRC_URI="%s"\n' "$T/src/hello-1.0.tar.gz" > "$T/rec/nosum2-1.0.kpkg"
+  check build-without-sha256-refused 1 "$(KPKG_FORCE=1 run install -y "$T/rec/nosum2-1.0.kpkg")" "a source without a checksum is never built"
   rm -f /etc/kpkg-e2e.conf /etc/kpkg-e2e.conf.kpkg-new /usr/local/bin/kpkg-e2e
 fi
 

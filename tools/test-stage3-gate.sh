@@ -25,7 +25,9 @@ if [ -n "$ARCHIVE" ]; then
   need_entry() { if grep -qxE "(\./)?(usr/)?$1" "$LIST"; then ok "$1"; else bad "missing $1"; fi; }
   forbid_entry() { if grep -qxE "(\./)?$1" "$LIST"; then bad "forbidden $1"; else ok "absent $1"; fi; }
   need_entry usr/bin/kpkg
-  need_entry etc/kpkg/kpkg.conf
+  need_entry usr/bin/kpkg
+  need_entry etc/kpkg/config.kpkg
+  need_entry etc/kpkg/kryonux.pub
   need_entry etc/os-release
   need_entry sbin/openrc-init
   need_entry etc/doas.conf

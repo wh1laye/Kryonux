@@ -46,12 +46,17 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: wh1laye/kpkg-recipes
+          path: recipes
+          persist-credentials: false
+
       - name: проверка ключа подписи
-        if: ${{ inputs.publish }}
         env:
           HAS_KEY: ${{ secrets.MINISIGN_KEY != '' }}
         run: |
-          [ "$HAS_KEY" = true ] || { echo "::error::MINISIGN_KEY не задан, публикация без подписи запрещена"; exit 1; }
+          [ "$HAS_KEY" = true ] || { echo "::error::MINISIGN_KEY не задан, без него дерево рецептов не проверить: kpkg принимает только подписанное"; exit 1; }
 
       - name: проверка параметров
         env:
@@ -68,9 +73,19 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq minisign gnupg debootstrap ubuntu-keyring
 
+      - name: подписанное дерево рецептов
+        env:
+          MINISIGN_KEY: ${{ secrets.MINISIGN_KEY }}
+          MINISIGN_PASSWORD: ${{ secrets.MINISIGN_PASSWORD }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/rt"
+          tar --exclude=.git -czf "$RUNNER_TEMP/rt/kpkg-recipes.tar.gz" --transform 's,^recipes,kpkg-recipes,' recipes
+          bash tools/sign.sh "$RUNNER_TEMP/rt/kpkg-recipes.tar.gz"
+          [ -s "$RUNNER_TEMP/rt/kpkg-recipes.tar.gz.minisig" ] || { echo "::error::нет подписи дерева рецептов"; exit 1; }
+
       - name: проверка скриптов и kpkg
         run: |
-          for f in tools/build-stage3.sh tools/test-kpkg.sh tools/stage3/*.sh tools/stage3/kryonux-adduser tools/stage3/kryonux-firewall tools/stage3/kryonux-audit tools/test-firewall.sh tools/test-forum.sh kpkg/*.sh; do bash -n "$f"; done
+          for f in tools/build-stage3.sh tools/test-all.sh tools/test-kpkg.sh tools/stage3/*.sh tools/stage3/kryonux-adduser tools/stage3/kryonux-firewall tools/stage3/kryonux-audit tools/test-firewall.sh tools/test-forum.sh kpkg/*.sh; do bash -n "$f"; done
           make -C kpkg clean all CC="gcc -Wextra -Werror"
           ./kpkg/kpkg version
           sudo bash tools/test-kpkg.sh
@@ -100,7 +115,7 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p "$PWD/out"
-          sudo -E env WORK=/mnt/stage3 OUT="$PWD/out" VERSION="$VERSION" REFRESH_LIST="$REFRESH_LIST" STRICT="$STRICT" BASE_TAG="$BASE_TAG" BASE_VERSION="$BASE_VERSION" \
+          sudo -E env RECIPES_TARBALL="$RUNNER_TEMP/rt/kpkg-recipes.tar.gz" WORK=/mnt/stage3 OUT="$PWD/out" VERSION="$VERSION" REFRESH_LIST="$REFRESH_LIST" STRICT="$STRICT" BASE_TAG="$BASE_TAG" BASE_VERSION="$BASE_VERSION" \
             bash tools/build-stage3.sh 2>&1 | tee "$RUNNER_TEMP/build.log"
           ls -lh out
 

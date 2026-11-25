@@ -41,6 +41,11 @@ static int phase_known(const char *name)
 }
 static void set_field(struct recipe *r, const char *key, const char *val)
 {
+	static const char *const known[] = { "PACKAGE", "VERSION", "DESCRIPTION", "HOMEPAGE", "LICENSE", "SLOT", "SRC_URI", "SHA256", "DEPEND", "RDEPEND", "BUILD_FLAGS", NULL };
+	int k, ok = 0;
+	for (k = 0; known[k]; k++)
+		if (!strcmp(key, known[k])) ok = 1;
+	if (!ok && !r->unknown[0]) snprintf(r->unknown, sizeof r->unknown, "%s", key);
 	if (!strcmp(key, "PACKAGE")) snprintf(r->name, sizeof r->name, "%s", val);
 	else if (!strcmp(key, "VERSION")) snprintf(r->version, sizeof r->version, "%s", val);
 	else if (!strcmp(key, "DESCRIPTION")) snprintf(r->description, sizeof r->description, "%s", val);
@@ -474,10 +479,38 @@ int recipe_ver_ok(const char *s)
 	if (!*s || !((*s >= '0' && *s <= '9') || (*s >= 'a' && *s <= 'z'))) return 0;
 	return strspn(s, "0123456789abcdefghijklmnopqrstuvwxyz.+_~-") == strlen(s) && s[strlen(s) - 1] != '.';
 }
+static int count_words(const char *s, int skip_arrows)
+{
+	char buf[2048], *tok, *save = NULL;
+	int n = 0, after_arrow = 0;
+	snprintf(buf, sizeof buf, "%s", s);
+	for (tok = strtok_r(buf, " \t\n", &save); tok; tok = strtok_r(NULL, " \t\n", &save)) {
+		if (skip_arrows && !strcmp(tok, "->")) { after_arrow = 1; continue; }
+		if (after_arrow) { after_arrow = 0; continue; }
+		n++;
+	}
+	return n;
+}
+static int hash_bad(const char *s)
+{
+	char buf[1024], *tok, *save = NULL;
+	snprintf(buf, sizeof buf, "%s", s);
+	for (tok = strtok_r(buf, " \t\n", &save); tok; tok = strtok_r(NULL, " \t\n", &save))
+		if (strlen(tok) != 64 || strspn(tok, "0123456789abcdefABCDEF") != 64) return 1;
+	return 0;
+}
+static int insecure_uri(const char *s)
+{
+	char buf[2048], *tok, *save = NULL;
+	snprintf(buf, sizeof buf, "%s", s);
+	for (tok = strtok_r(buf, " \t\n", &save); tok; tok = strtok_r(NULL, " \t\n", &save))
+		if (!strncmp(tok, "http://", 7) || !strncmp(tok, "ftp://", 6)) return 1;
+	return 0;
+}
 int recipe_lint(const char *path)
 {
 	struct recipe r;
-	int bad = 0;
+	int bad = 0, ns, nh;
 	recipe_init(&r);
 	if (!recipe_load(path, &r)) {
 		recipe_free(&r);
@@ -489,7 +522,15 @@ int recipe_lint(const char *path)
 	else if (!recipe_ver_ok(r.version)) { fprintf(stderr, "kpkg: %s: VERSION has invalid characters\n", path); bad++; }
 	if (!r.description[0]) { fprintf(stderr, "kpkg: %s: DESCRIPTION is missing\n", path); bad++; }
 	if (!r.license[0]) { fprintf(stderr, "kpkg: %s: LICENSE is missing\n", path); bad++; }
+	if (r.unknown[0]) { fprintf(stderr, "kpkg: %s: unknown header field %s\n", path, r.unknown); bad++; }
 	if (r.src_uri[0] && !r.sha256[0]) { fprintf(stderr, "kpkg: %s: SHA256 is missing\n", path); bad++; }
+	if (r.src_uri[0] && r.sha256[0]) {
+		ns = count_words(r.src_uri, 1);
+		nh = count_words(r.sha256, 0);
+		if (ns != nh) { fprintf(stderr, "kpkg: %s: %d sources but %d checksums\n", path, ns, nh); bad++; }
+		if (hash_bad(r.sha256)) { fprintf(stderr, "kpkg: %s: SHA256 must be 64 hex digits per source\n", path); bad++; }
+	}
+	if (r.src_uri[0] && insecure_uri(r.src_uri)) { fprintf(stderr, "kpkg: %s: SRC_URI must use https\n", path); bad++; }
 	if (!r.src_uri[0] && recipe_phase(&r, "src_install")) { fprintf(stderr, "kpkg: %s: SRC_URI is missing\n", path); bad++; }
 	if (!r.src_uri[0] && !recipe_phase(&r, "src_install") && !r.depend[0] && !r.rdepend[0]) {
 		fprintf(stderr, "kpkg: %s: the recipe installs nothing and has no dependencies\n", path);

@@ -1,0 +1,7 @@
+# optional packages: installed only when their recipe has a SHA256, otherwise skipped
+libs/libcap
+system/kbd
+tools/htop
+tools/rsync
+tools/pciutils
+tools/lsof

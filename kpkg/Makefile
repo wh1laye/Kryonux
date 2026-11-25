@@ -7,7 +7,7 @@ DESTDIR ?=
 
 all: kpkg
 
-SRCS := kpkg.c util.c lock.c recipe.c db.c build.c cmds.c snap.c update.c
+SRCS := kpkg.c util.c lock.c recipe.c db.c build.c cmds.c snap.c update.c check.c
 
 kpkg: $(SRCS) kpkg.h
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(SRCS)
@@ -25,6 +25,7 @@ install-box:
 conf:
 	install -d $(DESTDIR)/etc/kpkg
 	@if [ -f etc/kpkg/kryonux.pub ]; then install -m644 etc/kpkg/kryonux.pub $(DESTDIR)/etc/kpkg/kryonux.pub; fi
+	@if [ ! -e $(DESTDIR)/etc/kpkg/config.kpkg ]; then install -m644 etc/kpkg/config.kpkg $(DESTDIR)/etc/kpkg/config.kpkg; fi
 	@if [ ! -e $(DESTDIR)/etc/kpkg/kpkg.conf ]; then \
 	  install -m644 etc/kpkg/kpkg.conf $(DESTDIR)/etc/kpkg/kpkg.conf; \
 	elif ! cmp -s etc/kpkg/kpkg.conf $(DESTDIR)/etc/kpkg/kpkg.conf; then \

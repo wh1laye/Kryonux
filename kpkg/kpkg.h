@@ -14,8 +14,12 @@
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <sys/wait.h>
+#include <signal.h>
 #ifndef CONF
 #define CONF "/etc/kpkg/kpkg.conf"
+#endif
+#ifndef USERCONF
+#define USERCONF "/etc/kpkg/config.kpkg"
 #endif
 #ifndef LOCKFILE
 #define LOCKFILE "/run/kpkg.lock"
@@ -32,7 +36,7 @@
 #define UPD_BRANCH "main"
 #define UPD_TAG "kpkg-latest"
 #define UPD_ASSET "kpkg-src.tar.gz"
-#define RECIPES_URL "https://codeload.github.com/wh1laye/kpkg-recipes/tar.gz/refs/heads/master"
+#define RECIPES_URL "https://github.com/wh1laye/kpkg-recipes/releases/download/recipes-latest/kpkg-recipes.tar.gz"
 #define MAXPLAN 512
 #define MAXPHASE 65536
 #define BUF 1024
@@ -40,19 +44,23 @@ struct phase { char name[32]; char *body; };
 struct recipe {
 	char category[128]; char name[128]; char version[64];
 	char description[512]; char homepage[256]; char license[128]; char slot[32];
-	char src_uri[2048]; char sha256[1024]; char depend[1024]; char rdepend[1024]; char build_flags[512];
+	char src_uri[2048]; char sha256[1024]; char depend[1024]; char rdepend[1024]; char build_flags[512]; char unknown[64];
 	char dir[BUF]; struct phase phases[8]; int nphases;
 };
 struct db_pkg { char category[128]; char name[128]; char version[64]; int explicit; };
 extern const char *cp_version;
 extern char repo[256]; extern char distdir[256]; extern char workdir[256]; extern char recipes_url[512];
 extern int jobs; extern int keep_workdir; extern int allow_host; extern int sn_keep; extern int lock_fd;
+extern char cfg_cflags[512]; extern char cfg_cxxflags[512]; extern char cfg_ldflags[512];
+extern int cfg_nice; extern int cfg_ask; extern int cfg_min_battery; extern int cfg_config_loaded;
 int acquire_lock(void); void release_lock(void);
+void txn_begin(const char *what); void txn_end(void); int txn_interrupted(char *what, size_t n);
+void crit_begin(void); void crit_end(void); int power_ok(void); void lock_signals(void);
 void *xcalloc(size_t n, size_t m); void *xrealloc(void *p, size_t n); char *xstrdup(const char *s);
 int run(char *const av[]); int capture(char *const av[], char *out, size_t n);
 char *trim(char *s); int exists(const char *p); int is_dir(const char *p);
 int mkdirs(const char *path); int safe_dir(const char *p); void rm_tree(const char *path);
-void loadconf(void); void osid(char *out, size_t n); int host_allowed(char *id, size_t n);
+void loadconf(void); int flags_ok(const char *v); void osid(char *out, size_t n); int host_allowed(char *id, size_t n);
 int host_ok(void); int need_root(void); int have(const char *cmd);
 int fetch(const char *url, const char *out); extern int use_color; const char *C(char k); void ui_init(void); int vercmp(const char *a, const char *b);
 void list_add(char ***v, int *n, const char *s); void list_free(char **v, int n); int list_has(char **v, int n, const char *s);
@@ -79,11 +87,11 @@ int world_has(const char *cat, const char *name); void world_add(const char *cat
 int pkg_build_install(const char *cat, const char *name, const char *ver, int explicit, int force);
 void ownership_free(void);
 const char *pkg_owner_of(const char *relpath);
-int cmd_sync(void); int cmd_install(int argc, char **argv); int cmd_remove(int argc, char **argv);
+int cmd_sync(void); int cmd_sync_file(const char *file); int cmd_install(int argc, char **argv); int cmd_remove(int argc, char **argv);
 int cmd_upgrade(int argc, char **argv); int cmd_clean(int argc, char **argv);
 int cmd_search(int argc, char **argv); int cmd_info(int argc, char **argv); int cmd_list(void);
 int cmd_files(int argc, char **argv); int cmd_owns(int argc, char **argv);
-int cmd_lint(int argc, char **argv); int cmd_hold(int argc, char **argv, int add); int cmd_checksum(int argc, char **argv); int cmd_doctor(void); int cmd_fix(void);
+int cmd_lint(int argc, char **argv); int cmd_check(int argc, char **argv); int cmd_hold(int argc, char **argv, int add); int cmd_checksum(int argc, char **argv); int cmd_doctor(void); int cmd_fix(void);
 int root_btrfs(char *dev, size_t n); int sn_is_name(const char *s); int sn_label_ok(const char *s);
 int top_mount(void); void top_umount(void); int sn_names(const char *dir, char ***out);
 void sn_prune(const char *dir); void sn_stamp(char *out, size_t n, int full);

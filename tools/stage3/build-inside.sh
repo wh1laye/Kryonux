@@ -36,14 +36,16 @@ setup_kpkg() {
     /var/cache/kpkg/distfiles /var/tmp/kpkg-build
   cat > /etc/kpkg/kpkg.conf <<CONF
 repo=/var/db/repos/kpkg-recipes
-recipes_url=https://codeload.github.com/wh1laye/kpkg-recipes/tar.gz/refs/heads/master
+recipes_url=https://github.com/wh1laye/kpkg-recipes/releases/download/recipes-latest/kpkg-recipes.tar.gz
 distdir=/var/cache/kpkg/distfiles
 workdir=/var/tmp/kpkg-build
-jobs=$(nproc)
+jobs=0
 snapshots=0
 keep_workdir=no
 allow_host=yes
 CONF
+  install -m644 "$PKG/etc/kpkg/kryonux.pub" /etc/kpkg/kryonux.pub
+  [ -e /etc/kpkg/config.kpkg ] || install -m644 "$PKG/etc/kpkg/config.kpkg" /etc/kpkg/config.kpkg
   make -C "$PKG" clean >/dev/null
   make -C "$PKG" -j"$(nproc)"
   install -m755 "$PKG/kpkg" /usr/bin/kpkg
@@ -51,24 +53,50 @@ CONF
 }
 
 fetch_recipes() {
-  kpkg sync
+  if [ -s /var/tmp/recipes.tar.gz ] && [ -s /var/tmp/recipes.tar.gz.minisig ]; then
+    kpkg sync --file /var/tmp/recipes.tar.gz
+  else
+    kpkg sync
+  fi
 }
 
 install_set() {
-  local ok=0 fail=0 line
+  local ok=0 fail=0 line log broken last=
   while read -r line; do
     case $line in ''|\#*) continue ;; esac
     say "install: $line"
-    if kpkg install -y --force "$line" > "$L/$(printf '%s' "$line" | tr / -).log" 2>&1; then
+    log=$L/$(printf '%s' "$line" | tr / -).log
+    if kpkg install -y --force "$line" > "$log" 2>&1; then
       ok=$((ok+1))
     else
       fail=$((fail+1))
       echo "$line" >> "$REPORT"
-      tail -20 "$L/$(printf '%s' "$line" | tr / -).log" >&2 || true
+      tail -20 "$log" >&2 || true
+      broken=$(sed -n 's/^kpkg: build failed for \([^,]*\),.*/\1/p' "$log" | head -1)
+      if [ -n "$broken" ] && [ "$broken" = "$last" ]; then
+        echo "dependency $broken cannot be built, stopping instead of repeating the same failure" | tee -a "$REPORT" >&2
+        break
+      fi
+      last=$broken
     fi
   done < "$F/kryonux-packages.list"
   say "packages: installed $ok, failed $fail"
   [ "$fail" = 0 ]
+}
+
+install_extra() {
+  local line log
+  [ -f "$F/kryonux-extra.list" ] || return 0
+  while read -r line; do
+    case $line in ''|\#*) continue ;; esac
+    log=$L/extra-$(printf '%s' "$line" | tr / -).log
+    if kpkg install -y --force "$line" > "$log" 2>&1; then
+      say "extra: $line installed"
+    else
+      say "extra: $line skipped, see $log"
+    fi
+  done < "$F/kryonux-extra.list"
+  return 0
 }
 
 layout() {
@@ -77,7 +105,7 @@ layout() {
   [ -f "$F/logo.png" ] && install -m644 "$F/logo.png" /usr/share/kryonux/logo.png
   local f src
   install -d /etc/xdg/fastfetch
-  install -m644 "$F/fastfetch.jsonc" /etc/xdg/fastfetch/config.jsonc
+  [ -f /etc/xdg/fastfetch/config.jsonc ] || install -m644 "$F/fastfetch.jsonc" /etc/xdg/fastfetch/config.jsonc
   install -d /etc/kpkg
   grep -qx fastfetch /etc/kpkg/hold 2>/dev/null || printf 'fastfetch\n' >> /etc/kpkg/hold
   for f in kryonux-users kryonux-adduser kryonux-fix kryonux-firewall kryonux-audit; do
@@ -91,13 +119,14 @@ layout() {
 }
 
 clean() {
-  rm -rf /var/cache/kpkg/distfiles/* /var/tmp/kpkg-build/* \
+  rm -rf /var/cache/kpkg/distfiles/* /var/tmp/kpkg-build/* /var/tmp/recipes.tar.gz* \
     /var/tmp/kpkg-src /root/.cache /tmp/* /etc/resolv.conf
 }
 
 step kpkg-setup setup_kpkg || exit 1
 step kpkg-recipes fetch_recipes || exit 1
 step kryonux-package-set install_set || exit 1
+step kryonux-extra-packages install_extra || exit 1
 step kryonux-layout layout || exit 1
 clean
 

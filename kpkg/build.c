@@ -63,6 +63,7 @@ static const char *find_owner(const char *path)
 {
 	struct owned key;
 	struct owned *hit;
+	if (!owned_idx || nowned <= 0) return NULL;
 	key.path = (char *)path;
 	hit = bsearch(&key, owned_idx, (size_t)nowned, sizeof *owned_idx, owned_cmp);
 	return hit ? hit->owner : NULL;
@@ -93,19 +94,19 @@ static int checksum_check(const struct build_ctx *c, const char *filename, const
 	char list[1024], got[BUF], *tok, *save = NULL, *a[3];
 	int i = 0;
 	snprintf(list, sizeof list, "%s", c->r.sha256);
-	for (tok = strtok_r(list, " 	\n", &save); tok && i < c->ndist; tok = strtok_r(NULL, " 	\n", &save)) i++;
+	for (tok = strtok_r(list, " \t\n", &save); tok && i < c->ndist; tok = strtok_r(NULL, " \t\n", &save)) i++;
 	if (!tok) {
-	fprintf(stderr, "kpkg: no SHA256 for %s, the source is not verified\n", filename);
-	return 1;
+		fprintf(stderr, "kpkg: no SHA256 for %s, a source without a checksum is never built\n", filename);
+		return 0;
 	}
 	if (strspn(tok, "0123456789abcdefABCDEF") != 64 || strlen(tok) != 64) {
-	fprintf(stderr, "kpkg: malformed SHA256 for %s\n", filename);
-	return 0;
+		fprintf(stderr, "kpkg: malformed SHA256 for %s\n", filename);
+		return 0;
 	}
 	a[0] = "sha256sum"; a[1] = (char *)full; a[2] = NULL;
 	if (capture(a, got, sizeof got) != 0 || strncasecmp(got, tok, 64)) {
-	fprintf(stderr, "kpkg: SHA256 mismatch for %s\n", filename);
-	return 0;
+		fprintf(stderr, "kpkg: SHA256 mismatch for %s\n", filename);
+		return 0;
 	}
 	return 1;
 }
@@ -192,7 +193,7 @@ static int extract_sources(struct build_ctx *c)
 {
 	char full[BUF], srcbase[BUF], probe[BUF + 256];
 	char *a[8];
-	int i, n;
+	int i, n, real = 0, last = -1;
 	struct dirent **nl = NULL;
 	size_t l;
 	if (snprintf(srcbase, sizeof srcbase, "%s/src", c->base) >= (int)sizeof srcbase) return 0;
@@ -211,19 +212,25 @@ static int extract_sources(struct build_ctx *c)
 	}
 	snprintf(c->srcdir, sizeof c->srcdir, "%s", srcbase);
 	n = scandir(srcbase, &nl, NULL, alphasort);
-	if (n == 1 && nl[0]->d_name[0] != '.') {
-		if (snprintf(probe, sizeof probe, "%s/%s", srcbase, nl[0]->d_name) < (int)sizeof probe && is_dir(probe) && strlen(probe) < sizeof c->srcdir)
-			memcpy(c->srcdir, probe, sizeof c->srcdir);
+	if (n < 0) return 0;
+	for (i = 0; i < n; i++) {
+		const char *d = nl[i]->d_name;
+		if (d[0] == '.' && (!d[1] || (d[1] == '.' && !d[2]))) continue;
+		real++;
+		last = i;
 	}
+	if (real == 1 && snprintf(probe, sizeof probe, "%s/%s", srcbase, nl[last]->d_name) < (int)sizeof probe && is_dir(probe)
+	    && strlen(probe) < sizeof c->srcdir)
+		snprintf(c->srcdir, sizeof c->srcdir, "%s", probe);
 	for (i = 0; i < n; i++) free(nl[i]);
-	if (n >= 0) free(nl);
+	free(nl);
 	return 1;
 }
 static int run_phase(struct build_ctx *c, const char *name, const char *body, const char *dest)
 {
 	int fd[2], st, code;
 	pid_t p;
-	char buf[4096], jobsval[16], makeflags[24];
+	char buf[4096], jobsval[16], makeflags[24], filesdir[BUF + 16];
 	ssize_t r;
 	FILE *log;
 	printf("kpkg: %s/%s-%s: phase %s\n", c->r.category, c->r.name, c->r.version, name);
@@ -241,6 +248,16 @@ static int run_phase(struct build_ctx *c, const char *name, const char *body, co
 		dup2(fd[1], 2);
 		close(fd[1]);
 		umask(022);
+		clearenv();
+		setenv("PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", 1);
+		setenv("TERM", "dumb", 1);
+		if (cfg_nice > 0 && nice(cfg_nice) < 0) {}
+		if (cfg_cflags[0]) setenv("CFLAGS", cfg_cflags, 1);
+		if (cfg_cxxflags[0]) setenv("CXXFLAGS", cfg_cxxflags, 1);
+		else if (cfg_cflags[0]) setenv("CXXFLAGS", cfg_cflags, 1);
+		if (cfg_ldflags[0]) setenv("LDFLAGS", cfg_ldflags, 1);
+		snprintf(filesdir, sizeof filesdir, "%s/files", c->r.dir);
+		setenv("FILESDIR", filesdir, 1);
 		snprintf(jobsval, sizeof jobsval, "%d", c->jobcount);
 		snprintf(makeflags, sizeof makeflags, "-j%d", c->jobcount);
 		setenv("D", dest, 1);
@@ -374,7 +391,7 @@ static void protect_configs(const char *image, char **files, int nf)
 int pkg_build_install(const char *cat, const char *name, const char *ver, int explicit, int force)
 {
 	struct build_ctx c;
-	char path[BUF + 256], oldver[64] = "", srcarg[BUF + 8];
+	char path[BUF + 256], oldver[64] = "", srcarg[BUF + 8], txnname[320];
 	char **files = NULL, **dirs = NULL;
 	int nf = 0, nd = 0, r = 1, was_installed, old_explicit = 0;
 	char *a[6];
@@ -396,7 +413,12 @@ int pkg_build_install(const char *cat, const char *name, const char *ver, int ex
 	snprintf(c.r.category, sizeof c.r.category, "%s", cat);
 	snprintf(c.r.name, sizeof c.r.name, "%s", name);
 	snprintf(c.r.version, sizeof c.r.version, "%s", ver);
-	snprintf(c.r.dir, sizeof c.r.dir, "%s/%s/%s/%s-%s", repo, cat, name, name, ver);
+	if (strlen(path) >= sizeof c.r.dir) {
+		fprintf(stderr, "kpkg: recipe path is too long: %s\n", path);
+		goto out;
+	}
+	memcpy(c.r.dir, path, strlen(path) + 1);
+	if (strrchr(c.r.dir, '/')) *strrchr(c.r.dir, '/') = 0;
 	recipe_expand(&c.r);
 	was_installed = db_installed_version(cat, name, oldver, sizeof oldver);
 	if (was_installed && !strcmp(oldver, ver) && !force) {
@@ -436,10 +458,14 @@ int pkg_build_install(const char *cat, const char *name, const char *ver, int ex
 		goto fail;
 	}
 	if (!check_conflicts(&c, files, nf, force)) goto fail;
-	if (!force) protect_configs(c.image, files, nf);
+	protect_configs(c.image, files, nf);
 	snprintf(srcarg, sizeof srcarg, "%s/.", c.image);
+	snprintf(txnname, sizeof txnname, "%s/%s-%s", cat, name, ver);
+	txn_begin(txnname);
+	crit_begin();
 	a[0] = "cp"; a[1] = "-a"; a[2] = srcarg; a[3] = "/"; a[4] = NULL;
 	if (run(a) != 0) {
+		crit_end();
 		fputs("kpkg: cannot copy the staged image into /\n", stderr);
 		goto fail;
 	}
@@ -447,12 +473,17 @@ int pkg_build_install(const char *cat, const char *name, const char *ver, int ex
 		a[0] = "ldconfig"; a[1] = NULL;
 		run(a);
 	}
-	if (!db_record(&c.r, files, nf, dirs, nd, explicit || old_explicit)) goto fail;
+	if (!db_record(&c.r, files, nf, dirs, nd, explicit || old_explicit)) {
+		crit_end();
+		goto fail;
+	}
 	if (was_installed && strcmp(oldver, ver)) {
 		db_remove(cat, name, oldver, files, nf);
 		printf("kpkg: upgraded %s/%s %s -> %s\n", cat, name, oldver, ver);
 	}
 	if (explicit || old_explicit) world_add(cat, name);
+	crit_end();
+	txn_end();
 	printf("%s::%s kpkg: installed %s/%s-%s (%d files)\n", C('g'), C('0'), cat, name, ver, nf);
 	if (recipe_phase(&c.r, "pkg_postinst")) run_phase(&c, "pkg_postinst", recipe_phase(&c.r, "pkg_postinst"), "/");
 	if (!keep_workdir) rm_tree(c.base);

@@ -12,7 +12,7 @@ main() {
 	BOX=${KPKG_BOX:-/var/lib/kpkg/box}
 	MODE=${KPKG_MODE:-auto}
 	SRC=${KPKG_SRC:-}
-	STRICT=${KPKG_STRICT:-1}
+	STRICT=1
 	UPDATE=0
 	TMP=
 	PM=
@@ -22,7 +22,6 @@ main() {
 	case $REPO in "" | *[!A-Za-z0-9._/-]* | *..*) die "плохое имя репозитория: $REPO" "bad repository name: $REPO" ;; esac
 	case $BRANCH in "" | *[!A-Za-z0-9._/-]* | *..*) die "плохое имя ветки: $BRANCH" "bad branch name: $BRANCH" ;; esac
 
-	case $STRICT in 0 | 1) ;; *) die "KPKG_STRICT: 1 или 0" "KPKG_STRICT: 1 or 0" ;; esac
 
 	need_root "$@"
 
@@ -31,7 +30,6 @@ main() {
 			--box) MODE=box ;;
 			--native) MODE=native ;;
 			--update) UPDATE=1 ;;
-			--insecure) STRICT=0 ;;
 			-h | --help) usage; exit 0 ;;
 			*) die "неизвестный параметр: $a" "unknown option: $a" ;;
 		esac
@@ -75,14 +73,12 @@ usage() {
 
   --box       изолированный режим (по умолчанию на любом дистрибутиве, кроме kryonux)
   --native    поставить прямо в систему (по умолчанию в kryonux)
-  --insecure  не требовать подпись minisign (по умолчанию она обязательна)
   --update    обновить kpkg, бокс и пакеты не трогать
   -h          эта справка" "install kpkg with one command
   curl -fsSL https://raw.githubusercontent.com/wh1laye/Kryonux/main/kpkg/install.sh | sh
 
   --box       isolated mode (default on every distro except kryonux)
   --native    install straight into the system (default on kryonux)
-  --insecure  do not require the minisign signature (required by default)
   --update    update kpkg, keep the box and packages
   -h          this help"
 }
@@ -103,9 +99,9 @@ need_root() {
 		has "$s" || continue
 		say "нужен root, перезапускаю через $s" "root is needed, re-running with $s"
 		if [ -f "$0" ]; then
-			exec "$s" env "KPKG_REPO=$REPO" "KPKG_BRANCH=$BRANCH" "KPKG_BOX=$BOX" "KPKG_MODE=$MODE" "KPKG_SRC=$SRC" "KPKG_STAGE3=${KPKG_STAGE3:-}" "KPKG_STRICT=$STRICT" "KPKG_FORCE=${KPKG_FORCE:-}" "KPKG_KEEP=${KPKG_KEEP:-}" "KPKG_INSTALL_URL=$INSTALL_URL" sh "$0" "$@"
+			exec "$s" env "KPKG_REPO=$REPO" "KPKG_BRANCH=$BRANCH" "KPKG_BOX=$BOX" "KPKG_MODE=$MODE" "KPKG_SRC=$SRC" "KPKG_STAGE3=${KPKG_STAGE3:-}" "KPKG_FORCE=${KPKG_FORCE:-}" "KPKG_KEEP=${KPKG_KEEP:-}" "KPKG_INSTALL_URL=$INSTALL_URL" sh "$0" "$@"
 		fi
-		fetch_out "$INSTALL_URL" | "$s" env "KPKG_REPO=$REPO" "KPKG_BRANCH=$BRANCH" "KPKG_BOX=$BOX" "KPKG_MODE=$MODE" "KPKG_SRC=$SRC" "KPKG_STAGE3=${KPKG_STAGE3:-}" "KPKG_STRICT=$STRICT" "KPKG_FORCE=${KPKG_FORCE:-}" "KPKG_KEEP=${KPKG_KEEP:-}" "KPKG_INSTALL_URL=$INSTALL_URL" sh -s -- "$@"
+		fetch_out "$INSTALL_URL" | "$s" env "KPKG_REPO=$REPO" "KPKG_BRANCH=$BRANCH" "KPKG_BOX=$BOX" "KPKG_MODE=$MODE" "KPKG_SRC=$SRC" "KPKG_STAGE3=${KPKG_STAGE3:-}" "KPKG_FORCE=${KPKG_FORCE:-}" "KPKG_KEEP=${KPKG_KEEP:-}" "KPKG_INSTALL_URL=$INSTALL_URL" sh -s -- "$@"
 		exit $?
 	done
 	die "нужен root (sudo или doas). запусти от root: su -c 'curl -fsSL $INSTALL_URL | sh'" \
@@ -197,15 +193,11 @@ get_src() {
 		if has minisign; then
 			minisign -Vq -P "$PUBKEY" -x "$TMP/repo.tar.gz.minisig" -m "$TMP/repo.tar.gz" || die "подпись исходников не подошла, установка отменена" "source signature mismatch, install aborted"
 			say "подпись minisign проверена" "minisign signature verified"
-		elif [ "$STRICT" = 1 ]; then
-			die "нет minisign, а проверка подписи обязательна (--insecure отключает)" "minisign is missing and signature checking is required (--insecure disables it)"
 		else
-			say "внимание: нет minisign, подпись не проверена" "warning: minisign is missing, signature not verified"
+			die "нет minisign, а проверка подписи обязательна" "minisign is missing and signature checking is required"
 		fi
 	else
-		[ "$STRICT" != 1 ] || die "нет подписанных исходников, а проверка подписи обязательна (--insecure отключает)" "no signed sources and signature checking is required (--insecure disables it)"
-		say "внимание: подписанного релиза нет, беру ветку $BRANCH без проверки" "warning: no signed release, taking branch $BRANCH unverified"
-		dl "https://codeload.github.com/$REPO/tar.gz/refs/heads/$BRANCH" "$TMP/repo.tar.gz" || die "не удалось скачать исходники" "could not download the sources"
+		die "нет подписанных исходников, а проверка подписи обязательна" "no signed sources and signature checking is required"
 	fi
 	tar -xzf "$TMP/repo.tar.gz" -C "$TMP" --no-same-owner
 	SRC=$(echo "$TMP"/*/kpkg)
@@ -265,10 +257,8 @@ get_stage3() {
 			die "подпись stage 3 не подошла, файл удалён, повтори установку" "stage 3 signature mismatch, the file was removed, run the installer again"
 		fi
 		say "подпись minisign stage 3 проверена" "stage 3 minisign signature verified"
-	elif [ "$STRICT" = 1 ]; then
-		die "подпись stage 3 не проверена, а проверка подписи обязательна (--insecure отключает)" "stage 3 signature is not verified and signature checking is required (--insecure disables it)"
 	else
-		say "внимание: подпись stage 3 не проверена (нет minisign или файла .minisig)" "warning: stage 3 signature is not verified (no minisign or .minisig file)"
+		die "подпись stage 3 не проверена, а проверка подписи обязательна" "stage 3 signature is not verified and signature checking is required"
 	fi
 	rm -rf "$BOX.new"
 	mkdir -p "$BOX.new"

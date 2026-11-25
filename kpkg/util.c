@@ -4,6 +4,8 @@ char distdir[256] = "/var/cache/kpkg/distfiles";
 char workdir[256] = "/var/tmp/kpkg-build";
 char recipes_url[512] = RECIPES_URL;
 int jobs; int keep_workdir; int allow_host; int sn_keep = 5;
+char cfg_cflags[512]; char cfg_cxxflags[512]; char cfg_ldflags[512];
+int cfg_nice; int cfg_ask = 1; int cfg_min_battery = 10; int cfg_config_loaded;
 void *xcalloc(size_t n, size_t m)
 {
 	void *p = calloc(n, m);
@@ -124,6 +126,87 @@ void rm_tree(const char *path)
 	a[0] = "rm"; a[1] = "-rf"; a[2] = (char *)path; a[3] = NULL;
 	run(a);
 }
+int flags_ok(const char *v)
+{
+	static const char *const deny[] = { "-wrapper", "-fplugin", "-specs", "-B", "-Wa,--execstack", NULL };
+	char buf[512], *tok, *save = NULL;
+	const char *p;
+	int i;
+	if (strlen(v) >= sizeof buf) return 0;
+	for (p = v; *p; p++)
+		if (!(isalnum((unsigned char)*p) || strchr(" -_=+.,/:%", *p))) return 0;
+	snprintf(buf, sizeof buf, "%s", v);
+	for (tok = strtok_r(buf, " ", &save); tok; tok = strtok_r(NULL, " ", &save))
+		for (i = 0; deny[i]; i++)
+			if (!strncmp(tok, deny[i], strlen(deny[i]))) return 0;
+	return 1;
+}
+static int yesno(const char *v, int *out)
+{
+	if (!strcmp(v, "yes") || !strcmp(v, "1") || !strcmp(v, "true")) { *out = 1; return 1; }
+	if (!strcmp(v, "no") || !strcmp(v, "0") || !strcmp(v, "false")) { *out = 0; return 1; }
+	return 0;
+}
+static void load_userconf(void)
+{
+	FILE *f = fopen(USERCONF, "r");
+	struct stat st;
+	char line[BUF], *k, *v, *eq, *h;
+	size_t l;
+	long lv;
+	int n = 0, b;
+	if (!f) return;
+	if (fstat(fileno(f), &st) != 0 || (geteuid() == 0 && (st.st_uid != 0 || (st.st_mode & (S_IWGRP | S_IWOTH))))) {
+		fprintf(stderr, "kpkg: %s must be owned by root and not writable by others, the file is ignored\n", USERCONF);
+		fclose(f);
+		return;
+	}
+	cfg_config_loaded = 1;
+	while (fgets(line, sizeof line, f)) {
+		n++;
+		h = strchr(line, '#');
+		if (h) *h = 0;
+		k = trim(line);
+		if (!*k) continue;
+		eq = strchr(k, '=');
+		if (!eq) {
+			fprintf(stderr, "kpkg: %s:%d: expected KEY=value, ignored\n", USERCONF, n);
+			continue;
+		}
+		*eq = 0;
+		v = trim(eq + 1);
+		k = trim(k);
+		l = strlen(v);
+		if (l >= 2 && v[0] == '"' && v[l - 1] == '"') { v[l - 1] = 0; v++; }
+		if (!strcmp(k, "JOBS")) {
+			lv = strtol(v, NULL, 10);
+			if (lv < 0 || lv > 256) { fprintf(stderr, "kpkg: %s:%d: JOBS must be 0 to 256, ignored\n", USERCONF, n); continue; }
+			jobs = (int)lv;
+		} else if (!strcmp(k, "CFLAGS") || !strcmp(k, "CXXFLAGS") || !strcmp(k, "LDFLAGS")) {
+			if (!flags_ok(v)) { fprintf(stderr, "kpkg: %s:%d: %s has unsupported characters or options, ignored\n", USERCONF, n, k); continue; }
+			snprintf(!strcmp(k, "CFLAGS") ? cfg_cflags : !strcmp(k, "CXXFLAGS") ? cfg_cxxflags : cfg_ldflags, 512, "%s", v);
+		} else if (!strcmp(k, "NICE")) {
+			lv = strtol(v, NULL, 10);
+			if (lv < 0 || lv > 19) { fprintf(stderr, "kpkg: %s:%d: NICE must be 0 to 19, ignored\n", USERCONF, n); continue; }
+			cfg_nice = (int)lv;
+		} else if (!strcmp(k, "SNAPSHOTS")) {
+			lv = strtol(v, NULL, 10);
+			sn_keep = lv < 0 ? 0 : lv > 50 ? 50 : (int)lv;
+		} else if (!strcmp(k, "MIN_BATTERY")) {
+			lv = strtol(v, NULL, 10);
+			cfg_min_battery = lv < 0 ? 0 : lv > 90 ? 90 : (int)lv;
+		} else if (!strcmp(k, "ASK")) {
+			if (!yesno(v, &b)) fprintf(stderr, "kpkg: %s:%d: ASK must be yes or no, ignored\n", USERCONF, n);
+			else cfg_ask = b;
+		} else if (!strcmp(k, "KEEP_WORKDIR")) {
+			if (!yesno(v, &b)) fprintf(stderr, "kpkg: %s:%d: KEEP_WORKDIR must be yes or no, ignored\n", USERCONF, n);
+			else keep_workdir = b;
+		} else {
+			fprintf(stderr, "kpkg: %s:%d: unknown option %s, ignored\n", USERCONF, n, k);
+		}
+	}
+	fclose(f);
+}
 void loadconf(void)
 {
 	FILE *f = fopen(CONF, "r");
@@ -154,6 +237,7 @@ void loadconf(void)
 		}
 		fclose(f);
 	}
+	load_userconf();
 	for (sl = strlen(repo); sl > 1 && repo[sl - 1] == '/'; sl--) repo[sl - 1] = 0;
 	for (sl = strlen(distdir); sl > 1 && distdir[sl - 1] == '/'; sl--) distdir[sl - 1] = 0;
 	for (sl = strlen(workdir); sl > 1 && workdir[sl - 1] == '/'; sl--) workdir[sl - 1] = 0;
@@ -241,7 +325,7 @@ static int fetch_one_url(const char *url, const char *out)
 	int n = 0;
 	a[n++] = "curl"; a[n++] = "-fL";
 	if (!isatty(2)) a[n++] = "-sS";
-	a[n++] = "--proto"; a[n++] = "=http,https";
+	a[n++] = "--proto"; a[n++] = "=https";
 	a[n++] = "--proto-redir"; a[n++] = "=https";
 	a[n++] = "--retry"; a[n++] = "1";
 	a[n++] = "--connect-timeout"; a[n++] = "10";

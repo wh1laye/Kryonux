@@ -34,6 +34,7 @@ Instructions for AI coding agents (OpenCode, Claude Code and others) working in 
 - Check the website: `node tools/test-site.js`
 - Check JavaScript syntax: `node --check <file>`
 - Check shell scripts: `bash -n <file>` and `shellcheck -x <file>` (config in `.shellcheckrc`)
+- Everything at once: `bash tools/test-all.sh [--stage3 FILE] [--iso FILE] [--kernel FILE] [--recipes DIR] [--boot]`
 - Stage 3 gate: `bash tools/test-stage3-gate.sh`
 - ISO checks: `bash tools/test-iso.sh`
 - kpkg checks: `bash tools/test-kpkg.sh`
@@ -56,7 +57,7 @@ Instructions for AI coding agents (OpenCode, Claude Code and others) working in 
 - **kpkg:** read the actual files in `kpkg/` before changing internal logic, flags or filesystem paths. It is source-based and does not use Portage, ebuilds or global `USE` flags
 - **Kernel:** `kryonk` is a fork of the Linux 6.18 LTS series. Sources come from kernel.org and must be verified with the kernel.org PGP signature. The fork is the patch series in `tools/kernel/patches/` (listed in `series`) plus the scripted edits in `tools/kernel/kryonk-source.sh`. Do not add third-party kernel patch sets
 - **Stage 3:** keep it minimal: toolchain, core utilities, networking basics and `kpkg`. Add a package to `tools/stage3/kryonux-packages.list` only when the system cannot work without it
-- **Recipes:** the recipe tree is the separate repository `wh1laye/kpkg-recipes`, reset to a clean layout with two reference recipes. `.kpkg` format is documented in `kpkg/RECIPES.md`; every recipe needs a `SHA256`; `kpkg` is independent of Gentoo and other package managers
+- **Recipes:** the recipe tree is the separate repository `wh1laye/kpkg-recipes`, reset to a clean layout with two reference recipes. `.kpkg` format is documented in `kpkg/RECIPES.md`; every recipe needs a `SHA256` and verification can never be disabled; user settings live in `/etc/kpkg/config.kpkg` (empty by default); `kpkg` is independent of Gentoo and other package managers
 - **Git:** commit and push only when asked, using the style described in "Finishing a task"
 
 ## Release artifacts

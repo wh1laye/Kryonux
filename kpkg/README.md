@@ -8,7 +8,8 @@ The standalone package manager of Kryonux. Written in C, it builds packages from
 - 🔐 Sources are checked against the `SHA256` field of the recipe
 - 📥 Install from the recipe tree or straight from a local `.kpkg` file
 - 🧩 Dependency resolution with per-recipe build options
-- ✍️ `minisign` signature verification for self-updates
+- ✍️ `minisign` is mandatory for the recipe tree and for self-updates; SHA256 is mandatory for every source and neither can be disabled
+- ⚙️ Optional settings in `/etc/kpkg/config.kpkg`, empty by default, see [CONFIG.md](CONFIG.md)
 - ✋ Asks for confirmation before changing the system (`-y` skips it), keeps your edited `/etc` files and can hold packages
 - 📸 Automatic `btrfs` snapshots before upgrades, with `kpkg rollback`
 - 🩺 Environment diagnostics with `kpkg doctor` and `kpkg fix`
@@ -23,7 +24,8 @@ make
 
 | Command | Purpose |
 | :--- | :--- |
-| `sync` | Download the recipe tree (kpkg-recipes) |
+| `sync` | Download and verify the recipe tree (kpkg-recipes) |
+| `check` | Lint a whole recipe tree |
 | `update` | Update kpkg itself from GitHub releases |
 | `install` | Install packages by name or from a `.kpkg` file |
 | `remove` | Remove packages |
