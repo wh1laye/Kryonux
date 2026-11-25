@@ -10,6 +10,7 @@ SEED_SUITE=${SEED_SUITE:-noble}
 SEED_MIRROR=${SEED_MIRROR:-http://archive.ubuntu.com/ubuntu}
 BASE_VERIFY=${BASE_VERIFY:-1}
 PUB=${PUB:-$REPO/docs/kryonux.pub}
+RECIPES_PUB=${RECIPES_PUB:-$REPO/kpkg/etc/kpkg/recipes.pub}
 MINISIGN_KEY=${MINISIGN_KEY:-}
 BASE=${BASE:-}
 if [ -z "$BASE" ] && [ -n "$BASE_TAG" ] && [ -n "$BASE_VERSION" ]; then
@@ -104,7 +105,8 @@ cp -R "$REPO"/kpkg/. "$ROOT/var/tmp/kpkg-src/"
 if [ -n "$RECIPES_TARBALL" ]; then
   [ -s "$RECIPES_TARBALL" ] && [ -s "$RECIPES_TARBALL.minisig" ] || die "RECIPES_TARBALL needs the file and its .minisig"
   command -v minisign >/dev/null || die "minisign is missing"
-  minisign -V -p "$PUB" -m "$RECIPES_TARBALL" -x "$RECIPES_TARBALL.minisig" >/dev/null || die "recipe tree signature does not match $PUB"
+  [ -f "$RECIPES_PUB" ] || die "recipe tree public key not found: $RECIPES_PUB"
+  minisign -V -p "$RECIPES_PUB" -m "$RECIPES_TARBALL" -x "$RECIPES_TARBALL.minisig" >/dev/null || die "recipe tree signature does not match $RECIPES_PUB"
   cp "$RECIPES_TARBALL" "$ROOT/var/tmp/recipes.tar.gz"
   cp "$RECIPES_TARBALL.minisig" "$ROOT/var/tmp/recipes.tar.gz.minisig"
 fi
@@ -158,7 +160,7 @@ LIST=$(mktemp); trap 'rm -f "$LIST"' EXIT
 tar -tf "$OUT/$NAME" > "$LIST"
 miss=0
 for f in sbin/init sbin/openrc-init etc/os-release etc/init.d/syslog-ng etc/runlevels/default/syslog-ng \
-         etc/syslog-ng/syslog-ng.conf usr/bin/kpkg usr/bin/fastfetch etc/xdg/fastfetch/config.jsonc etc/kpkg/kpkg.conf etc/kpkg/config.kpkg etc/kpkg/kryonux.pub \
+         etc/syslog-ng/syslog-ng.conf usr/bin/kpkg usr/bin/fastfetch etc/xdg/fastfetch/config.jsonc etc/kpkg/kpkg.conf etc/kpkg/config.kpkg etc/kpkg/kryonux.pub etc/kpkg/recipes.pub \
          usr/sbin/kryonux-users usr/sbin/kryonux-adduser usr/sbin/kryonux-fix \
          etc/login.defs etc/doas.conf; do
   grep -qxE "(\./)?(usr/)?$f" "$LIST" || { printf 'the archive has no %s\n' "$f" >&2; miss=1; }

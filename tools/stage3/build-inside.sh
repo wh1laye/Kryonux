@@ -45,6 +45,7 @@ keep_workdir=no
 allow_host=yes
 CONF
   install -m644 "$PKG/etc/kpkg/kryonux.pub" /etc/kpkg/kryonux.pub
+  install -m644 "$PKG/etc/kpkg/recipes.pub" /etc/kpkg/recipes.pub
   [ -e /etc/kpkg/config.kpkg ] || install -m644 "$PKG/etc/kpkg/config.kpkg" /etc/kpkg/config.kpkg
   make -C "$PKG" clean >/dev/null
   make -C "$PKG" -j"$(nproc)"
@@ -100,6 +101,7 @@ install_extra() {
 }
 
 layout() {
+  install -d /usr/share/kryonux
   [ -f "$F/logo.txt" ] && install -m644 "$F/logo.txt" /usr/share/kryonux/logo.txt
   [ -f "$F/logo.ansi" ] && install -m644 "$F/logo.ansi" /usr/share/kryonux/logo.ansi
   [ -f "$F/logo.png" ] && install -m644 "$F/logo.png" /usr/share/kryonux/logo.png

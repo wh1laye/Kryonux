@@ -221,7 +221,7 @@ static int extract_sources(struct build_ctx *c)
 	}
 	if (real == 1 && snprintf(probe, sizeof probe, "%s/%s", srcbase, nl[last]->d_name) < (int)sizeof probe && is_dir(probe)
 	    && strlen(probe) < sizeof c->srcdir)
-		snprintf(c->srcdir, sizeof c->srcdir, "%s", probe);
+		memcpy(c->srcdir, probe, strlen(probe) + 1);
 	for (i = 0; i < n; i++) free(nl[i]);
 	free(nl);
 	return 1;

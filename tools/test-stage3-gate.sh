@@ -28,6 +28,7 @@ if [ -n "$ARCHIVE" ]; then
   need_entry usr/bin/kpkg
   need_entry etc/kpkg/config.kpkg
   need_entry etc/kpkg/kryonux.pub
+  need_entry etc/kpkg/recipes.pub
   need_entry etc/os-release
   need_entry sbin/openrc-init
   need_entry etc/doas.conf

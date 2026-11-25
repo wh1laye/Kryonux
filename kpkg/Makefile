@@ -25,6 +25,7 @@ install-box:
 conf:
 	install -d $(DESTDIR)/etc/kpkg
 	@if [ -f etc/kpkg/kryonux.pub ]; then install -m644 etc/kpkg/kryonux.pub $(DESTDIR)/etc/kpkg/kryonux.pub; fi
+	@if [ -f etc/kpkg/recipes.pub ]; then install -m644 etc/kpkg/recipes.pub $(DESTDIR)/etc/kpkg/recipes.pub; fi
 	@if [ ! -e $(DESTDIR)/etc/kpkg/config.kpkg ]; then install -m644 etc/kpkg/config.kpkg $(DESTDIR)/etc/kpkg/config.kpkg; fi
 	@if [ ! -e $(DESTDIR)/etc/kpkg/kpkg.conf ]; then \
 	  install -m644 etc/kpkg/kpkg.conf $(DESTDIR)/etc/kpkg/kpkg.conf; \

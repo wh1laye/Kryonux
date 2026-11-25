@@ -36,16 +36,20 @@ int remote_ver(const char *dir, char *out, size_t n)
 }
 int verify_sig(const char *file, const char *sig)
 {
+	return verify_sig_with(PUBKEY, file, sig);
+}
+int verify_sig_with(const char *key, const char *file, const char *sig)
+{
 	char *a[10];
 	if (!have("minisign")) {
 		fputs("kpkg: minisign is required for signature verification\n", stderr);
 		return 0;
 	}
-	if (access(PUBKEY, R_OK) != 0) {
-		fprintf(stderr, "kpkg: public key not found: %s\n", PUBKEY);
+	if (access(key, R_OK) != 0) {
+		fprintf(stderr, "kpkg: public key not found: %s\n", key);
 		return 0;
 	}
-	a[0] = "minisign"; a[1] = "-V"; a[2] = "-q"; a[3] = "-p"; a[4] = PUBKEY;
+	a[0] = "minisign"; a[1] = "-V"; a[2] = "-q"; a[3] = "-p"; a[4] = (char *)key;
 	a[5] = "-x"; a[6] = (char *)sig; a[7] = "-m"; a[8] = (char *)file; a[9] = NULL;
 	return run(a) == 0;
 }

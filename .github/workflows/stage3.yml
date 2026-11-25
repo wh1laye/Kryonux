@@ -74,14 +74,12 @@ jobs:
           sudo apt-get install -y -qq minisign gnupg debootstrap ubuntu-keyring
 
       - name: подписанное дерево рецептов
-        env:
-          MINISIGN_KEY: ${{ secrets.MINISIGN_KEY }}
-          MINISIGN_PASSWORD: ${{ secrets.MINISIGN_PASSWORD }}
         run: |
           mkdir -p "$RUNNER_TEMP/rt"
-          tar --exclude=.git -czf "$RUNNER_TEMP/rt/kpkg-recipes.tar.gz" --transform 's,^recipes,kpkg-recipes,' recipes
-          bash tools/sign.sh "$RUNNER_TEMP/rt/kpkg-recipes.tar.gz"
-          [ -s "$RUNNER_TEMP/rt/kpkg-recipes.tar.gz.minisig" ] || { echo "::error::нет подписи дерева рецептов"; exit 1; }
+          u=https://github.com/wh1laye/kpkg-recipes/releases/download/recipes-latest
+          curl -fsSL --proto =https -o "$RUNNER_TEMP/rt/kpkg-recipes.tar.gz" "$u/kpkg-recipes.tar.gz"
+          curl -fsSL --proto =https -o "$RUNNER_TEMP/rt/kpkg-recipes.tar.gz.minisig" "$u/kpkg-recipes.tar.gz.minisig"
+          minisign -V -p kpkg/etc/kpkg/recipes.pub -m "$RUNNER_TEMP/rt/kpkg-recipes.tar.gz" -x "$RUNNER_TEMP/rt/kpkg-recipes.tar.gz.minisig" || { echo "::error::подпись дерева рецептов не подошла к kpkg/etc/kpkg/recipes.pub"; exit 1; }
 
       - name: проверка скриптов и kpkg
         run: |

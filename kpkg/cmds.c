@@ -784,6 +784,7 @@ int cmd_doctor(void)
 	bad += !check("build directory", exists(workdir));
 	bad += !check("installed database", exists(INSTALLED));
 	bad += !check("signature public key", exists(PUBKEY));
+	bad += !check("recipe tree public key", exists(RECIPES_PUBKEY));
 	row("config.kpkg", cfg_config_loaded ? "loaded" : "not present, defaults are used");
 	if (txn_interrupted(pending, sizeof pending)) {
 		row("last transaction", "INTERRUPTED");
@@ -885,11 +886,11 @@ static int sync_verify(const char *tarball, const char *sig)
 		fputs("kpkg: minisign is required, the recipe tree is never installed unverified\n", stderr);
 		return 0;
 	}
-	if (!exists(PUBKEY)) {
-		fprintf(stderr, "kpkg: public key not found: %s\n", PUBKEY);
+	if (!exists(RECIPES_PUBKEY)) {
+		fprintf(stderr, "kpkg: recipe tree public key not found: %s\n", RECIPES_PUBKEY);
 		return 0;
 	}
-	if (!verify_sig(tarball, sig)) {
+	if (!verify_sig_with(RECIPES_PUBKEY, tarball, sig)) {
 		fputs("kpkg: recipe tree signature mismatch, sync aborted\n", stderr);
 		return 0;
 	}

@@ -8,6 +8,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 
 ### 📦 kpkg
 #### Added
+- The recipe tree has its own public key, `/etc/kpkg/recipes.pub` (shipped as `kpkg/etc/kpkg/recipes.pub`); `kpkg sync` verifies the tree with it and `kpkg doctor` checks it. `kryonux.pub` stays the key of kpkg, stage 3, ISO and kernel releases
 - `/etc/kpkg/config.kpkg`: optional settings (`JOBS`, `CFLAGS`, `CXXFLAGS`, `LDFLAGS`, `NICE`, `ASK`, `SNAPSHOTS`, `MIN_BATTERY`, `KEEP_WORKDIR`); it ships empty and an empty file changes nothing, see `kpkg/CONFIG.md`
 - The install plan shows the package name, version, description, source URL and SHA256 prefix and asks `Download, verify and build these packages? [Y/n]` before anything is downloaded
 - `kpkg check [tree]` lints every recipe in a tree and checks the layout, category and dependencies
@@ -16,6 +17,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - The lock file records the holder pid, an interrupted install (power loss, crash) is detected and reported on the next run and in `kpkg doctor`, signals are blocked while files are copied and the database is written, and changes are refused on a battery below `MIN_BATTERY`
 
 #### Fixed
+- Build failure in CI: `-Werror=format-truncation` in `extract_sources` (`build.c`) when the probed source directory path was copied into `srcdir`; the length is now checked and the path is copied with `memcpy`
 - Stage 3 build: every package failed because the unpacked source directory was never entered (`scandir` counted `.` and `..`), so `make mrproper` ran without a Makefile in `linux-headers`
 - `bsearch` was called with a null pointer when no package was installed (found by UBSan)
 - `--force` overwrote edited `/etc` files; they are now always kept as `.kpkg-new`
@@ -28,9 +30,12 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 - Build phases run with a clean environment and a fixed `PATH`; downloads allow https only
 
 ### 🧱 Stage 3
+#### Fixed
+- The layout step creates `/usr/share/kryonux` before installing the logo files
+
 #### Added
 - `tools/stage3/kryonux-extra.list`: optional packages installed when their recipe has a checksum
-- The build is fed a signed recipe tree (`RECIPES_TARBALL`), so it does not depend on a published release
+- The build is fed the signed recipe tree (`RECIPES_TARBALL`), downloaded from the `recipes-latest` release and verified with `recipes.pub`; stage 3 ships `recipes.pub`
 
 #### Fixed
 - The build stops after the same dependency fails twice instead of repeating a 20 minute failure for every package
@@ -41,10 +46,12 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 
 ### 🌐 Website
 #### Fixed
+- The 404 page and the entry check (`gate.js`) use the site's default blue crystal theme in a simpler layout, are always in English regardless of the saved language, and the Turnstile widget is rendered with `language: en`
 - The 404 page is always English: no language switch, no translation scripts, `translate="no"`
 
 ### 🗂️ Repository
 #### Added
+- `kpkg-recipes`: the release workflow uses a pinned `actions/checkout`, and the README shows only the number of recipes instead of the full list
 - `tools/test-all.sh` runs the scripts, C code (including UBSan and ASan), kpkg, security, fastfetch, website, stage 3, ISO and kernel checks in one go
 
 ### 📦 kpkg (earlier in this release)

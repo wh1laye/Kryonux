@@ -27,6 +27,9 @@
 #ifndef DBDIR
 #define DBDIR "/var/db/kpkg"
 #endif
+#ifndef RECIPES_PUBKEY
+#define RECIPES_PUBKEY "/etc/kpkg/recipes.pub"
+#endif
 #ifndef PUBKEY
 #define PUBKEY "/etc/kpkg/kryonux.pub"
 #endif
@@ -99,5 +102,5 @@ int sn_create(const char *label); int sn_auto(void); int sn_list(void);
 int sn_remove(const char *name); int sn_rollback(const char *name);
 int cmd_snapshot(int argc, char **argv); int cmd_snapshots(void); int cmd_snapshot_rm(int argc, char **argv); int cmd_rollback(int argc, char **argv);
 int safe_id(const char *s); int ver_ok(const char *s); int remote_ver(const char *dir, char *out, size_t n);
-int verify_sig(const char *file, const char *sig); int cmd_update(int argc, char **argv); void usage(void);
+int verify_sig(const char *file, const char *sig); int verify_sig_with(const char *key, const char *file, const char *sig); int cmd_update(int argc, char **argv); void usage(void);
 #endif
