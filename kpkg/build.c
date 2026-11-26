@@ -295,6 +295,27 @@ static int run_phase(struct build_ctx *c, const char *name, const char *body, co
 	if (code != 0) fprintf(stderr, "kpkg: phase %s failed (exit %d), full log: %s\n", name, code, c->log);
 	return code;
 }
+static void show_config_errors(const struct build_ctx *c)
+{
+	char path[BUF + 32], line[1024], *keep[24];
+	FILE *f;
+	int n = 0, i, k;
+	static char store[24][1024];
+	snprintf(path, sizeof path, "%s/config.log", c->srcdir);
+	f = fopen(path, "r");
+	if (!f) return;
+	while (fgets(line, sizeof line, f)) {
+		if (!strstr(line, "error:") && !strstr(line, "fatal error") && !strstr(line, "undeclared")) continue;
+		k = n % 24;
+		snprintf(store[k], sizeof store[k], "%s", line);
+		keep[k] = store[k];
+		n++;
+	}
+	fclose(f);
+	if (!n) return;
+	fprintf(stderr, "kpkg: last errors from %s:\n", path);
+	for (i = n > 24 ? n - 24 : 0; i < n; i++) fputs(keep[i % 24], stderr);
+}
 static int run_named_phase(struct build_ctx *c, const char *name)
 {
 	const char *body = recipe_phase(&c->r, name);
@@ -445,7 +466,10 @@ int pkg_build_install(const char *cat, const char *name, const char *ver, int ex
 	if (!fetch_distfiles(&c)) goto fail;
 	if (!extract_sources(&c)) goto fail;
 	if (run_named_phase(&c, "src_prepare") != 0) goto fail;
-	if (run_named_phase(&c, "src_configure") != 0) goto fail;
+	if (run_named_phase(&c, "src_configure") != 0) {
+		show_config_errors(&c);
+		goto fail;
+	}
 	if (run_named_phase(&c, "src_compile") != 0) goto fail;
 	if (run_named_phase(&c, "pkg_preinst") != 0) goto fail;
 	if (run_named_phase(&c, "src_install") != 0) goto fail;

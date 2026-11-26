@@ -177,6 +177,7 @@ jobs:
         run: |
           cp "$RUNNER_TEMP/build.log" "$PWD/build.log" 2>/dev/null || true
           sudo tar -C /mnt/stage3/root/var/tmp -czf "$PWD/s3log.tgz" s3log || true
+          sudo find /mnt/stage3/root/var/tmp/kpkg-build -maxdepth 3 \( -name config.log -o -name build.log \) -printf '%P\n' 2>/dev/null | sudo tar -C /mnt/stage3/root/var/tmp/kpkg-build -czf "$PWD/kpkg-build-logs.tgz" -T - || true
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
@@ -184,6 +185,7 @@ jobs:
           name: s3log-${{ inputs.version }}
           path: |
             s3log.tgz
+            kpkg-build-logs.tgz
             build.log
           if-no-files-found: ignore
 

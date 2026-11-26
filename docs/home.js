@@ -96,14 +96,6 @@ if(tb){
   });
 });
 
-[].forEach.call(d.querySelectorAll('.hm .card'),function(c){
-  c.addEventListener('pointermove',function(e){
-    var r=c.getBoundingClientRect();
-    c.style.setProperty('--sx',(e.clientX-r.left)+'px');
-    c.style.setProperty('--sy',(e.clientY-r.top)+'px');
-  });
-});
-
 var rv=d.querySelectorAll('.rv');
 if('IntersectionObserver' in W){
   var io=new IntersectionObserver(function(es){

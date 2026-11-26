@@ -6,6 +6,20 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 
 ## [v0.0.1] - 2026-11-25
 
+### 🌐 Website
+#### Changed
+- The interface was rebuilt on a flat, calm layer: `home.css` and `ui.css` were rewritten, and the stacked gradients, diagonal grid background, shine sweeps, diamond decorations, gradient headings and hard-coded light chips were removed from `style.css` and `theme.css`
+- The home page lost the chips row, the duplicated "Проверка защиты" card and the "Дальше" link grid; the stats are one strip and the feature grid is three columns
+- `sw.js` cache version bumped to 47
+
+### 📦 kpkg
+#### Added
+- When `src_configure` fails, `kpkg` prints the last error lines of `config.log` so the real cause shows in the CI log
+
+### 🧱 Stage 3
+#### Added
+- The CI keeps `config.log` and `build.log` of failed package builds in the `s3log` artifact (`kpkg-build-logs.tgz`)
+
 ### 📦 kpkg
 #### Added
 - The recipe tree has its own public key, `/etc/kpkg/recipes.pub` (shipped as `kpkg/etc/kpkg/recipes.pub`); `kpkg sync` verifies the tree with it and `kpkg doctor` checks it. `kryonux.pub` stays the key of kpkg, stage 3, ISO and kernel releases

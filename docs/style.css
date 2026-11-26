@@ -103,26 +103,3 @@ footer p{margin:0 0 6px}
 }
 .sc:has(>table){padding:0;margin:14px 0 20px;border:1px solid var(--line);border-radius:calc(12px*var(--rs,1));background:var(--surf);overflow-x:auto}
 .sc:has(>table)>table,.tw>table{margin:0;border:0;border-radius:0;background:none}
-
-body{background-image:linear-gradient(135deg,transparent 49.6%,color-mix(in srgb,var(--ac) 10%,transparent) 50%,transparent 50.4%),linear-gradient(45deg,transparent 49.6%,color-mix(in srgb,var(--ac) 10%,transparent) 50%,transparent 50.4%);background-size:72px 72px}
-.top{background:color-mix(in srgb,var(--surf) 92%,var(--ac));border-bottom-color:color-mix(in srgb,var(--line) 80%,var(--ac))}
-.btn.p{background:linear-gradient(135deg,color-mix(in srgb,var(--ac) 78%,#fff),var(--ac));color:var(--onac);box-shadow:0 6px 20px color-mix(in srgb,var(--ac) 35%,transparent),inset 0 1px 0 rgba(255,255,255,.3)}
-
-.top{backdrop-filter:blur(10px) saturate(1.3);-webkit-backdrop-filter:blur(10px) saturate(1.3)}
-h2,.hm h2{position:relative}
-.hm h2::after{content:"";display:block;width:56px;height:3px;margin-top:10px;border-radius:2px;background:linear-gradient(90deg,#8ee9ff,#2b6fe0 60%,transparent)}
-.gh.on{background:linear-gradient(135deg,color-mix(in srgb,var(--soft) 80%,#fff),var(--soft));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ac) 25%,transparent)}
-pre,.code{border:1px solid color-mix(in srgb,var(--ac) 18%,var(--line));box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
-a.card,.card{transition:transform .18s,box-shadow .18s,border-color .18s}
-a.card:hover,.card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--ac) 45%,var(--line));box-shadow:0 10px 28px color-mix(in srgb,var(--ac) 16%,transparent)}
-::selection{background:color-mix(in srgb,var(--ac) 28%,transparent)}
-
-.bento>*,.card,.stat{background:linear-gradient(145deg,color-mix(in srgb,var(--surf) 90%,#d4eeff),color-mix(in srgb,var(--surf) 95%,#b9defa));border:1px solid color-mix(in srgb,var(--ac) 24%,var(--line));box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 8px 24px color-mix(in srgb,var(--ac) 9%,transparent);position:relative;overflow:hidden}
-.bento>*::after,.card::after,.stat::after{content:"";position:absolute;top:-60%;left:-30%;width:55%;height:220%;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:rotate(18deg) translateX(-180%);transition:transform .9s ease}
-.bento>*:hover::after,.card:hover::after,.stat:hover::after{transform:rotate(18deg) translateX(460%)}
-.chip,.kick{background:linear-gradient(135deg,#e2f5ff,#bfe1ff);color:#0a3a78;border:1px solid #9ed0ff}
-.hero-w::after{content:"";position:absolute;left:-40px;bottom:-30px;width:220px;height:220px;z-index:-1;pointer-events:none;background:linear-gradient(135deg,rgba(150,215,255,.7),rgba(255,255,255,0));clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);opacity:.55}
-html[data-theme=gray] .bento>*,html[data-theme=gray] .card,html[data-theme=gray] .stat{background:linear-gradient(145deg,color-mix(in srgb,var(--surf) 90%,var(--ac)),var(--surf));border-color:var(--line);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--ink) 8%,transparent),0 8px 28px color-mix(in srgb,var(--ac) 8%,transparent)}
-html[data-theme=gray] .chip,html[data-theme=gray] .kick{background:color-mix(in srgb,var(--soft) 80%,var(--ac) 20%);color:var(--ac);border-color:color-mix(in srgb,var(--ac) 35%,var(--line))}
-html[data-theme=gray] .hero-w::before,html[data-theme=gray] .hero-w::after{opacity:.28}
-@media(prefers-reduced-motion:reduce){.bento>*::after,.card::after,.stat::after{transition:none}}

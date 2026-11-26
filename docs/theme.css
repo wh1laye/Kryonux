@@ -52,7 +52,6 @@ html[data-glass] .top{--gl:blur(calc(var(--gb) + 6px)) saturate(calc(var(--gs) +
 :where(html:not([data-glass])) .btn.p{background:var(--abg,var(--ac));box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 8px 20px -8px var(--ac)}
 :where(html:not([data-glass])) .toc li a.on{box-shadow:inset 3px 0 0 var(--ac)}
 :where(html:not([data-glass])) pre{box-shadow:inset 0 1px 0 color-mix(in srgb,var(--ink) 6%,transparent),0 10px 26px -18px rgba(0,0,0,.5)}
-:where(html:not([data-glass])) h1{background:linear-gradient(100deg,var(--ink) 30%,var(--ac));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 :where(html:not([data-glass])) table tbody tr{transition:background .15s}
 :where(html:not([data-glass])) table tbody tr:hover{background:color-mix(in srgb,var(--soft) 60%,transparent)}
 body{background-color:transparent}
