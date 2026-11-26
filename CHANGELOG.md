@@ -31,6 +31,7 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 
 ### 🧱 Stage 3
 #### Fixed
+- The seed `gcc` forced `_FORTIFY_SOURCE` and broke the `glibc` build in `syslog.c`; while the first stage 3 is seeded, `/etc/kpkg/config.kpkg` sets `-U_FORTIFY_SOURCE` and the layout step restores the empty file
 - The layout step creates `/usr/share/kryonux` before installing the logo files
 
 #### Added
@@ -46,6 +47,13 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 
 ### 🌐 Website
 #### Fixed
+- The 404 page has no logo, only the code and text, and uses a new icy cryo look; the entry check (`gate.js`) uses the same look and no logo
+- The `Другие` menu opens directly under its button instead of the screen corner
+- The `Мои значения` feature and its button were removed from the handbook
+- Settings are regrouped: seasonal themes, animations, smooth transitions and extras moved to the new `эффекты` tab, rounding and density moved to `ещё`
+- Cards, chips, the header and primary buttons follow the active theme and accent instead of fixed blue colours
+- The scroll progress line follows the rounded corners of the floating header
+- Handbook and header buttons are flat, without glow or white gradients; the divider next to the brand text was removed
 - The 404 page logo did not load on `github.io` because the `base` host check compared ten characters against `github.io`; it now uses the right length
 - The home terminal shared `id="tb"` with the theme toggle, so changing the colour theme painted the moon icon (a black circle) over the terminal; the terminal id is now `tmb`
 - The scroll progress and rainbow line no longer stick out of the rounded corners of the floating header

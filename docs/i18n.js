@@ -43,7 +43,7 @@ var D={
 "страница не найдена: Kryonux":"page not found: Kryonux",
 "страница не найдена":"page not found",
 "такой страницы нет или она переехала. вернись на главную или открой нужный раздел.":"this page does not exist or has moved. return to the home page or open the section you need.",
-"пройден":"done","убрать пройден":"unmark done","стекло":"glass","главная":"home","справочник":"handbook","новое":"news","форум":"forum","релизы":"releases","пакеты":"packages","железо":"hardware","поиск":"search","сообщения":"messages","уведомления":"notifications","поиск по справочнику":"search the handbook","мои значения":"my values","настройки":"settings",
+"пройден":"done","убрать пройден":"unmark done","стекло":"glass","главная":"home","справочник":"handbook","новое":"news","форум":"forum","релизы":"releases","пакеты":"packages","железо":"hardware","поиск":"search","сообщения":"messages","уведомления":"notifications","поиск по справочнику":"search the handbook","настройки":"settings","эффекты":"effects",
 "рецепты пакетов написаны для Kryonux и распространяются под лицензией проекта.":"package recipes are written for Kryonux and distributed under the project license.","и":"and","форум работает только при подключении к интернету. справочник и уже открытые страницы доступны без сети.":"the forum works only with an internet connection. the handbook and pages you already opened are available offline.","повторить":"try again",
 "что уже готово, что в работе и что планируется. сроков нет, проект делается по мере готовности.":"what is done, what is in progress and what is planned. there are no deadlines, the project is made as it gets ready.",
 "готово":"done","в работе":"in progress","в планах":"planned","возможно":"maybe",

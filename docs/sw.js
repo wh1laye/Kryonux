@@ -1,4 +1,4 @@
-const V = '45'
+const V = '46'
 const CACHE = 'kryonux-' + V
 const SCOPE = self.registration.scope
 const CORE_FILES = ['offline.html', 'typo.js', 'manifest.webmanifest', 'icon.svg', 'apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png']

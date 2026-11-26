@@ -83,7 +83,7 @@ footer a:hover{text-decoration:underline}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
 
-:root[data-mfs="1"] .top::after{left:16px;right:16px;border-radius:2px}
+:root[data-mfs="1"] .top::after{inset:-1px;height:auto;border-radius:inherit;-webkit-mask:linear-gradient(#000,#000) bottom/100% 2px no-repeat;mask:linear-gradient(#000,#000) bottom/100% 2px no-repeat}
 .seg2{gap:4px;padding:4px;background:var(--surf);border:1px solid var(--line)}
 .seg2 button{background:transparent;color:var(--mute);border:1px solid transparent;box-shadow:none}
 .seg2 button:hover{background:var(--soft);color:var(--ink)}
@@ -95,3 +95,10 @@ footer a:hover{text-decoration:underline}
 .hbd:hover{background:var(--soft);color:var(--ac);border-color:color-mix(in srgb,var(--ac) 55%,var(--line))}
 .hbq1{background:var(--surf);border:1px solid var(--line)}
 .hbq1:hover{background:var(--soft)}
+
+.gh,.btn,.seg2,.tsr,.cpb,.hbd,.hbq1,.ddm{background-image:none!important;box-shadow:none!important;text-shadow:none}
+.btn.p{background:var(--abg,var(--ac))!important;border-color:transparent;color:var(--onac)}
+.btn:hover,.btn.p:hover,.gh:hover{box-shadow:none!important;filter:none}
+.gh{border:1px solid transparent}
+.gh.on{background:var(--soft);color:var(--ac);border-color:color-mix(in srgb,var(--ac) 40%,transparent)}
+.brand span{border-left:0;padding-left:10px}

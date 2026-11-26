@@ -239,8 +239,8 @@
   });
   function dot(t){return '<i class="dt" style="background:'+(t==='auto'?'linear-gradient(90deg,#f6f8fc 50%,#1a1c20 50%)':BG[t])+'"></i>'}
   function extra(){var o='',k,L=['night','nord','dracula','sepia'];if(secOn())L=L.concat(['matrix','amber']);for(k=0;k<L.length;k++)o+='<button type="button" data-th="'+L[k]+'">'+dot(L[k])+T(NM[L[k]])+'</button>';return o}
-  var TABS=[['look','тема'],['color','цвета'],['glass','стекло'],['text','чтение'],['more','ещё']];
-  function tabGet(){try{var v=localStorage.getItem('sptab');if(/^(look|color|glass|text|more)$/.test(v))return v}catch(e){}return 'look'}
+  var TABS=[['look','тема'],['color','цвета'],['glass','стекло'],['text','чтение'],['fx','эффекты'],['more','ещё']];
+  function tabGet(){try{var v=localStorage.getItem('sptab');if(/^(look|color|glass|text|fx|more)$/.test(v))return v}catch(e){}return 'look'}
   function setTab(v){
     if(!sp)return;
     var b=sp.querySelector('.spb');
@@ -256,7 +256,7 @@
     if(!b)return;
     [].forEach.call(b.children,function(n){
       if(!n.classList||!n.classList.contains('sps')||n.hasAttribute('data-t'))return;
-      n.setAttribute('data-t',n.classList.contains('zss')?'look':'more');
+      n.setAttribute('data-t',n.classList.contains('zss')||n.classList.contains('fns')?'fx':'more');
     });
   }
   function fill(){
@@ -535,7 +535,16 @@ function sh(open){
   if(!b||!m)return;
   m.hidden=!open;
   b.setAttribute('aria-expanded',open?'true':'false');
+  if(open)place(b,m);
 }
+function place(b,m){
+  var r=b.getBoundingClientRect(),w=m.offsetWidth,vw=document.documentElement.clientWidth,x=r.left+r.width/2-w/2;
+  x=Math.max(12,Math.min(x,vw-w-12));
+  m.style.right='auto';
+  m.style.left=Math.round(x)+'px';
+  m.style.top=Math.round(r.bottom+8)+'px';
+}
+window.addEventListener('resize',function(){var b=d.getElementById('ob'),m=d.getElementById('om');if(b&&m&&!m.hidden)place(b,m)});
 d.addEventListener('click',function(e){
   var b=e.target.closest?e.target.closest('#ob'):null,m=d.getElementById('om');
   if(b){sh(m&&m.hidden);return}
@@ -548,6 +557,6 @@ d.addEventListener('keydown',function(e){if(e.key==='Escape')sh(false)});
 var s=document.currentScript;
 if(!s||!s.src)return;
 var e=document.createElement('script');
-e.src=s.src.replace(/theme\.js.*$/,'')+'themes/themes.js?v=11';
+e.src=s.src.replace(/theme\.js.*$/,'')+'themes/themes.js?v=12';
 document.head.appendChild(e);
 })();

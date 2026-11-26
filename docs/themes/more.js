@@ -117,7 +117,7 @@ function ui(){
   if(!spb||spb.querySelector('.mos'))return;
   s=d.createElement('div');
   s.className='sps mos';
-  s.setAttribute('data-t','look');
+  s.setAttribute('data-t','more');
   x='<h4>'+t('вид и удобство')+'</h4><p class="spm">'+t('скругление углов')+'</p><div class="mrg">'+RAD.map(function(o){
     return '<button type="button" class="mrb" data-mk="rs" data-mv="'+o[0]+'" aria-label="'+t(o[1])+'"><i style="--q:'+o[2]+'"></i><span>'+t(o[1])+'</span></button>';
   }).join('')+'</div><div class="mrv"><span class="b1">'+t('кнопка')+'</span><span class="b2">'+t('кнопка')+'</span><span class="b3">'+t('метка')+'</span></div>';

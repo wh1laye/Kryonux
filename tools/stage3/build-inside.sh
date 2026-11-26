@@ -47,6 +47,10 @@ CONF
   install -m644 "$PKG/etc/kpkg/kryonux.pub" /etc/kpkg/kryonux.pub
   install -m644 "$PKG/etc/kpkg/recipes.pub" /etc/kpkg/recipes.pub
   [ -e /etc/kpkg/config.kpkg ] || install -m644 "$PKG/etc/kpkg/config.kpkg" /etc/kpkg/config.kpkg
+  if [ -d /var/lib/dpkg ]; then
+    printf 'CFLAGS="-O2 -U_FORTIFY_SOURCE"\nCXXFLAGS="-O2 -U_FORTIFY_SOURCE"\n' > /etc/kpkg/config.kpkg
+    chmod 644 /etc/kpkg/config.kpkg
+  fi
   make -C "$PKG" clean >/dev/null
   make -C "$PKG" -j"$(nproc)"
   install -m755 "$PKG/kpkg" /usr/bin/kpkg
@@ -109,6 +113,7 @@ layout() {
   install -d /etc/xdg/fastfetch
   [ -f /etc/xdg/fastfetch/config.jsonc ] || install -m644 "$F/fastfetch.jsonc" /etc/xdg/fastfetch/config.jsonc
   install -d /etc/kpkg
+  install -m644 "$PKG/etc/kpkg/config.kpkg" /etc/kpkg/config.kpkg
   grep -qx fastfetch /etc/kpkg/hold 2>/dev/null || printf 'fastfetch\n' >> /etc/kpkg/hold
   for f in kryonux-users kryonux-adduser kryonux-fix kryonux-firewall kryonux-audit; do
     src=$F/$f
