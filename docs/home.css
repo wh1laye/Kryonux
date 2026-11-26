@@ -79,7 +79,7 @@
 .hm .two .n li::before,.hm .two .n li::after{content:"";position:absolute;left:4px;top:10px;width:2px;height:14px;background:var(--mute);transform:rotate(45deg)}
 .hm .two .n li::after{transform:rotate(-45deg)}
 .hm .pk{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:14px}
-.hm #tb{min-height:236px}
+.hm #tmb{min-height:236px}
 .hm .pk .tm{align-self:start}
 .hm .nl{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
 .hm .nl .card{gap:8px}

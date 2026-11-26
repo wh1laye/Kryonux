@@ -46,6 +46,12 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 
 ### 🌐 Website
 #### Fixed
+- The 404 page logo did not load on `github.io` because the `base` host check compared ten characters against `github.io`; it now uses the right length
+- The home terminal shared `id="tb"` with the theme toggle, so changing the colour theme painted the moon icon (a black circle) over the terminal; the terminal id is now `tmb`
+- The scroll progress and rainbow line no longer stick out of the rounded corners of the floating header
+- The `K` in the header logo sits on the text baseline and reads as the first letter of the name
+- Handbook buttons (`UEFI`/`BIOS`, search, copy, quick cards) use theme colours instead of white glass gradients
+- Bumped the service worker cache to `45` and the `ui.css`, `style.css` and `home.css` asset versions
 - The 404 page and the entry check (`gate.js`) use the site's default blue crystal theme in a simpler layout, are always in English regardless of the saved language, and the Turnstile widget is rendered with `language: en`
 - The 404 page is always English: no language switch, no translation scripts, `translate="no"`
 

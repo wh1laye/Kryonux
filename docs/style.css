@@ -9,8 +9,8 @@ a{color:var(--ac);text-underline-offset:3px}
 .mu{color:var(--mute)}
 
 .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;height:54px;padding:0 20px;background:var(--surf);border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:1px;color:var(--ink);text-decoration:none;font-weight:600;font-size:19px;letter-spacing:-.01em;min-width:0}
-.brand svg{height:22px;width:auto;flex:none;margin-right:1px}
+.brand{display:flex;align-items:baseline;gap:0;color:var(--ink);text-decoration:none;font-weight:600;font-size:19px;letter-spacing:-.01em;min-width:0}
+.brand svg{height:.86em;width:auto;flex:none;margin:0 .03em 0 0;overflow:visible}
 .brand span{color:var(--mute);font-weight:400;font-size:15px;border-left:1px solid var(--line);padding-left:10px;white-space:nowrap}
 .hl{display:flex;align-items:center;gap:2px;min-width:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .hl::-webkit-scrollbar{display:none}
@@ -83,7 +83,7 @@ footer p{margin:0 0 6px}
   .hl .gh{padding:7px}
   .brand span{display:none}
   .brand{font-size:16px;gap:0}
-  .brand svg{height:19px}
+  .brand svg{height:.86em}
 }
 
 .ddw{position:relative;display:inline-flex}

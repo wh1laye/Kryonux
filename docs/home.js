@@ -54,7 +54,7 @@ function tr(s){return W.I18N&&W.I18N.t?W.I18N.t(s):s}
 function $(s,r){return (r||d).querySelector(s)}
 function el(t,c,x){var e=d.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
 
-var tb=$('#tb'),cur='i';
+var tb=$('#tmb'),cur='i';
 function draw(k){
   cur=k;
   tb.className='tb';
