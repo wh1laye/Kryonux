@@ -26,11 +26,6 @@ window.KryonuxSeason.reg('fo',{
     for(j=0;j<4;j++)mi.push({x:k.rnd(-.3,1),y:k.rnd(.55,.85),v:k.rnd(.004,.012),s:k.rnd(.5,1)});
     k.canvas(function(c,dt,t,w,h){
       var n,g,x,y,al,i;
-      c.fillStyle='rgba(210,245,150,.07)';
-      for(i=0;i<3;i++){
-        x=w*(.3+i*.22)+Math.sin(t*.2+i)*w*.03;
-        c.beginPath();c.moveTo(x,0);c.lineTo(x+w*.07,0);c.lineTo(x+w*.07+w*.2,h);c.lineTo(x-w*.1,h);c.closePath();c.fill();
-      }
       for(j=0;j<mi.length;j++){
         o=mi[j];o.x+=o.v*dt;if(o.x>1.3)o.x=-.4;
         g=c.createLinearGradient(0,(o.y-.08)*h,0,(o.y+.08)*h);

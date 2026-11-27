@@ -21,3 +21,11 @@ function upd(){
 W.addEventListener('scroll',function(){if(!t)t=W.requestAnimationFrame(upd)},{passive:true});
 upd();
 })();
+
+(function(){
+  var W=window,d=document,r=d.documentElement,t=0;
+  if(W.CSS&&CSS.supports&&CSS.supports('animation-timeline','scroll()'))return;
+  function u(){t=0;var m=r.scrollHeight-W.innerHeight;r.style.setProperty('--pw',(m>0?Math.min(100,Math.max(0,(W.scrollY||r.scrollTop)/m*100)):0)+'%')}
+  W.addEventListener('scroll',function(){if(!t)t=W.requestAnimationFrame(u)},{passive:true});
+  W.addEventListener('resize',u);u();
+})();

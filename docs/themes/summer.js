@@ -31,7 +31,6 @@ window.KryonuxSeason.reg('su',{
     k.el('zs-bob',k.svg('0 0 72 58',DUCK),'left:'+(wd?'58%':'30%')+';bottom:'+Math.round(gh*.36)+'px;width:'+(m?38:56)+'px;animation-delay:-1.2s');
     k.el('zs-bob',k.svg('0 0 140 150',FLAM),'right:4%;bottom:'+Math.round(gh*.2)+'px;width:'+(m?74:120)+'px');
     k.el('zs-wv b2',wave('#35b8f2',34,true),'left:0;bottom:0;width:100%;height:'+Math.round(gh*.62)+'px');
-    k.logo('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 15" style="display:block;overflow:visible">'+GLASS+'</svg>',.12,.3,m?18:20);
     if(k.pc()){
       var fl=[.22,.38,.52,.7,.86].map(function(f,j){return k.el('zs-flare','','width:'+[34,64,22,48,90][j]+'px;height:'+[34,64,22,48,90][j]+'px;opacity:'+[.5,.28,.55,.3,.18][j])});
       k.hbWatch(function(hb){

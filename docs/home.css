@@ -23,7 +23,9 @@
 
 .hm .tm{border:1px solid var(--line);border-radius:var(--r);background:var(--code);overflow:hidden}
 .hm .tt{display:flex;align-items:center;gap:6px;padding:11px 16px;border-bottom:1px solid var(--line);background:var(--side)}
-.hm .tt i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.hm .tt i{flex:none;width:12px;height:12px;border-radius:50%;background:#ff5f57}
+.hm .tt i:nth-child(2){background:#febc2e}
+.hm .tt i:nth-child(3){background:#28c840}
 .hm .tabs{display:flex;gap:2px;margin-left:12px;overflow-x:auto;scrollbar-width:none}
 .hm .tabs::-webkit-scrollbar{display:none}
 .hm .tab{padding:4px 12px;border:0;border-radius:calc(8px*var(--rs,1));background:none;color:var(--mute);font:500 13px/1.4 var(--sans);cursor:pointer;white-space:nowrap;transition:color .15s,background .15s}

@@ -6,10 +6,11 @@ html{scrollbar-gutter:stable}
 ::selection{background:color-mix(in srgb,var(--ac) 26%,transparent)}
 
 .top{background:color-mix(in srgb,var(--surf) 88%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-.top::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ac);transform-origin:0 50%;transform:scaleX(0);pointer-events:none}
+@property --pw{syntax:"<percentage>";inherits:true;initial-value:0%}
+:root:not([data-mrn="1"]) .top::after{content:"";position:absolute;inset:-1px;border-radius:inherit;border-bottom:2px solid var(--ac);pointer-events:none;clip-path:inset(0 calc(100% - var(--pw)) 0 0)}
 @supports (animation-timeline:scroll()){
-  .top::after{animation:uip linear both;animation-timeline:scroll(root block)}
-  @keyframes uip{to{transform:scaleX(1)}}
+  :root:not([data-mrn="1"]) .top::after{animation:uip linear both;animation-timeline:scroll(root block)}
+  @keyframes uip{from{--pw:0%}to{--pw:100%}}
 }
 .brand{transition:opacity .15s}
 .brand:hover{opacity:.8}
@@ -75,7 +76,6 @@ footer a:hover{text-decoration:underline}
 .tsr:hover,.cpb:hover,.hbd:hover,.hbq1:hover{background:var(--soft);color:var(--ac);border-color:color-mix(in srgb,var(--ac) 50%,var(--line))}
 .tsr kbd{padding:1px 7px;border:1px solid var(--line);border-radius:6px;background:var(--side);color:var(--mute);font:500 12px/1.5 var(--mono)}
 
-:root[data-mfs="1"] .top::after{inset:-1px;height:auto;border-radius:inherit;-webkit-mask:linear-gradient(#000,#000) bottom/100% 2px no-repeat;mask:linear-gradient(#000,#000) bottom/100% 2px no-repeat}
 
 @media(max-width:560px){
   .ut{right:14px;bottom:14px}

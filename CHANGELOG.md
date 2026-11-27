@@ -10,7 +10,11 @@ Component versions at this release: Kryonux `v0.0.1`, website `v0.0.1`, live ISO
 #### Changed
 - The interface was rebuilt on a flat, calm layer: `home.css` and `ui.css` were rewritten, and the stacked gradients, diagonal grid background, shine sweeps, diamond decorations, gradient headings and hard-coded light chips were removed from `style.css` and `theme.css`
 - The home page lost the chips row, the duplicated "Проверка защиты" card and the "Дальше" link grid; the stats are one strip and the feature grid is three columns
-- `sw.js` cache version bumped to 47
+- The scroll progress line is now a rounded bottom edge that follows the corners of the floating header, with a JS fallback for browsers without scroll timelines
+- The terminal windows got their red, yellow and green dots back
+- The settings panel has larger titles, clearer tabs and a plain close button; every setting is kept
+- The forest theme no longer draws diagonal light beams and the summer theme no longer puts sunglasses on the logo letter K
+- `sw.js` cache version bumped to 48
 
 ### 📦 kpkg
 #### Added
